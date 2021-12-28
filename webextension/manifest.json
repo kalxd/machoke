@@ -1,0 +1,18 @@
+{
+	"name": "HttpClient",
+	"author": "荀润林",
+	"icons": {
+		"32": "./azzet/logo.png"
+	},
+	"version": "0.0.1",
+	"manifest_version": 2,
+	"page_action": {
+		"default_title": "给老子看看",
+		"default_popup": "option.html",
+		"default_icon": "./azzet/logo.png"
+	},
+	"browser_action": {
+		"default_icon": "./azzet/logo.png",
+		"default_title": "给老子看看"
+	}
+}
