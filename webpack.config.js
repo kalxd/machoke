@@ -7,12 +7,26 @@ const config = {
 	context: path.resolve("."),
 
 	entry: {
-		main: "./src/main.js",
-		background: "./src/background.js"
+		// main: "./src/main.js",
+		background: "./src/background.ts"
 	},
 
 	output: {
 		path: path.resolve("webextension/dist")
+	},
+
+	resolve: {
+		extensions: [".ts", ".js"]
+	},
+
+	module: {
+		rules: [
+			{
+				test: /\.ts$/,
+				use: "ts-loader",
+				exclude: /node_modules/
+			}
+		]
 	}
 };
 
