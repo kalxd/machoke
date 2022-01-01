@@ -11,7 +11,7 @@ const tabID: (tab: Tabs.Tab) => Option.Option<number> = flow(
 	Option.fromNullable
 );
 
-const tabRef: IO.IO<IORef<Option.Option<Tabs.Tab>>> = newIORef(Option.none);
+const tabRef: IORef<Option.Option<Tabs.Tab>> = newIORef(Option.none)();
 
 const baseTabOption: Tabs.CreateCreatePropertiesType = {
 	url: runtime.getURL("./page.html")
@@ -23,8 +23,7 @@ const createTab: (a: Tabs.CreateCreatePropertiesType) => Task.Task<Tabs.Tab> =
 const createTabAndSet: Task.Task<void> = pipe(
 	createTab(baseTabOption),
 	Task.chain(tab => pipe(
-		tabRef,
-		IO.chain(ref => ref.write(Option.some(tab))),
+		tabRef.write(Option.some(tab)),
 		Task.fromIO
 	))
 );
@@ -39,14 +38,13 @@ const activeTabById: (a: number) => Task.Task<void> = id => pipe(
 	Task.map(IArray.findFirst(tab => tab.id == id)),
 	Task.map(Option.chain(tabID)),
 	Task.chain(Option.fold(
-		() => () => Promise.resolve(),
+		() => createTabAndSet,
 		activeTab
 	))
 );
 
 const openPage: Task.Task<void> = pipe(
-	tabRef,
-	IO.chain(ref => ref.read),
+	tabRef.read,
 	IO.map(Option.chain(tabID)),
 	Task.fromIO,
 	Task.chain(Option.fold(
