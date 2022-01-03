@@ -9,6 +9,7 @@
   "author": "XG.Ley",
   "license": "AGPL-3.0-or-later",
   "devDependencies": {
+    "@types/mithril": "^2.0.8",
     "@types/webextension-polyfill": "^0.8.2",
     "fp-ts": "^2.11.5",
     "ts-loader": "^9.2.6",
@@ -17,6 +18,7 @@
     "webpack-cli": "^4.9.1"
   },
   "dependencies": {
+    "mithril": "^2.0.4",
     "webextension-polyfill": "^0.8.0"
   }
 }
