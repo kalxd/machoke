@@ -7,7 +7,7 @@ const config = {
 	context: path.resolve("."),
 
 	entry: {
-		// main: "./src/main.js",
+		main: "./src/main.ts",
 		background: "./src/background.ts"
 	},
 
