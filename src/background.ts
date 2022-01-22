@@ -1,56 +1,56 @@
+import { Right, Left } from "purify-ts/Either";
+import { EitherAsync } from "purify-ts/EitherAsync";
+import { List } from "purify-ts/List";
+import { Just, Maybe, Nothing } from "purify-ts/Maybe";
 import { tabs, runtime, browserAction, Tabs } from "webextension-polyfill";
-import { IORef, newIORef } from "fp-ts/IORef";
-import * as Option from "fp-ts/Option";
-import * as Task  from "fp-ts/Task";
-import * as IO from "fp-ts/IO";
-import * as IArray from "fp-ts/Array";
-import { pipe, flow, constVoid } from "fp-ts/function";
+import IORef from "./prelude/IORef";
 
-const tabID: (tab: Tabs.Tab) => Option.Option<number> = flow(
-	tab => tab.id,
-	Option.fromNullable
-);
+const tabRef: IORef<Maybe<Tabs.Tab>> = new IORef(Nothing);
 
-const tabRef: IORef<Option.Option<Tabs.Tab>> = newIORef(Option.none)();
+type Task<T> = EitherAsync<Error, T>;
+
+const tabID = (tab: Tabs.Tab): Maybe<number> => {
+	const { id } = tab;
+	return Maybe.fromNullable(id);
+};
 
 const baseTabOption: Tabs.CreateCreatePropertiesType = {
 	url: runtime.getURL("./page.html")
 };
 
-const createTab: (a: Tabs.CreateCreatePropertiesType) => Task.Task<Tabs.Tab> =
-	option => () => tabs.create(option);
+const createTab = (option: Tabs.CreateCreatePropertiesType): Task<Tabs.Tab> =>
+	EitherAsync.fromPromise(() => tabs.create(option).then(Right).catch(Left));
 
-const createTabAndSet: Task.Task<void> = pipe(
-	createTab(baseTabOption),
-	Task.chain(tab => pipe(
-		tabRef.write(Option.some(tab)),
-		Task.fromIO
-	))
-);
+const createTabAndActive: Task<Tabs.Tab> =
+	createTab(baseTabOption).ifRight(tab => tabRef.write(Just(tab)));
 
-const activeTab: (a: number) => Task.Task<void> = id => pipe(
-	() => tabs.update(id, { active: true }),
-	Task.map(constVoid)
-);
 
-const activeTabById: (a: number) => Task.Task<void> = id => pipe(
-	() => tabs.query({}),
-	Task.map(IArray.findFirst(tab => tab.id == id)),
-	Task.map(Option.chain(tabID)),
-	Task.chain(Option.fold(
-		() => createTabAndSet,
-		activeTab
-	))
-);
+const activeTab = (id: number): Task<Tabs.Tab> =>
+	EitherAsync.fromPromise(
+		() => tabs.update(id, { active: true })
+			.then(Right)
+			.catch(Left)
+	);
 
-const openPage: Task.Task<void> = pipe(
-	tabRef.read,
-	IO.map(Option.chain(tabID)),
-	Task.fromIO,
-	Task.chain(Option.fold(
-		() => createTabAndSet,
-		activeTabById
-	))
-);
+const queryAllTab: Task<Array<Tabs.Tab>> =
+	EitherAsync.fromPromise(
+		() => tabs.query({}).then(Right).catch(Left)
+	);
+
+const activeTabById = (id: number): Task<Tabs.Tab> => {
+	return queryAllTab.chain(tabs => {
+		return List.find(t => t.id === id, tabs)
+			.chain(tab => Maybe.fromNullable(tab.id))
+			.map(activeTab)
+			.orDefault(createTabAndActive)
+	});
+};
+
+const openPage = (): void => {
+	tabRef.read().chain(tabID)
+		.map(activeTabById)
+		.orDefault(createTabAndActive)
+		.run();
+}
 
 browserAction.onClicked.addListener(openPage);
