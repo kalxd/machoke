@@ -12,4 +12,8 @@ export default class IORef<T> {
 	read(): T {
 		return this.value;
 	}
+
+	mapOut<R>(f: (ref: T) => R): R {
+		return f(this.value);
+	}
 }
