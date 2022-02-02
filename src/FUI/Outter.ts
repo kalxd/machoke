@@ -17,6 +17,7 @@ export const Outter = (): m.Component<IOutter> => {
 					const isInner = children.some(child => child.dom.contains(el));
 					if (!isInner && vnode.attrs.onclick) {
 						vnode.attrs.onclick(e);
+						m.redraw();
 					}
 				}
 			};
