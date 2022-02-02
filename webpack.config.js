@@ -1,3 +1,5 @@
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+
 const path = require("path");
 
 const config = {
@@ -25,9 +27,15 @@ const config = {
 				test: /\.ts$/,
 				use: "ts-loader",
 				exclude: /node_modules/
+			},
+			{
+				test: /\.css$/,
+				use: [MiniCssExtractPlugin.loader, "css-loader"]
 			}
 		]
-	}
+	},
+
+	plugins: [new MiniCssExtractPlugin()]
 };
 
 module.exports = config;

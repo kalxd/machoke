@@ -1,17 +1,19 @@
 import * as m from "mithril";
+import "construct-ui/lib/index.css";
 
-import Container from "./widget/container";
-import Sidebar from "./layout/sidebar";
+import { Grid, IGridAttrs, Col, IColAttrs } from "construct-ui";
+
+const gridOption: Readonly<IGridAttrs> = {
+	gutter: 20
+};
+
+const withColOption = (span: number): Readonly<IColAttrs> => ({ span });
 
 const App: m.ClassComponent = {
-	view: () => m(Container, m("div.ui.grid", [
-		m("div.six.wide.column", [
-			m(Sidebar)
-		]),
-		m("div.ten.wide.column", m("div.ui.blue.segment", [
-			m("h1", "hello world")
-		]))
-	]))
+	view: () => m(Grid, gridOption, [
+		m(Col, withColOption(4), "left"),
+		m(Col, withColOption(8), "Right")
+	])
 };
 
 m.mount(document.body, App)
