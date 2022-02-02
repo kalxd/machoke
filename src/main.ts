@@ -1,20 +1,15 @@
 import * as m from "mithril";
-import "construct-ui/lib/index.css";
-
-import { Grid, IGridAttrs, Col, IColAttrs } from "construct-ui";
-
-import Controller from "./component/Controller";
-
-const gridOption: Readonly<IGridAttrs> = {
-	gutter: 20
-};
-
-const withColOption = (span: number): Readonly<IColAttrs> => ({ span });
+import { Input } from "./FUI/Input";
+import { Outter } from "./FUI/Outter";
 
 const App: m.ClassComponent = {
-	view: () => m(Grid, gridOption, [
-		m(Col, withColOption(4), "left"),
-		m(Col, withColOption(8), m(Controller))
+	view: () => m("div.ui.container.grid.segment", [
+		m("h1", "hello world"),
+		m(Outter, [
+			m("button", "hello first world"),
+			m(Input)
+		]),
+		m(Input, { placeholder: "sb" })
 	])
 };
 
