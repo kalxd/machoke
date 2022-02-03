@@ -34,7 +34,7 @@ const SelectMenu: m.Component<ISelectMenu> = {
 
 		const items = [...(vnode.attrs.items ?? [])];
 		return m(Outter, outterOption, m(
-			"div.menu.transition.visible",
+			"div.menu.transition.visible.animate__animated.animate__flipInX.animate__faster",
 			option,
 			items.map(text =>
 				m(
