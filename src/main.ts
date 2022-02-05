@@ -23,4 +23,7 @@ const App: m.ClassComponent = {
 	])
 };
 
-m.mount(document.body, App)
+const appNode = document.createElement("main");
+document.body.appendChild(appNode);
+
+m.mount(appNode, App)
