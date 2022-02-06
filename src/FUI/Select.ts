@@ -1,7 +1,7 @@
 import * as m from "mithril";
 import { Either } from "purify-ts/Either";
 import { Maybe, Nothing, Just } from "purify-ts/Maybe";
-import IORef from "../prelude/IORef";
+import IORef from "./Interal/IORef";
 import { selectClass } from "./Interal/Util";
 import { IOutter, Outter } from "./Outter";
 

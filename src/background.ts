@@ -3,7 +3,7 @@ import { EitherAsync } from "purify-ts/EitherAsync";
 import { List } from "purify-ts/List";
 import { Just, Maybe, Nothing } from "purify-ts/Maybe";
 import { tabs, runtime, browserAction, Tabs } from "webextension-polyfill";
-import IORef from "./prelude/IORef";
+import IORef from "./FUI/Interal/IORef";
 
 const tabRef: IORef<Maybe<Tabs.Tab>> = new IORef(Nothing);
 

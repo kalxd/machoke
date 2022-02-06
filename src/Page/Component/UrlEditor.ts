@@ -1,6 +1,6 @@
 import * as m from "mithril";
+import IORef from "../../FUI/Interal/IORef";
 import { HttpMethod } from "../../prelude/Http";
-import IORef from "../../prelude/IORef";
 import { IMethodAttr, MethodSelect } from "../Widget/MethodSelect";
 
 export const UrlEditor = (): m.Component => {
