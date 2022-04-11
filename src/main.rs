@@ -1,4 +1,4 @@
-use gtk::{prelude::*, Application, ApplicationWindow, Orientation, Paned};
+use gtk::{prelude::*, Application, ApplicationWindow, Frame, Orientation, Paned};
 
 mod widget;
 
@@ -12,9 +12,13 @@ fn gui_main(app: &Application) {
 
 	let main_layout = Paned::new(Orientation::Horizontal);
 
-	let file_chooser = widget::FileWidget::new();
+	let form_layout = widget::SongForm::new();
+	main_layout.add1(&form_layout.layout);
 
-	main_layout.add2(&*file_chooser);
+	let file_chooser = widget::FileWidget::new();
+	let right_layout = Frame::builder().label("文件区").build();
+	right_layout.add(&*file_chooser);
+	main_layout.add2(&right_layout);
 
 	window.add(&main_layout);
 	window.show_all();
