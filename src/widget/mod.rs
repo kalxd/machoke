@@ -38,7 +38,10 @@ impl SongForm {
 		let main_layout = GtkBox::builder().orientation(Orientation::Vertical).build();
 
 		let cover_layout = Frame::builder().label("封面").build();
-		let cover_item = Image::new();
+		let cover_item = Image::builder()
+			.width_request(200)
+			.height_request(200)
+			.build();
 		cover_layout.add(&cover_item);
 
 		main_layout.pack_start(&cover_layout, false, false, 0);
