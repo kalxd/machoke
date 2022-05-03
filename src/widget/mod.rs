@@ -1,52 +1,33 @@
-use gtk::{prelude::*, Box as GtkBox, FileChooserWidget, FileFilter, Frame, Image, Orientation};
+use gtk::{traits::BoxExt, Box as GtkBox, Button, Image};
 
-use std::ops::Deref;
+const COVER_SIZE: i32 = 128;
 
-pub struct FileWidget {
-	file_chooser: FileChooserWidget,
+pub struct CoverWidget {
+	image: Image,
+	pub layout: GtkBox,
 }
 
-impl FileWidget {
+impl CoverWidget {
 	pub fn new() -> Self {
-		let filter = FileFilter::new();
-		filter.add_mime_type("audio/*");
-
-		let file_chooser = FileChooserWidget::builder()
-			.select_multiple(false)
-			.filter(&filter)
+		let image = Image::builder()
+			.width_request(COVER_SIZE)
+			.height_request(COVER_SIZE)
 			.build();
-		Self { file_chooser }
-	}
-}
-
-impl Deref for FileWidget {
-	type Target = FileChooserWidget;
-
-	fn deref(&self) -> &Self::Target {
-		&self.file_chooser
-	}
-}
-
-pub struct SongForm {
-	pub layout: Frame,
-}
-
-impl SongForm {
-	pub fn new() -> Self {
-		let layout = Frame::builder().label("歌曲信息").build();
-
-		let main_layout = GtkBox::builder().orientation(Orientation::Vertical).build();
-
-		let cover_layout = Frame::builder().label("封面").build();
-		let cover_item = Image::builder()
-			.width_request(200)
-			.height_request(200)
+		let layout = GtkBox::builder()
+			.orientation(gtk::Orientation::Horizontal)
 			.build();
-		cover_layout.add(&cover_item);
 
-		main_layout.pack_start(&cover_layout, false, false, 0);
-		layout.add(&main_layout);
+		let change_btn = Button::builder().sensitive(false).label("更换封面").build();
+		let remove_btn = Button::builder().sensitive(false).label("删除封面").build();
+		let btn_layout = GtkBox::builder()
+			.orientation(gtk::Orientation::Vertical)
+			.build();
+		btn_layout.pack_start(&change_btn, false, false, 0);
+		btn_layout.pack_end(&remove_btn, false, false, 0);
 
-		Self { layout }
+		layout.pack_start(&image, false, false, 0);
+		layout.pack_start(&btn_layout, false, false, 0);
+
+		Self { image, layout }
 	}
 }
