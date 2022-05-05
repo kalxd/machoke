@@ -1,6 +1,7 @@
 use gtk::{
 	prelude::*, Application, ApplicationWindow, Box as GtkBox, FileChooserButton, FileFilter, Frame,
 };
+use widget::FormWidget;
 
 mod widget;
 
@@ -13,6 +14,7 @@ fn gui_main(app: &Application) {
 		.build();
 
 	let main_layout = GtkBox::builder()
+		.margin(10)
 		.orientation(gtk::Orientation::Vertical)
 		.spacing(10)
 		.build();
@@ -41,8 +43,12 @@ fn gui_main(app: &Application) {
 	let cover_widget = widget::CoverWidget::new();
 	let cover_frame = Frame::builder().label("封面设置").build();
 	cover_frame.add(&cover_widget.layout);
-
 	main_layout.pack_start(&cover_frame, false, false, 10);
+
+	let frame = Frame::builder().label("属性").build();
+	let form_widget = FormWidget::new();
+	frame.add(&form_widget.layout);
+	main_layout.pack_start(&frame, false, false, 0);
 
 	window.add(&main_layout);
 	window.show_all();
