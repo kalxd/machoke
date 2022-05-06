@@ -1,15 +1,20 @@
-use std::{cell::RefCell, rc::Rc};
-
-use gtk::{prelude::*, Box as GtkBox, Button, Entry, Image, Label, SizeGroup};
+use gtk::{glib::GString, prelude::*, Box as GtkBox, Button, Entry, Image, Label, SizeGroup};
 use id3::Tag;
 
 const COVER_SIZE: i32 = 128;
 
+fn entry_text(entry: &Entry) -> Option<GString> {
+	let text = entry.text();
+	Some(text.trim())
+		.filter(|s| s.is_empty())
+		.map(GString::from)
+}
+
 pub struct FormState {
-	title: Option<String>,
-	artist: Option<String>,
-	album: Option<String>,
-	genere: Option<String>,
+	title: Option<GString>,
+	artist: Option<GString>,
+	album: Option<GString>,
+	genre: Option<GString>,
 }
 
 impl Default for FormState {
@@ -18,22 +23,18 @@ impl Default for FormState {
 			title: None,
 			artist: None,
 			album: None,
-			genere: None,
+			genre: None,
 		}
 	}
 }
 
 pub struct AppState {
 	tag: Option<Tag>,
-	form_state: Rc<RefCell<FormState>>,
 }
 
 impl Default for AppState {
 	fn default() -> Self {
-		Self {
-			tag: None,
-			form_state: Default::default(),
-		}
+		Self { tag: None }
 	}
 }
 
@@ -135,6 +136,20 @@ impl FormWidget {
 			album_entry,
 			genre_entry,
 			layout,
+		}
+	}
+
+	pub fn get_form_state(&self) -> FormState {
+		let title = entry_text(&self.title_entry);
+		let artist = entry_text(&self.artist_entry);
+		let album = entry_text(&self.album_entry);
+		let genre = entry_text(&self.genre_entry);
+
+		FormState {
+			title,
+			artist,
+			album,
+			genre,
 		}
 	}
 }
