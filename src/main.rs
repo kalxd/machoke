@@ -4,8 +4,10 @@ use gtk::{
 	prelude::*, Application, ApplicationWindow, Box as GtkBox, Button, ButtonBox,
 	FileChooserButton, FileFilter, Frame,
 };
+use tag::read_cover_from_path;
 use widget::{CoverWidget, FormWidget};
 
+mod tag;
 mod widget;
 
 #[derive(Clone, Debug)]
@@ -82,7 +84,15 @@ impl MainWindow {
 				.audio_chooser
 				.clone()
 				.connect_file_set(move |file_btn| {
-					audio_path.replace(file_btn.filename());
+					let path = file_btn.filename();
+
+					if let Some(path) = &path {
+						match read_cover_from_path(path) {
+							Ok(tag) => println!("{:?}", tag),
+							Err(e) => eprintln!("{:?}", e),
+						};
+					}
+					audio_path.replace(path);
 				});
 		}
 
