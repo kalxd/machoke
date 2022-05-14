@@ -1,6 +1,8 @@
 use gtk::{glib::GString, prelude::*, Box as GtkBox, Button, Entry, Image, Label, SizeGroup};
 use id3::Tag;
 
+use crate::t::AudioTag;
+
 const COVER_SIZE: i32 = 128;
 
 fn entry_text(entry: &Entry) -> Option<GString> {
@@ -68,6 +70,7 @@ impl CoverWidget {
 	}
 }
 
+#[derive(Clone)]
 pub struct FormWidget {
 	title_entry: Entry,
 	artist_entry: Entry,
@@ -137,6 +140,18 @@ impl FormWidget {
 			genre_entry,
 			layout,
 		}
+	}
+
+	pub fn set_form_state(&self, tag: &AudioTag) -> &Self {
+		self.title_entry
+			.set_text(tag.title.as_deref().unwrap_or_default());
+		self.artist_entry
+			.set_text(tag.artist.as_deref().unwrap_or_default());
+		self.album_entry
+			.set_text(tag.album.as_deref().unwrap_or_default());
+		self.genre_entry
+			.set_text(tag.genre.as_deref().unwrap_or_default());
+		return &self;
 	}
 
 	pub fn get_form_state(&self) -> FormState {

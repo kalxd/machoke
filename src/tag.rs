@@ -1,20 +1,10 @@
 use std::path::Path;
 
-use id3::{
-	frame::{Picture, PictureType},
-	Result, Tag, TagLike,
-};
+use id3::{frame::PictureType, Result, Tag, TagLike};
 
-#[derive(Debug)]
-pub struct AudioTag {
-	pub cover: Option<Picture>,
-	pub artist: Option<String>,
-	pub album: Option<String>,
-	pub title: Option<String>,
-	pub genre: Option<String>,
-}
+use crate::t::AudioTag;
 
-pub fn read_cover_from_path<P: AsRef<Path>>(path: P) -> Result<AudioTag> {
+pub fn read_audio_tag_from_path<P: AsRef<Path>>(path: P) -> Result<AudioTag> {
 	let tag = Tag::read_from_path(path)?;
 	let pic = tag
 		.pictures()
