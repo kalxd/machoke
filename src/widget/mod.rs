@@ -1,46 +1,22 @@
-use gtk::{
-	gdk_pixbuf::PixbufLoader, glib::GString, prelude::*, Box as GtkBox, Button, Entry, Image,
-	Label, SizeGroup,
-};
-use id3::Tag;
+use std::path::PathBuf;
 
-use crate::t::AudioTag;
+use gtk::{
+	gdk_pixbuf::{Pixbuf, PixbufLoader},
+	glib::GString,
+	prelude::*,
+	Box as GtkBox, Button, Entry, FileChooserDialog, FileFilter, Image, Label, ResponseType,
+	SizeGroup,
+};
+
+use crate::t::{AudioBaseInfo, FormState};
 
 const COVER_SIZE: i32 = 128;
 
 fn entry_text(entry: &Entry) -> Option<GString> {
 	let text = entry.text();
 	Some(text.trim())
-		.filter(|s| s.is_empty())
+		.filter(|s| !s.is_empty())
 		.map(GString::from)
-}
-
-pub struct FormState {
-	title: Option<GString>,
-	artist: Option<GString>,
-	album: Option<GString>,
-	genre: Option<GString>,
-}
-
-impl Default for FormState {
-	fn default() -> Self {
-		Self {
-			title: None,
-			artist: None,
-			album: None,
-			genre: None,
-		}
-	}
-}
-
-pub struct AppState {
-	tag: Option<Tag>,
-}
-
-impl Default for AppState {
-	fn default() -> Self {
-		Self { tag: None }
-	}
 }
 
 #[derive(Clone)]
@@ -82,18 +58,77 @@ impl CoverWidget {
 		return s;
 	}
 
-	pub fn update_cover(&self, tag: &AudioTag) -> &Self {
+	pub fn update_cover(&self, tag: &AudioBaseInfo) -> &Self {
 		if let Some(pic) = &tag.cover {
 			let loader = PixbufLoader::new();
 			unsafe {
 				loader.write(&pic.data).unwrap_unchecked();
 				loader.close().unwrap_unchecked();
 			}
-			self.image.set_pixbuf(loader.pixbuf().as_ref());
+			let pixbuf = loader.pixbuf().and_then(|pixbuf| {
+				pixbuf.scale_simple(COVER_SIZE, COVER_SIZE, gtk::gdk_pixbuf::InterpType::Nearest)
+			});
+			self.image.set_pixbuf(pixbuf.as_ref());
+			self.active();
 		} else {
 			self.image.clear();
+			self.inactive();
 		}
 		return &self;
+	}
+
+	pub fn connect_cover_changed<F: Fn(PathBuf) + 'static>(&self, f: F) {
+		let image = self.image.clone();
+
+		self.change_btn.connect_clicked(move |_| {
+			let filter = FileFilter::new();
+			filter.add_mime_type("image/*");
+			let dialog = FileChooserDialog::builder()
+				.title("选择一张能看的封面！")
+				.select_multiple(false)
+				.filter(&filter)
+				.action(gtk::FileChooserAction::Open)
+				.create_folders(false)
+				.preview_widget_active(true)
+				.build();
+
+			dialog.add_buttons(&[("不好", ResponseType::Cancel), ("好", ResponseType::Ok)]);
+			match dialog.run() {
+				gtk::ResponseType::Ok => {
+					if let Some(path) = dialog.filename() {
+						let pixbuf = unsafe { Pixbuf::from_file(&path).unwrap_unchecked() };
+						let pixbuf = pixbuf.scale_simple(
+							COVER_SIZE,
+							COVER_SIZE,
+							gtk::gdk_pixbuf::InterpType::Nearest,
+						);
+						image.set_pixbuf(pixbuf.as_ref());
+						f(path);
+					}
+				}
+				_ => {}
+			}
+
+			dialog.emit_close();
+		});
+	}
+
+	pub fn connect_cover_remove<F: Fn() + 'static>(&self, f: F) {
+		let image = self.image.clone();
+		self.remove_btn.connect_clicked(move |_| {
+			image.clear();
+			f();
+		});
+	}
+
+	fn active(&self) {
+		self.remove_btn.set_sensitive(true);
+		self.change_btn.set_sensitive(true);
+	}
+
+	fn inactive(&self) {
+		self.remove_btn.set_sensitive(false);
+		self.change_btn.set_sensitive(false);
 	}
 }
 
@@ -169,7 +204,7 @@ impl FormWidget {
 		}
 	}
 
-	pub fn set_form_state(&self, tag: &AudioTag) -> &Self {
+	pub fn set_form_state(&self, tag: &AudioBaseInfo) -> &Self {
 		self.title_entry
 			.set_text(tag.title.as_deref().unwrap_or_default());
 		self.artist_entry
