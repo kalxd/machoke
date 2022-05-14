@@ -1,4 +1,7 @@
-use gtk::{glib::GString, prelude::*, Box as GtkBox, Button, Entry, Image, Label, SizeGroup};
+use gtk::{
+	gdk_pixbuf::PixbufLoader, glib::GString, prelude::*, Box as GtkBox, Button, Entry, Image,
+	Label, SizeGroup,
+};
 use id3::Tag;
 
 use crate::t::AudioTag;
@@ -40,8 +43,11 @@ impl Default for AppState {
 	}
 }
 
+#[derive(Clone)]
 pub struct CoverWidget {
 	image: Image,
+	change_btn: Button,
+	remove_btn: Button,
 	pub layout: GtkBox,
 }
 
@@ -66,7 +72,28 @@ impl CoverWidget {
 		layout.pack_start(&image, false, false, 0);
 		layout.pack_start(&btn_layout, false, false, 0);
 
-		Self { image, layout }
+		let s = Self {
+			image,
+			change_btn,
+			remove_btn,
+			layout,
+		};
+
+		return s;
+	}
+
+	pub fn update_cover(&self, tag: &AudioTag) -> &Self {
+		if let Some(pic) = &tag.cover {
+			let loader = PixbufLoader::new();
+			unsafe {
+				loader.write(&pic.data).unwrap_unchecked();
+				loader.close().unwrap_unchecked();
+			}
+			self.image.set_pixbuf(loader.pixbuf().as_ref());
+		} else {
+			self.image.clear();
+		}
+		return &self;
 	}
 }
 

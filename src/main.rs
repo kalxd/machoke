@@ -81,6 +81,7 @@ impl MainWindow {
 			main_layout.pack_start(&frame, false, true, 10);
 
 			let audio_path = main_window.state.audio_path.clone();
+			let cover_widget = main_window.cover_widget.clone();
 			let form_widget = main_window.form_widget.clone();
 			main_window
 				.audio_chooser
@@ -92,6 +93,7 @@ impl MainWindow {
 						match read_audio_tag_from_path(path) {
 							Ok(tag) => {
 								form_widget.set_form_state(&tag);
+								cover_widget.update_cover(&tag);
 							}
 							Err(e) => eprintln!("{:?}", e),
 						};
