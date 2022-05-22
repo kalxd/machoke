@@ -1,10 +1,15 @@
 use std::{cell::RefCell, path::PathBuf, rc::Rc};
 
-use gtk::glib::GString;
+use gtk::ListStore;
+use gtk::{glib::GString, prelude::*};
 use id3::{
 	frame::{Picture, PictureType},
 	Tag, TagLike,
 };
+
+pub const GENRE_LIST: &[&'static str] = &[
+	"袁派", "傅派", "王派", "戚派", "金派", "吕派", "张派", "范派", "徐派", "毕派", "陆派", "尹派",
+];
 
 /// 我想要从一张音频中拿到哪些信息
 #[derive(Debug)]
@@ -103,5 +108,23 @@ impl AppState {
 				Ok(())
 			}
 		}
+	}
+}
+
+#[derive(Clone)]
+pub struct GenreStore {
+	pub store: ListStore,
+}
+
+impl GenreStore {
+	pub fn new() -> Self {
+		let store = ListStore::new(&[gtk::glib::types::Type::STRING]);
+
+		GENRE_LIST.iter().for_each(|name| {
+			let iter = store.append();
+			store.set(&iter, &[(0, name)]);
+		});
+
+		Self { store }
 	}
 }

@@ -4,11 +4,11 @@ use gtk::{
 	gdk_pixbuf::{Pixbuf, PixbufLoader},
 	glib::GString,
 	prelude::*,
-	Box as GtkBox, Button, Entry, FileChooserDialog, FileFilter, Image, Label, ResponseType,
-	SizeGroup,
+	Box as GtkBox, Button, Entry, EntryCompletion, FileChooserDialog, FileFilter, Image, Label,
+	ResponseType, SizeGroup,
 };
 
-use crate::t::{AudioBaseInfo, FormState};
+use crate::t::{AudioBaseInfo, FormState, GenreStore};
 
 const COVER_SIZE: i32 = 128;
 
@@ -189,7 +189,13 @@ impl FormWidget {
 			.build();
 
 		let genre_label = Label::new(Some("流派"));
-		let genre_entry = Entry::new();
+		let genre_complete = EntryCompletion::builder()
+			.model(&GenreStore::new().store)
+			.minimum_key_length(0)
+			.popup_completion(true)
+			.build();
+		let genre_entry = Entry::builder().completion(&genre_complete).build();
+		genre_complete.set_text_column(0);
 		size_group.add_widget(&genre_label);
 		row_layout.pack_start(&genre_label, false, false, 0);
 		row_layout.pack_start(&genre_entry, true, true, 0);
