@@ -1,5 +1,7 @@
 use gtk::{prelude::*, Application, ApplicationWindow};
 
+mod headerbar;
+
 pub struct MainWindow {
 	window: ApplicationWindow,
 }
@@ -11,6 +13,10 @@ impl MainWindow {
 			.default_height(600)
 			.default_width(800)
 			.build();
+
+		let title_bar = headerbar::TitleBar::new();
+
+		window.set_titlebar(Some(&title_bar.bar));
 
 		Self { window }
 	}
