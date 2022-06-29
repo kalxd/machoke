@@ -1,5 +1,6 @@
-use gtk::{prelude::*, Application, ApplicationWindow};
+use gtk::{prelude::*, Application, ApplicationWindow, Box as GtkBox};
 
+mod form;
 mod headerbar;
 
 pub struct MainWindow {
@@ -15,8 +16,14 @@ impl MainWindow {
 			.build();
 
 		let title_bar = headerbar::TitleBar::new();
-
 		window.set_titlebar(Some(&title_bar.bar));
+
+		let main_layout = GtkBox::new(gtk::Orientation::Vertical, 10);
+
+		let form = form::MetaForm::new();
+		main_layout.pack_start(&form.layout, false, false, 0);
+
+		window.add(&main_layout);
 
 		Self { window }
 	}
