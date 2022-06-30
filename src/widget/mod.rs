@@ -18,7 +18,10 @@ impl MainWindow {
 		let title_bar = headerbar::TitleBar::new();
 		window.set_titlebar(Some(&title_bar.bar));
 
-		let main_layout = GtkBox::new(gtk::Orientation::Vertical, 10);
+		let main_layout = GtkBox::builder()
+			.orientation(gtk::Orientation::Vertical)
+			.margin(10)
+			.build();
 
 		let form = form::MetaForm::new();
 		main_layout.pack_start(&form.layout, false, false, 0);
