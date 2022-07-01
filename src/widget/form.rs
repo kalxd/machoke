@@ -7,7 +7,10 @@ struct FormRow {
 
 impl FormRow {
 	fn new() -> Self {
-		let layout = GtkBox::new(Orientation::Vertical, 10);
+		let layout = GtkBox::builder()
+			.orientation(Orientation::Vertical)
+			.margin(10)
+			.build();
 		let size_group = SizeGroup::new(SizeGroupMode::Horizontal);
 
 		Self { size_group, layout }
@@ -30,8 +33,10 @@ impl FormRow {
 
 pub struct MetaForm {
 	pub layout: Frame,
+	title_entry: Entry,
 	artist_entry: Entry,
 	album_entry: Entry,
+	genre_entry: Entry,
 }
 
 impl MetaForm {
@@ -40,15 +45,19 @@ impl MetaForm {
 
 		let form_row = FormRow::new();
 
+		let title_entry = form_row.add_row("歌手");
 		let artist_entry = form_row.add_row("艺术家");
 		let album_entry = form_row.add_row("专辑");
+		let genre_entry = form_row.add_row("流派");
 
 		frame.add(&form_row.layout);
 
 		Self {
 			layout: frame,
+			title_entry,
 			artist_entry,
 			album_entry,
+			genre_entry,
 		}
 	}
 }
