@@ -28,8 +28,11 @@ impl MainWindow {
 
 		let form = song::SongWidget::new();
 		main_layout.pack_start(&form.layout, false, false, 0);
-
 		window.add(&main_layout);
+
+		title_bar.connect_open_song(|path| {
+			dbg!(path);
+		});
 
 		Self {
 			window,

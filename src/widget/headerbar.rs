@@ -1,22 +1,18 @@
-use gtk::{glib, prelude::*, Button, HeaderBar, IconSize, Image};
+use std::path::PathBuf;
 
-enum TheAction {
-	OpenFile,
-}
+use gtk::{
+	prelude::*, Button, FileChooserDialog, FileFilter, HeaderBar, IconSize, Image, ResponseType,
+};
 
 pub struct TitleBar {
 	pub bar: HeaderBar,
 	open_chooser_btn: Button,
-	save_btn: Button,
-	save_as_btn: Button,
-	tx: glib::Sender<TheAction>,
-	rx: glib::Receiver<TheAction>,
+	pub save_btn: Button,
+	pub save_as_btn: Button,
 }
 
 impl TitleBar {
 	pub fn new() -> Self {
-		let (tx, rx) = glib::MainContext::channel::<TheAction>(glib::PRIORITY_DEFAULT);
-
 		let bar = HeaderBar::builder()
 			.title("音频元信息编辑器")
 			.show_close_button(true)
@@ -54,8 +50,6 @@ impl TitleBar {
 
 		let widget = Self {
 			bar,
-			tx,
-			rx,
 			open_chooser_btn,
 			save_btn,
 			save_as_btn,
@@ -63,5 +57,27 @@ impl TitleBar {
 		return widget;
 	}
 
-	fn setup_connection(&self) {}
+	pub fn connect_open_song<F: Fn(PathBuf) + 'static>(&self, f: F) {
+		self.open_chooser_btn.connect_clicked(move |_| {
+			let filter = FileFilter::new();
+			filter.add_mime_type("audio/*");
+
+			let dialog = FileChooserDialog::builder()
+				.title("选择一个小音频")
+				.action(gtk::FileChooserAction::Open)
+				.select_multiple(false)
+				.filter(&filter)
+				.build();
+
+			dialog.add_button("确定", ResponseType::Accept);
+
+			if ResponseType::Accept == dialog.run() {
+				if let Some(path) = dialog.filename() {
+					f(path);
+				}
+			}
+
+			dialog.emit_close();
+		});
+	}
 }
