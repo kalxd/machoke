@@ -1,10 +1,13 @@
 use gtk::{prelude::*, Application, ApplicationWindow, Box as GtkBox};
 
+mod cover;
 mod form;
 mod headerbar;
+mod song;
 
 pub struct MainWindow {
 	window: ApplicationWindow,
+	widget: song::SongWidget,
 }
 
 impl MainWindow {
@@ -23,16 +26,20 @@ impl MainWindow {
 			.margin(10)
 			.build();
 
-		let form = form::MetaForm::new();
+		let form = song::SongWidget::new();
 		main_layout.pack_start(&form.layout, false, false, 0);
 
 		window.add(&main_layout);
 
-		Self { window }
+		Self {
+			window,
+			widget: form,
+		}
 	}
 
 	pub fn run(app: &Application) {
 		let main_window = Self::new(app);
 		main_window.window.show_all();
+		main_window.widget.hide_something();
 	}
 }

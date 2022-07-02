@@ -32,7 +32,7 @@ impl FormRow {
 }
 
 pub struct MetaForm {
-	pub layout: Frame,
+	pub layout: GtkBox,
 	title_entry: Entry,
 	artist_entry: Entry,
 	album_entry: Entry,
@@ -41,7 +41,7 @@ pub struct MetaForm {
 
 impl MetaForm {
 	pub fn new() -> Self {
-		let frame = Frame::builder().label("歌曲信息").sensitive(false).build();
+		let layout = GtkBox::builder().orientation(Orientation::Vertical).build();
 
 		let form_row = FormRow::new();
 
@@ -50,10 +50,10 @@ impl MetaForm {
 		let album_entry = form_row.add_row("专辑");
 		let genre_entry = form_row.add_row("流派");
 
-		frame.add(&form_row.layout);
+		layout.add(&form_row.layout);
 
 		Self {
-			layout: frame,
+			layout,
 			title_entry,
 			artist_entry,
 			album_entry,

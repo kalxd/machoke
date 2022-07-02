@@ -37,6 +37,7 @@ impl TitleBar {
 				Some("document-save"),
 				IconSize::Button,
 			))
+			.sensitive(false)
 			.tooltip_text("就地保存")
 			.build();
 
@@ -45,6 +46,7 @@ impl TitleBar {
 				Some("document-save-as"),
 				IconSize::Button,
 			))
+			.sensitive(false)
 			.tooltip_text("另存为新音频文件")
 			.build();
 		bar.pack_end(&save_as_btn);
