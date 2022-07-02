@@ -1,6 +1,7 @@
 use gtk::{glib, MessageDialog};
 use gtk::{prelude::*, Application, ApplicationWindow, Box as GtkBox};
 
+use std::path::PathBuf;
 use std::rc::Rc;
 
 mod cover;
@@ -8,8 +9,9 @@ mod form;
 mod headerbar;
 mod song;
 
-pub(self) enum AppAction {
-	OpenAudia(id3::Tag),
+pub enum AppAction {
+	OpenAudia((PathBuf, id3::Tag)),
+	ChangeCover(PathBuf),
 	Error(String),
 }
 
@@ -17,7 +19,6 @@ pub struct MainWindow {
 	window: ApplicationWindow,
 	widget: song::SongWidget,
 
-	// tx: Rc<glib::Sender<AppAction>>,
 	rx: glib::Receiver<AppAction>,
 }
 
@@ -40,15 +41,15 @@ impl MainWindow {
 			.margin(10)
 			.build();
 
-		let form = song::SongWidget::new();
+		let form = song::SongWidget::new(tx.clone());
 		main_layout.pack_start(&form.layout, false, false, 0);
 		window.add(&main_layout);
 
 		title_bar.connect_open_song({
 			let tx = tx.clone();
 			move |path| {
-				match id3::Tag::read_from_path(path) {
-					Ok(tag) => tx.send(AppAction::OpenAudia(tag)),
+				match id3::Tag::read_from_path(&path) {
+					Ok(tag) => tx.send(AppAction::OpenAudia((path, tag))),
 					Err(e) => tx.send(AppAction::Error(e.to_string())),
 				}
 				.unwrap()
@@ -58,7 +59,6 @@ impl MainWindow {
 		Self {
 			window,
 			widget: form,
-			// tx,
 			rx,
 		}
 	}
@@ -71,8 +71,11 @@ impl MainWindow {
 
 		main_window.rx.attach(None, move |msg| {
 			match msg {
-				AppAction::OpenAudia(tag) => {
-					main_window.widget.update(&tag);
+				AppAction::OpenAudia((filepath, tag)) => {
+					main_window.widget.update(filepath, tag);
+				}
+				AppAction::ChangeCover(path) => {
+					main_window.widget.cover.update_cover_from_path(path);
 				}
 				AppAction::Error(msg) => {
 					MessageDialog::builder()

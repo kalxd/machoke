@@ -1,4 +1,4 @@
-use gtk::{prelude::*, Box as GtkBox, Entry, Frame, Label, Orientation, SizeGroup, SizeGroupMode};
+use gtk::{prelude::*, Box as GtkBox, Entry, Label, Orientation, SizeGroup, SizeGroupMode};
 use id3::TagLike;
 
 struct FormRow {

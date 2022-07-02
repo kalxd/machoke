@@ -1,6 +1,12 @@
-use gtk::gdk_pixbuf::PixbufLoader;
+use std::path::Path;
+use std::rc::Rc;
+
+use gtk::gdk_pixbuf::{Pixbuf, PixbufLoader};
+use gtk::{glib, FileChooserDialog, FileFilter, ResponseType};
 use gtk::{prelude::*, Box as GtkBox, Button, Image, Label, Orientation};
 use id3::frame::PictureType;
+
+use super::AppAction;
 
 const COVER_SIZE: i32 = 128;
 
@@ -9,10 +15,13 @@ pub struct CoverWidget {
 	pub layout: GtkBox,
 
 	image: Image,
+	change_btn: Button,
+
+	tx: Rc<glib::Sender<AppAction>>,
 }
 
 impl CoverWidget {
-	pub fn new() -> Self {
+	pub fn new(tx: Rc<glib::Sender<AppAction>>) -> Self {
 		let layout = GtkBox::builder()
 			.orientation(Orientation::Horizontal)
 			.spacing(20)
@@ -43,11 +52,40 @@ impl CoverWidget {
 		info_layout.pack_start(&btn_layout, false, false, 0);
 		layout.pack_start(&info_layout, false, true, 0);
 
-		Self {
+		let widget = Self {
 			info_layout,
 			layout,
 			image,
-		}
+			change_btn,
+			tx,
+		};
+
+		widget.setup_connection();
+
+		return widget;
+	}
+
+	fn setup_connection(&self) {
+		self.change_btn.connect_clicked({
+			let tx = self.tx.clone();
+			move |_| {
+				let filter = FileFilter::new();
+				filter.add_mime_type("image/*");
+				let dialog = FileChooserDialog::builder()
+					.title("选择新的封面")
+					.filter(&filter)
+					.build();
+				dialog.add_button("确定", ResponseType::Accept);
+
+				if ResponseType::Accept == dialog.run() {
+					if let Some(path) = dialog.filename() {
+						tx.send(AppAction::ChangeCover(path)).unwrap();
+					}
+				}
+
+				dialog.emit_close();
+			}
+		});
 	}
 
 	pub fn hide_something(&self) {
@@ -70,7 +108,22 @@ impl CoverWidget {
 				.ok()
 				.and_then(|_| loader.pixbuf());
 
-			self.image.set_pixbuf(pixbuf.as_ref());
+			self.set_pixbuf(pixbuf);
 		}
+	}
+
+	pub fn update_cover_from_path<P: AsRef<Path>>(&self, path: P) {
+		match Pixbuf::from_file(path) {
+			Err(e) => self.tx.send(AppAction::Error(e.to_string())).unwrap(),
+			Ok(pixbuf) => self.set_pixbuf(Some(pixbuf)),
+		}
+	}
+
+	fn set_pixbuf(&self, pixbuf: Option<Pixbuf>) {
+		let pixbuf = pixbuf.and_then(|pixbuf| {
+			pixbuf.scale_simple(COVER_SIZE, COVER_SIZE, gtk::gdk_pixbuf::InterpType::Nearest)
+		});
+
+		self.image.set_pixbuf(pixbuf.as_ref());
 	}
 }
