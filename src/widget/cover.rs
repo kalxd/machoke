@@ -1,17 +1,20 @@
+use gtk::gdk_pixbuf::PixbufLoader;
 use gtk::{prelude::*, Box as GtkBox, Button, Image, Label, Orientation};
+use id3::frame::PictureType;
 
 const COVER_SIZE: i32 = 128;
 
 pub struct CoverWidget {
 	pub info_layout: GtkBox,
 	pub layout: GtkBox,
+
+	image: Image,
 }
 
 impl CoverWidget {
 	pub fn new() -> Self {
 		let layout = GtkBox::builder()
 			.orientation(Orientation::Horizontal)
-			.sensitive(false)
 			.spacing(20)
 			.build();
 
@@ -43,10 +46,31 @@ impl CoverWidget {
 		Self {
 			info_layout,
 			layout,
+			image,
 		}
 	}
 
 	pub fn hide_something(&self) {
 		self.info_layout.hide();
+	}
+
+	pub fn update(&self, tag: &id3::Tag) {
+		self.info_layout.show();
+
+		let picture = tag
+			.pictures()
+			.find(|p| p.picture_type == PictureType::CoverFront);
+
+		if let Some(picture) = picture {
+			let loader = PixbufLoader::new();
+
+			let pixbuf = loader
+				.write(&picture.data)
+				.and_then(|_| loader.close())
+				.ok()
+				.and_then(|_| loader.pixbuf());
+
+			self.image.set_pixbuf(pixbuf.as_ref());
+		}
 	}
 }

@@ -71,8 +71,8 @@ impl MainWindow {
 
 		main_window.rx.attach(None, move |msg| {
 			match msg {
-				AppAction::OpenAudia(path) => {
-					dbg!(path);
+				AppAction::OpenAudia(tag) => {
+					main_window.widget.update(&tag);
 				}
 				AppAction::Error(msg) => {
 					MessageDialog::builder()

@@ -1,4 +1,5 @@
 use gtk::{prelude::*, Box as GtkBox, Entry, Frame, Label, Orientation, SizeGroup, SizeGroupMode};
+use id3::TagLike;
 
 struct FormRow {
 	size_group: SizeGroup,
@@ -59,5 +60,12 @@ impl MetaForm {
 			album_entry,
 			genre_entry,
 		}
+	}
+
+	pub fn update(&self, tag: &id3::Tag) {
+		self.title_entry.set_text(tag.title().unwrap_or(""));
+		self.artist_entry.set_text(tag.artist().unwrap_or(""));
+		self.album_entry.set_text(tag.album().unwrap_or(""));
+		self.genre_entry.set_text(tag.genre().unwrap_or(""));
 	}
 }

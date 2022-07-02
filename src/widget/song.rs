@@ -4,6 +4,7 @@ use super::{cover::CoverWidget, form::MetaForm};
 
 pub struct SongWidget {
 	cover: CoverWidget,
+	form: MetaForm,
 	pub layout: GtkBox,
 }
 
@@ -20,15 +21,25 @@ impl SongWidget {
 		frame.add(&cover.layout);
 		layout.pack_start(&frame, false, false, 10);
 
-		let w = MetaForm::new();
+		let form = MetaForm::new();
 		let frame = Frame::builder().label("详情").build();
-		frame.add(&w.layout);
+		frame.add(&form.layout);
 		layout.pack_start(&frame, false, false, 10);
 
-		Self { cover, layout }
+		Self {
+			cover,
+			form,
+			layout,
+		}
 	}
 
 	pub fn hide_something(&self) {
 		self.cover.hide_something();
+	}
+
+	pub fn update(&self, tag: &id3::Tag) {
+		self.layout.set_sensitive(true);
+		self.cover.update(tag);
+		self.form.update(tag);
 	}
 }
