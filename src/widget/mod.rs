@@ -1,7 +1,6 @@
-use gtk::glib;
+use gtk::{glib, MessageDialog};
 use gtk::{prelude::*, Application, ApplicationWindow, Box as GtkBox};
 
-use std::path::PathBuf;
 use std::rc::Rc;
 
 mod cover;
@@ -10,7 +9,8 @@ mod headerbar;
 mod song;
 
 pub(self) enum AppAction {
-	OpenAudia(PathBuf),
+	OpenAudia(id3::Tag),
+	Error(String),
 }
 
 pub struct MainWindow {
@@ -47,7 +47,11 @@ impl MainWindow {
 		title_bar.connect_open_song({
 			let tx = tx.clone();
 			move |path| {
-				tx.send(AppAction::OpenAudia(path)).unwrap();
+				match id3::Tag::read_from_path(path) {
+					Ok(tag) => tx.send(AppAction::OpenAudia(tag)),
+					Err(e) => tx.send(AppAction::Error(e.to_string())),
+				}
+				.unwrap()
 			}
 		});
 
@@ -69,6 +73,14 @@ impl MainWindow {
 			match msg {
 				AppAction::OpenAudia(path) => {
 					dbg!(path);
+				}
+				AppAction::Error(msg) => {
+					MessageDialog::builder()
+						.text(&msg)
+						.message_type(gtk::MessageType::Error)
+						.buttons(gtk::ButtonsType::Close)
+						.build()
+						.run();
 				}
 			}
 			glib::Continue(true)
