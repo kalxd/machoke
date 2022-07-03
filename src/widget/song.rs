@@ -65,16 +65,6 @@ impl SongWidget {
 		}
 	}
 
-	pub fn save_file_as(&self, path: PathBuf) {
-		if let Some(data) = self.data.borrow_mut().as_mut() {
-			if let Err(e) = std::fs::copy(&data.filepath, &path) {
-				self.tx.send(AppAction::Alert(Err(e.to_string()))).unwrap();
-			}
-
-			self.save_to(&mut data.tag, &path);
-		}
-	}
-
 	fn save_to<T: AsRef<Path>>(&self, tag: &mut Tag, path: T) {
 		let pic_bytes = self.cover.get_pixbuf_bytes();
 		let state = self.form.state();
