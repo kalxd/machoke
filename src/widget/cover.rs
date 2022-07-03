@@ -1,4 +1,5 @@
-use std::path::Path;
+use std::cell::RefCell;
+use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
 use gtk::gdk_pixbuf::{Pixbuf, PixbufLoader};
@@ -16,6 +17,7 @@ pub struct CoverWidget {
 
 	image: Image,
 	change_btn: Button,
+	cover_path: Rc<RefCell<Option<PathBuf>>>,
 
 	tx: Rc<glib::Sender<AppAction>>,
 }
@@ -59,6 +61,7 @@ impl CoverWidget {
 			layout,
 			image,
 			change_btn,
+			cover_path: Default::default(),
 			tx,
 		};
 
@@ -114,24 +117,26 @@ impl CoverWidget {
 		}
 	}
 
-	pub fn update_cover_from_path<P: AsRef<Path>>(&self, path: P) {
-		match Pixbuf::from_file(path) {
+	pub fn update_cover_from_path(&self, path: PathBuf) {
+		match Pixbuf::from_file(&path) {
 			Err(e) => self.tx.send(AppAction::Alert(Err(e.to_string()))).unwrap(),
-			Ok(pixbuf) => self.set_pixbuf(Some(pixbuf)),
+			Ok(pixbuf) => {
+				self.cover_path.replace(Some(path.clone()));
+				self.set_pixbuf(Some(pixbuf));
+			}
 		}
 	}
 
 	pub fn get_pixbuf_bytes(&self) -> Option<Vec<u8>> {
-		let bytes = self
-			.image
-			.pixbuf()
-			.and_then(|pixbuf| pixbuf.read_pixel_bytes())?;
-
-		dbg!(bytes.len());
-
-		let x: Vec<u8> = bytes.iter().map(Clone::clone).collect();
-		dbg!(x.len());
-		Some(x)
+		let path = self.cover_path.borrow();
+		let path = path.as_ref();
+		match std::fs::read(path?) {
+			Ok(x) => Some(x),
+			Err(e) => {
+				self.tx.send(AppAction::Alert(Err(e.to_string()))).unwrap();
+				None
+			}
+		}
 	}
 
 	fn set_pixbuf(&self, pixbuf: Option<Pixbuf>) {
