@@ -4,7 +4,7 @@ use std::rc::Rc;
 
 use gtk::gdk_pixbuf::{Pixbuf, PixbufLoader};
 use gtk::{glib, FileChooserDialog, FileFilter, ResponseType};
-use gtk::{prelude::*, Box as GtkBox, Button, Image, Label, Orientation};
+use gtk::{prelude::*, Box as GtkBox, Button, Image, Orientation};
 use id3::frame::PictureType;
 
 use super::AppAction;
@@ -39,9 +39,6 @@ impl CoverWidget {
 			.orientation(Orientation::Horizontal)
 			.spacing(20)
 			.build();
-
-		let label = Label::new(Some("信息"));
-		info_layout.pack_start(&label, false, false, 0);
 
 		let btn_layout = GtkBox::builder()
 			.orientation(Orientation::Horizontal)
