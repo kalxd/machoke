@@ -31,10 +31,10 @@ impl CoverWidget {
 			.width_request(COVER_SIZE)
 			.height_request(COVER_SIZE)
 			.build();
-		layout.pack_start(&image, false, true, 10);
+		layout.pack_start(&image, false, false, 10);
 
 		let info_layout = GtkBox::builder()
-			.orientation(Orientation::Vertical)
+			.orientation(Orientation::Horizontal)
 			.spacing(20)
 			.build();
 
@@ -43,14 +43,16 @@ impl CoverWidget {
 
 		let btn_layout = GtkBox::builder()
 			.orientation(Orientation::Horizontal)
+			.valign(gtk::Align::Center)
 			.spacing(20)
 			.build();
+
 		let change_btn = Button::with_label("change");
 		btn_layout.pack_start(&change_btn, false, false, 0);
 		let remove_btn = Button::with_label("remove");
 		btn_layout.pack_start(&remove_btn, false, false, 0);
 		info_layout.pack_start(&btn_layout, false, false, 0);
-		layout.pack_start(&info_layout, false, true, 0);
+		layout.pack_start(&info_layout, false, false, 0);
 
 		let widget = Self {
 			info_layout,
