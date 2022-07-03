@@ -35,6 +35,7 @@ impl MainWindow {
 			.application(app)
 			.default_height(600)
 			.default_width(800)
+			.icon_name("machoke")
 			.build();
 
 		let title_bar = headerbar::TitleBar::new();

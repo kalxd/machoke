@@ -1,6 +1,7 @@
 [Desktop Entry]
 Type = Application
 Name = 音频元信息编辑器
+Icon = machoke
 Terminal = false
 Comment = 音频元信息编辑器，提供更多的编辑选项，例如可以编辑封面啦！
 Exec = .cargo/bin/machoke
