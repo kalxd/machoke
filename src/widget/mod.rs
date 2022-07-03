@@ -13,6 +13,7 @@ pub enum AppAction {
 	OpenAudia((PathBuf, id3::Tag)),
 	ChangeCover(PathBuf),
 	Save,
+	SaveAs(PathBuf),
 
 	Alert(Result<String, String>),
 }
@@ -66,6 +67,11 @@ impl MainWindow {
 			}
 		});
 
+		title_bar.connect_save_as({
+			let tx = tx.clone();
+			move |path| tx.send(AppAction::SaveAs(path)).unwrap()
+		});
+
 		Self {
 			window,
 			title_bar,
@@ -91,6 +97,7 @@ impl MainWindow {
 					main_window.widget.cover.update_cover_from_path(path);
 				}
 				AppAction::Save => main_window.widget.save_file(),
+				AppAction::SaveAs(path) => main_window.widget.save_file_as(path),
 				AppAction::Alert(msg) => {
 					let mtype = if msg.is_ok() {
 						gtk::MessageType::Info

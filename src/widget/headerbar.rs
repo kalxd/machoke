@@ -80,4 +80,25 @@ impl TitleBar {
 			dialog.emit_close();
 		});
 	}
+
+	pub fn connect_save_as<F: Fn(PathBuf) + 'static>(&self, f: F) {
+		self.save_as_btn.connect_clicked(move |_| {
+			let dialog = FileChooserDialog::builder()
+				.title("保存为新音频")
+				.action(gtk::FileChooserAction::Save)
+				.select_multiple(false)
+				.build();
+
+			dialog.add_button("保存", ResponseType::Accept);
+
+			if dialog.run() == ResponseType::Accept {
+				if let Some(path) = dialog.filename() {
+					dbg!(&path);
+					f(path);
+				}
+			}
+
+			dialog.emit_close();
+		});
+	}
 }
