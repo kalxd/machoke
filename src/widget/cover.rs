@@ -120,6 +120,8 @@ impl CoverWidget {
 				.and_then(|_| loader.pixbuf());
 
 			self.set_pixbuf(pixbuf);
+		} else {
+			self.image.set_pixbuf(None);
 		}
 	}
 
