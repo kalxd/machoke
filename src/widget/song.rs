@@ -77,6 +77,7 @@ impl SongWidget {
 				data: bytes,
 			};
 
+			dbg!("saving covers!!!");
 			tag.add_frame(pic);
 		} else {
 			tag.remove_picture_by_type(id3::frame::PictureType::CoverFront);

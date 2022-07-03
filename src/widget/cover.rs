@@ -125,9 +125,13 @@ impl CoverWidget {
 		let bytes = self
 			.image
 			.pixbuf()
-			.and_then(|pixbuf| pixbuf.pixel_bytes())?;
+			.and_then(|pixbuf| pixbuf.read_pixel_bytes())?;
 
-		Some(bytes.into_iter().map(Clone::clone).collect())
+		dbg!(bytes.len());
+
+		let x: Vec<u8> = bytes.iter().map(Clone::clone).collect();
+		dbg!(x.len());
+		Some(x)
 	}
 
 	fn set_pixbuf(&self, pixbuf: Option<Pixbuf>) {
