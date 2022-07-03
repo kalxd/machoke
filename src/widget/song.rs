@@ -1,7 +1,9 @@
+use std::path::Path;
 use std::{cell::RefCell, path::PathBuf, rc::Rc};
 
 use gtk::glib;
 use gtk::{prelude::*, Box as GtkBox, Frame};
+use id3::{Tag, TagLike};
 
 use super::AppAction;
 use super::{cover::CoverWidget, form::MetaForm};
@@ -15,7 +17,8 @@ pub struct SongWidget {
 	pub cover: CoverWidget,
 	pub form: MetaForm,
 	pub layout: GtkBox,
-	tag: Rc<RefCell<Option<SongMetaData>>>,
+	data: Rc<RefCell<Option<SongMetaData>>>,
+	tx: Rc<glib::Sender<AppAction>>,
 }
 
 impl SongWidget {
@@ -26,7 +29,7 @@ impl SongWidget {
 			.spacing(10)
 			.build();
 
-		let cover = CoverWidget::new(tx);
+		let cover = CoverWidget::new(tx.clone());
 		let frame = Frame::builder().label("封面").build();
 		frame.add(&cover.layout);
 		layout.pack_start(&frame, false, false, 10);
@@ -40,7 +43,8 @@ impl SongWidget {
 			cover,
 			form,
 			layout,
-			tag: Default::default(),
+			data: Default::default(),
+			tx,
 		}
 	}
 
@@ -52,6 +56,42 @@ impl SongWidget {
 		self.layout.set_sensitive(true);
 		self.cover.update(&tag);
 		self.form.update(&tag);
-		self.tag.replace(Some(SongMetaData { filepath, tag }));
+		self.data.replace(Some(SongMetaData { filepath, tag }));
+	}
+
+	pub fn save_file(&self) {
+		if let Some(SongMetaData { filepath, tag }) = self.data.borrow_mut().as_mut() {
+			self.save_to(tag, filepath);
+		}
+	}
+
+	fn save_to<T: AsRef<Path>>(&self, tag: &mut Tag, path: T) {
+		let pic_bytes = self.cover.get_pixbuf_bytes();
+		let state = self.form.state();
+
+		if let Some(bytes) = pic_bytes {
+			let pic = id3::frame::Picture {
+				mime_type: "image/png".into(),
+				picture_type: id3::frame::PictureType::CoverFront,
+				description: "".into(),
+				data: bytes,
+			};
+
+			tag.add_frame(pic);
+		} else {
+			tag.remove_picture_by_type(id3::frame::PictureType::CoverFront);
+		}
+
+		tag.set_title(state.title);
+		tag.set_artist(state.artist);
+		tag.set_album(state.album);
+		tag.set_genre(state.genre);
+
+		let version = tag.version();
+		let result = tag
+			.write_to_path(path, version)
+			.map(|_| "保存成功！".into())
+			.map_err(|e| e.to_string());
+		self.tx.send(AppAction::Alert(result)).unwrap();
 	}
 }

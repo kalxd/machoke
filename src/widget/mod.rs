@@ -12,11 +12,14 @@ mod song;
 pub enum AppAction {
 	OpenAudia((PathBuf, id3::Tag)),
 	ChangeCover(PathBuf),
-	Error(String),
+	Save,
+
+	Alert(Result<String, String>),
 }
 
 pub struct MainWindow {
 	window: ApplicationWindow,
+	title_bar: headerbar::TitleBar,
 	widget: song::SongWidget,
 
 	rx: glib::Receiver<AppAction>,
@@ -50,14 +53,22 @@ impl MainWindow {
 			move |path| {
 				match id3::Tag::read_from_path(&path) {
 					Ok(tag) => tx.send(AppAction::OpenAudia((path, tag))),
-					Err(e) => tx.send(AppAction::Error(e.to_string())),
+					Err(e) => tx.send(AppAction::Alert(Err(e.to_string()))),
 				}
 				.unwrap()
 			}
 		});
 
+		title_bar.save_btn.connect_clicked({
+			let tx = tx.clone();
+			move |_| {
+				tx.send(AppAction::Save).unwrap();
+			}
+		});
+
 		Self {
 			window,
+			title_bar,
 			widget: form,
 			rx,
 		}
@@ -73,17 +84,32 @@ impl MainWindow {
 			match msg {
 				AppAction::OpenAudia((filepath, tag)) => {
 					main_window.widget.update(filepath, tag);
+					main_window.title_bar.save_btn.set_sensitive(true);
+					main_window.title_bar.save_as_btn.set_sensitive(true);
 				}
 				AppAction::ChangeCover(path) => {
 					main_window.widget.cover.update_cover_from_path(path);
 				}
-				AppAction::Error(msg) => {
-					MessageDialog::builder()
+				AppAction::Save => main_window.widget.save_file(),
+				AppAction::Alert(msg) => {
+					let mtype = if msg.is_ok() {
+						gtk::MessageType::Info
+					} else {
+						gtk::MessageType::Error
+					};
+
+					let msg = match msg {
+						Ok(s) => s,
+						Err(s) => s,
+					};
+
+					let dialog = MessageDialog::builder()
 						.text(&msg)
-						.message_type(gtk::MessageType::Error)
+						.message_type(mtype)
 						.buttons(gtk::ButtonsType::Close)
-						.build()
-						.run();
+						.build();
+					dialog.run();
+					dialog.emit_close();
 				}
 			}
 			glib::Continue(true)

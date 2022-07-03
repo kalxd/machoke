@@ -1,4 +1,6 @@
-use gtk::{prelude::*, Box as GtkBox, Entry, Label, Orientation, SizeGroup, SizeGroupMode};
+use gtk::{
+	glib::GString, prelude::*, Box as GtkBox, Entry, Label, Orientation, SizeGroup, SizeGroupMode,
+};
 use id3::TagLike;
 
 struct FormRow {
@@ -30,6 +32,13 @@ impl FormRow {
 
 		return entry;
 	}
+}
+
+pub struct MetaFormData {
+	pub title: GString,
+	pub artist: GString,
+	pub album: GString,
+	pub genre: GString,
 }
 
 pub struct MetaForm {
@@ -67,5 +76,19 @@ impl MetaForm {
 		self.artist_entry.set_text(tag.artist().unwrap_or(""));
 		self.album_entry.set_text(tag.album().unwrap_or(""));
 		self.genre_entry.set_text(tag.genre().unwrap_or(""));
+	}
+
+	pub fn state(&self) -> MetaFormData {
+		let title = self.title_entry.text();
+		let artist = self.artist_entry.text();
+		let album = self.album_entry.text();
+		let genre = self.genre_entry.text();
+
+		MetaFormData {
+			title,
+			artist,
+			album,
+			genre,
+		}
 	}
 }

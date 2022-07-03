@@ -116,9 +116,18 @@ impl CoverWidget {
 
 	pub fn update_cover_from_path<P: AsRef<Path>>(&self, path: P) {
 		match Pixbuf::from_file(path) {
-			Err(e) => self.tx.send(AppAction::Error(e.to_string())).unwrap(),
+			Err(e) => self.tx.send(AppAction::Alert(Err(e.to_string()))).unwrap(),
 			Ok(pixbuf) => self.set_pixbuf(Some(pixbuf)),
 		}
+	}
+
+	pub fn get_pixbuf_bytes(&self) -> Option<Vec<u8>> {
+		let bytes = self
+			.image
+			.pixbuf()
+			.and_then(|pixbuf| pixbuf.pixel_bytes())?;
+
+		Some(bytes.into_iter().map(Clone::clone).collect())
 	}
 
 	fn set_pixbuf(&self, pixbuf: Option<Pixbuf>) {
