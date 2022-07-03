@@ -12,6 +12,7 @@ mod song;
 pub enum AppAction {
 	OpenAudia((PathBuf, id3::Tag)),
 	ChangeCover(PathBuf),
+	RemoveCover,
 	Save,
 
 	Alert(Result<String, String>),
@@ -88,6 +89,9 @@ impl MainWindow {
 				}
 				AppAction::ChangeCover(path) => {
 					main_window.widget.cover.update_cover_from_path(path);
+				}
+				AppAction::RemoveCover => {
+					main_window.widget.cover.remove_cover();
 				}
 				AppAction::Save => main_window.widget.save_file(),
 				AppAction::Alert(msg) => {

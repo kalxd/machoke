@@ -17,6 +17,7 @@ pub struct CoverWidget {
 
 	image: Image,
 	change_btn: Button,
+	remove_btn: Button,
 	cover_path: Rc<RefCell<Option<PathBuf>>>,
 
 	tx: Rc<glib::Sender<AppAction>>,
@@ -46,9 +47,9 @@ impl CoverWidget {
 			.spacing(20)
 			.build();
 
-		let change_btn = Button::with_label("change");
+		let change_btn = Button::with_label("更换封面");
 		btn_layout.pack_start(&change_btn, false, false, 0);
-		let remove_btn = Button::with_label("remove");
+		let remove_btn = Button::with_label("移除封面");
 		btn_layout.pack_start(&remove_btn, false, false, 0);
 		info_layout.pack_start(&btn_layout, false, false, 0);
 		layout.pack_start(&info_layout, false, false, 0);
@@ -58,6 +59,7 @@ impl CoverWidget {
 			layout,
 			image,
 			change_btn,
+			remove_btn,
 			cover_path: Default::default(),
 			tx,
 		};
@@ -86,6 +88,13 @@ impl CoverWidget {
 				}
 
 				dialog.emit_close();
+			}
+		});
+
+		self.remove_btn.connect_clicked({
+			let tx = self.tx.clone();
+			move |_| {
+				tx.send(AppAction::RemoveCover).unwrap();
 			}
 		});
 	}
@@ -122,6 +131,11 @@ impl CoverWidget {
 				self.set_pixbuf(Some(pixbuf));
 			}
 		}
+	}
+
+	pub fn remove_cover(&self) {
+		self.image.set_pixbuf(None);
+		self.cover_path.replace(None);
 	}
 
 	pub fn get_pixbuf_bytes(&self) -> Option<Vec<u8>> {
