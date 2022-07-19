@@ -141,15 +141,7 @@ impl CoverWidget {
 	}
 
 	pub fn get_pixbuf_bytes(&self) -> Option<Vec<u8>> {
-		let path = self.cover_path.borrow();
-		let path = path.as_ref();
-		match std::fs::read(path?) {
-			Ok(x) => Some(x),
-			Err(e) => {
-				self.tx.send(AppAction::Alert(Err(e.to_string()))).unwrap();
-				None
-			}
-		}
+		self.image.pixbuf()?.save_to_bufferv("png", &[]).ok()
 	}
 
 	fn set_pixbuf(&self, pixbuf: Option<Pixbuf>) {
