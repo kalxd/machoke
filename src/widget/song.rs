@@ -69,6 +69,10 @@ impl SongWidget {
 		let pic_bytes = self.cover.get_pixbuf_bytes();
 		let state = self.form.state();
 
+		tag.pictures().for_each(|p| {
+			dbg!(&p.mime_type);
+		});
+
 		if let Some(bytes) = pic_bytes {
 			let pic = id3::frame::Picture {
 				mime_type: "image/png".into(),
