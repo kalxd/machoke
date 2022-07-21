@@ -1,4 +1,4 @@
-use gtk::{glib, MessageDialog};
+use gtk::{glib, InfoBar, Label, MessageType};
 use gtk::{prelude::*, Application, ApplicationWindow, Box as GtkBox};
 
 use std::rc::Rc;
@@ -14,6 +14,8 @@ pub struct MainWindow {
 	window: ApplicationWindow,
 	title_bar: headerbar::TitleBar,
 	widget: song::SongWidget,
+	infobar: InfoBar,
+	infolabel: Label,
 
 	rx: glib::Receiver<EmitEvent>,
 }
@@ -38,6 +40,17 @@ impl MainWindow {
 			.margin(10)
 			.build();
 
+		let infobar = InfoBar::builder()
+			.show_close_button(true)
+			.visible(false)
+			.build();
+		let infolabel = Label::new(None);
+		infobar.pack_start(&infolabel, false, false, 0);
+		main_layout.pack_start(&infobar, false, true, 0);
+		infobar.connect_response(|infobar, _| {
+			infobar.hide();
+		});
+
 		let form = song::SongWidget::new(tx.clone());
 		main_layout.pack_start(&form.layout, false, false, 0);
 		window.add(&main_layout);
@@ -59,6 +72,8 @@ impl MainWindow {
 			window,
 			title_bar,
 			widget: form,
+			infobar,
+			infolabel,
 			rx,
 		}
 	}
@@ -68,12 +83,22 @@ impl MainWindow {
 
 		main_window.window.show_all();
 		main_window.widget.hide_something();
+		main_window.infobar.hide();
 
 		main_window.rx.attach(None, move |msg| {
 			match msg {
 				EmitEvent::OpenTag(tag) => {
 					main_window.widget.update(tag);
 					main_window.title_bar.save_btn.set_sensitive(true);
+				}
+				EmitEvent::Alert(result) => {
+					let (mtype, msg) = match result {
+						Ok(s) => (MessageType::Info, s),
+						Err(e) => (MessageType::Error, e),
+					};
+
+					main_window.infobar.set_message_type(mtype);
+					main_window.infolabel.set_text(&msg);
 				}
 				_ => {} /*
 						AppAction::ChangeCover(path) => {
