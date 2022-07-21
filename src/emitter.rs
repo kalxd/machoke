@@ -15,6 +15,10 @@ pub enum EmitEvent {
 pub struct Emitter(glib::Sender<EmitEvent>);
 
 impl Emitter {
+	pub fn new(tx: glib::Sender<EmitEvent>) -> Self {
+		Self(tx)
+	}
+
 	pub fn error<S: ToString>(&self, msg: S) {
 		self.0.send(EmitEvent::Alert(Err(msg.to_string()))).unwrap();
 	}
@@ -26,6 +30,10 @@ impl Emitter {
 	pub fn alert<S1: ToString, S2: ToString>(&self, msg: Result<S1, S2>) {
 		let s = msg.map(|s| s.to_string()).map_err(|e| e.to_string());
 		self.0.send(EmitEvent::Alert(s)).unwrap();
+	}
+
+	pub fn send(&self, event: EmitEvent) {
+		self.0.send(event).unwrap();
 	}
 }
 

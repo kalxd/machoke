@@ -3,11 +3,11 @@ use std::path::PathBuf;
 use std::rc::Rc;
 
 use gtk::gdk_pixbuf::{Pixbuf, PixbufLoader};
-use gtk::{glib, FileChooserDialog, FileFilter, ResponseType};
 use gtk::{prelude::*, Box as GtkBox, Button, Image, Orientation};
+use gtk::{FileChooserDialog, FileFilter, ResponseType};
 use id3::frame::PictureType;
 
-use super::AppAction;
+use crate::emitter::Emitter;
 
 const COVER_SIZE: i32 = 128;
 
@@ -20,11 +20,11 @@ pub struct CoverWidget {
 	remove_btn: Button,
 	cover_path: Rc<RefCell<Option<PathBuf>>>,
 
-	tx: Rc<glib::Sender<AppAction>>,
+	tx: Rc<Emitter>,
 }
 
 impl CoverWidget {
-	pub fn new(tx: Rc<glib::Sender<AppAction>>) -> Self {
+	pub fn new(tx: Rc<Emitter>) -> Self {
 		let layout = GtkBox::builder()
 			.orientation(Orientation::Horizontal)
 			.spacing(20)
@@ -83,7 +83,7 @@ impl CoverWidget {
 
 				if ResponseType::Accept == dialog.run() {
 					if let Some(path) = dialog.filename() {
-						tx.send(AppAction::ChangeCover(path)).unwrap();
+						// tx.send(AppAction::ChangeCover(path)).unwrap();
 					}
 				}
 
@@ -94,7 +94,7 @@ impl CoverWidget {
 		self.remove_btn.connect_clicked({
 			let tx = self.tx.clone();
 			move |_| {
-				tx.send(AppAction::RemoveCover).unwrap();
+				// tx.send(AppAction::RemoveCover).unwrap();
 			}
 		});
 	}
@@ -127,7 +127,7 @@ impl CoverWidget {
 
 	pub fn update_cover_from_path(&self, path: PathBuf) {
 		match Pixbuf::from_file(&path) {
-			Err(e) => self.tx.send(AppAction::Alert(Err(e.to_string()))).unwrap(),
+			Err(e) => self.tx.error(e),
 			Ok(pixbuf) => {
 				self.cover_path.replace(Some(path.clone()));
 				self.set_pixbuf(Some(pixbuf));

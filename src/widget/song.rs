@@ -1,12 +1,11 @@
 use std::path::Path;
 use std::{cell::RefCell, path::PathBuf, rc::Rc};
 
-use gtk::glib;
 use gtk::{prelude::*, Box as GtkBox, Frame};
 use id3::{Tag, TagLike};
 
-use super::AppAction;
 use super::{cover::CoverWidget, form::MetaForm};
+use crate::emitter::Emitter;
 
 struct SongMetaData {
 	filepath: PathBuf,
@@ -18,11 +17,11 @@ pub struct SongWidget {
 	pub form: MetaForm,
 	pub layout: GtkBox,
 	data: Rc<RefCell<Option<SongMetaData>>>,
-	tx: Rc<glib::Sender<AppAction>>,
+	tx: Rc<Emitter>,
 }
 
 impl SongWidget {
-	pub fn new(tx: Rc<glib::Sender<AppAction>>) -> Self {
+	pub fn new(tx: Rc<Emitter>) -> Self {
 		let layout = GtkBox::builder()
 			.orientation(gtk::Orientation::Vertical)
 			.sensitive(false)
@@ -52,11 +51,11 @@ impl SongWidget {
 		self.cover.hide_something();
 	}
 
-	pub fn update(&self, filepath: PathBuf, tag: id3::Tag) {
+	pub fn update(&self, tag: id3::Tag) {
 		self.layout.set_sensitive(true);
 		self.cover.update(&tag);
 		self.form.update(&tag);
-		self.data.replace(Some(SongMetaData { filepath, tag }));
+		// self.data.replace(Some(SongMetaData { filepath, tag }));
 	}
 
 	pub fn save_file(&self) {
@@ -95,8 +94,7 @@ impl SongWidget {
 		let version = tag.version();
 		let result = tag
 			.write_to_path(path, version)
-			.map(|_| "保存成功！".into())
-			.map_err(|e| e.to_string());
-		self.tx.send(AppAction::Alert(result)).unwrap();
+			.map(|_| String::from("保存成功！"));
+		self.tx.alert(result);
 	}
 }
