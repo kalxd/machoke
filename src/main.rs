@@ -1,6 +1,6 @@
 use gtk::{prelude::*, Application};
 
-mod value;
+mod emitter;
 mod widget;
 
 fn main() {
