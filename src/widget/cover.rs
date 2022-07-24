@@ -7,7 +7,8 @@ use gtk::{prelude::*, Box as GtkBox, Button, Image, Orientation};
 use gtk::{FileChooserDialog, FileFilter, ResponseType};
 use id3::frame::PictureType;
 
-use crate::emitter::{CoverMimeType, EmitEvent, Emitter};
+use crate::emitter::{EmitEvent, Emitter};
+use crate::value::CoverMimeType;
 
 const COVER_SIZE: i32 = 128;
 
@@ -112,6 +113,9 @@ impl CoverWidget {
 			.find(|p| p.picture_type == PictureType::CoverFront);
 
 		if let Some(picture) = picture {
+			self.mime_type
+				.replace(Some(CoverMimeType::from_mine_type(&picture.mime_type)));
+
 			let loader = PixbufLoader::new();
 
 			let pixbuf = loader

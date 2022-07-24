@@ -51,7 +51,7 @@ impl SongWidget {
 		self.cover.hide_something();
 	}
 
-	pub fn update(&self, tag: id3::Tag) {
+	pub fn update(&self, tag: &id3::Tag) {
 		self.layout.set_sensitive(true);
 		self.cover.update_with_tag(&tag);
 		self.form.update(&tag);

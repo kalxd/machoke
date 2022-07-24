@@ -1,54 +1,17 @@
 //! 发送者
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use gtk::glib;
 
 pub enum EmitEvent {
 	/// 打开新音频
-	OpenTag(id3::Tag),
+	OpenTag(PathBuf),
 	/// 保存信息到音频
 	Save,
 	/// 更改封面
 	ChangeCover(PathBuf),
 	/// 交互信息
 	Alert(Result<String, String>),
-}
-
-pub enum CoverMimeType {
-	PNG,
-	JPEG,
-}
-
-impl CoverMimeType {
-	pub fn from_path<P: AsRef<Path>>(path: P) -> Self {
-		path.as_ref()
-			.extension()
-			.filter(|ext| ext == &"png")
-			.map(|_| CoverMimeType::PNG)
-			.unwrap_or(CoverMimeType::JPEG)
-	}
-
-	pub fn from_mine_type<S: AsRef<str>>(t: S) -> Self {
-		match t.as_ref() {
-			"mine/png" => CoverMimeType::PNG,
-			_ => CoverMimeType::JPEG,
-		}
-	}
-}
-
-impl AsRef<str> for CoverMimeType {
-	fn as_ref(&self) -> &str {
-		match self {
-			CoverMimeType::PNG => "image/png",
-			_ => "image/jpeg",
-		}
-	}
-}
-
-impl ToString for CoverMimeType {
-	fn to_string(&self) -> String {
-		self.as_ref().into()
-	}
 }
 
 pub struct Emitter(glib::Sender<EmitEvent>);

@@ -1,9 +1,11 @@
 use gtk::{glib, InfoBar, Label, MessageType};
 use gtk::{prelude::*, Application, ApplicationWindow, Box as GtkBox};
 
+use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::emitter::{EmitEvent, Emitter};
+use crate::value::AppState;
 
 mod cover;
 mod form;
@@ -16,7 +18,9 @@ pub struct MainWindow {
 	widget: song::SongWidget,
 	infobar: InfoBar,
 	infolabel: Label,
+	app_state: Rc<RefCell<Option<AppState>>>,
 
+	tx: Rc<Emitter>,
 	rx: glib::Receiver<EmitEvent>,
 }
 
@@ -57,10 +61,7 @@ impl MainWindow {
 
 		title_bar.connect_open_song({
 			let tx = tx.clone();
-			move |path| match id3::Tag::read_from_path(&path) {
-				Ok(tag) => tx.send(EmitEvent::OpenTag(tag)),
-				Err(e) => tx.error(e),
-			}
+			move |path| tx.send(EmitEvent::OpenTag(path))
 		});
 
 		title_bar.save_btn.connect_clicked({
@@ -74,6 +75,8 @@ impl MainWindow {
 			widget: form,
 			infobar,
 			infolabel,
+			app_state: Default::default(),
+			tx,
 			rx,
 		}
 	}
@@ -85,15 +88,22 @@ impl MainWindow {
 		main_window.widget.hide_something();
 		main_window.infobar.hide();
 
+		let tx = main_window.tx;
+
 		main_window.rx.attach(None, move |msg| {
 			match msg {
-				EmitEvent::OpenTag(tag) => {
-					main_window.widget.update(tag);
-					main_window.title_bar.save_btn.set_sensitive(true);
-				}
+				EmitEvent::OpenTag(path) => match AppState::try_from(path) {
+					Ok(app_data) => {
+						main_window.widget.update(&app_data.tag);
+						main_window.title_bar.save_btn.set_sensitive(true);
+						main_window.app_state.replace(Some(app_data));
+					}
+					Err(e) => tx.error(e),
+				},
 				EmitEvent::ChangeCover(path) => {
 					main_window.widget.cover.update_cover_from_path(path);
 				}
+				EmitEvent::Save => main_window.widget.save_file(),
 				EmitEvent::Alert(result) => {
 					let (mtype, msg) = match result {
 						Ok(s) => (MessageType::Info, s),
@@ -103,36 +113,7 @@ impl MainWindow {
 					main_window.infobar.set_message_type(mtype);
 					main_window.infolabel.set_text(&msg);
 				}
-				_ => {} /*
-						AppAction::ChangeCover(path) => {
-							main_window.widget.cover.update_cover_from_path(path);
-						}
-						AppAction::RemoveCover => {
-							main_window.widget.cover.remove_cover();
-						}
-						AppAction::Save => main_window.widget.save_file(),
-						AppAction::Alert(msg) => {
-							let mtype = if msg.is_ok() {
-								gtk::MessageType::Info
-							} else {
-								gtk::MessageType::Error
-							};
-
-							let msg = match msg {
-								Ok(s) => s,
-								Err(s) => s,
-							};
-
-							let dialog = MessageDialog::builder()
-								.text(&msg)
-								.message_type(mtype)
-								.buttons(gtk::ButtonsType::Close)
-								.build();
-							dialog.run();
-							dialog.emit_close();
-						}
-						 */
-			}
+			};
 			glib::Continue(true)
 		});
 	}
