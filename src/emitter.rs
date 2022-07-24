@@ -1,5 +1,5 @@
 //! 发送者
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use gtk::glib;
 
@@ -8,6 +8,8 @@ pub enum EmitEvent {
 	OpenTag(id3::Tag),
 	/// 保存信息到音频
 	Save,
+	/// 更改封面
+	ChangeCover(PathBuf),
 	/// 交互信息
 	Alert(Result<String, String>),
 }

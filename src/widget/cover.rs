@@ -7,7 +7,7 @@ use gtk::{prelude::*, Box as GtkBox, Button, Image, Orientation};
 use gtk::{FileChooserDialog, FileFilter, ResponseType};
 use id3::frame::PictureType;
 
-use crate::emitter::{CoverMimeType, Emitter};
+use crate::emitter::{CoverMimeType, EmitEvent, Emitter};
 
 const COVER_SIZE: i32 = 128;
 
@@ -84,7 +84,7 @@ impl CoverWidget {
 
 				if ResponseType::Accept == dialog.run() {
 					if let Some(path) = dialog.filename() {
-						// tx.send(AppAction::ChangeCover(path)).unwrap();
+						tx.send(EmitEvent::ChangeCover(path));
 					}
 				}
 
@@ -127,6 +127,10 @@ impl CoverWidget {
 	}
 
 	pub fn update_cover_from_path(&self, path: PathBuf) {
+		let mime_type = CoverMimeType::from_path(&path);
+
+		self.mime_type.replace(Some(mime_type));
+
 		match Pixbuf::from_file(&path) {
 			Err(e) => self.tx.error(e),
 			Ok(pixbuf) => {

@@ -91,6 +91,9 @@ impl MainWindow {
 					main_window.widget.update(tag);
 					main_window.title_bar.save_btn.set_sensitive(true);
 				}
+				EmitEvent::ChangeCover(path) => {
+					main_window.widget.cover.update_cover_from_path(path);
+				}
 				EmitEvent::Alert(result) => {
 					let (mtype, msg) = match result {
 						Ok(s) => (MessageType::Info, s),
