@@ -1,3 +1,4 @@
+use std::cell::Ref;
 use std::path::Path;
 use std::{cell::RefCell, rc::Rc};
 
@@ -51,6 +52,17 @@ impl SongWidget {
 		self.layout.set_sensitive(true);
 		self.cover.update_with_tag(&state);
 		self.form.update(&state);
+
+		let pic = state
+			.front_cover()
+			.map(|pic| CoverMimeType::from_mime_type(&pic.mime_type));
+		self.mime_type.replace(pic);
+	}
+
+	pub fn get_data<'a>(&'a self) -> (Ref<Option<CoverMimeType>>, Option<Vec<u8>>) {
+		let mime_type = self.mime_type.borrow();
+		let pic_data = self.cover.get_pixbuf_bytes();
+		(mime_type, pic_data)
 	}
 
 	/*
@@ -63,7 +75,7 @@ impl SongWidget {
 
 	fn save_to<T: AsRef<Path>>(&self, tag: &mut Tag, path: T) {
 		let pic_bytes = self.cover.get_pixbuf_bytes();
-		let state = self.form.state();
+		let state = self.form.form_data();
 
 		tag.pictures().for_each(|p| {
 			dbg!(&p.mime_type);

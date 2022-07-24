@@ -1,7 +1,10 @@
 use std::path::{Path, PathBuf};
 
 use gtk::glib::GString;
-use id3::frame::{Picture, PictureType};
+use id3::{
+	frame::{Picture, PictureType},
+	TagLike,
+};
 
 pub struct MetaFormData {
 	pub title: GString,
@@ -47,6 +50,14 @@ impl ToString for CoverMimeType {
 	}
 }
 
+/// 最终在保存的数据
+pub struct SaveData<'a> {
+	/// 所有文本记录的信息
+	pub base: MetaFormData,
+	/// 封面
+	pub cover: Option<(&'a CoverMimeType, Vec<u8>)>,
+}
+
 /// 全局状态
 pub struct AppState {
 	pub tag: id3::Tag,
@@ -58,6 +69,30 @@ impl AppState {
 		self.tag
 			.pictures()
 			.find(|p| p.picture_type == PictureType::CoverFront)
+	}
+
+	pub fn save<'a>(&'a mut self, data: SaveData<'a>) -> id3::Result<()> {
+		if let Some((mime_type, pic_data)) = data.cover {
+			let pic = id3::frame::Picture {
+				mime_type: mime_type.to_string(),
+				picture_type: PictureType::CoverFront,
+				description: String::from(""),
+				data: pic_data,
+			};
+
+			self.tag.add_frame(pic);
+		} else {
+			self.tag.remove_picture_by_type(PictureType::CoverFront);
+		}
+
+		self.tag.set_title(data.base.title);
+		self.tag.set_artist(data.base.artist);
+		self.tag.set_album(data.base.album);
+		self.tag.set_genre(data.base.genre);
+
+		let version = self.tag.version();
+
+		self.tag.write_to_path(&self.audio_path, version)
 	}
 }
 

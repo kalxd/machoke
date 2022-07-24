@@ -1,10 +1,10 @@
 use gtk::{
-	glib::GString, prelude::*, Box as GtkBox, Entry, EntryCompletion, Label, ListStore,
-	Orientation, SizeGroup, SizeGroupMode,
+	prelude::*, Box as GtkBox, Entry, EntryCompletion, Label, ListStore, Orientation, SizeGroup,
+	SizeGroupMode,
 };
 use id3::TagLike;
 
-use crate::value::AppState;
+use crate::value::{AppState, MetaFormData};
 
 const GENRE: &[&'static str] = &[
 	"袁派", "王派", "傅派", "戚派", "金派", "张派", "吕派", "徐派", "范派", "陆派", "毕派", "尹派",
@@ -56,13 +56,6 @@ impl FormRow {
 	}
 }
 
-pub struct MetaFormData {
-	pub title: GString,
-	pub artist: GString,
-	pub album: GString,
-	pub genre: GString,
-}
-
 pub struct MetaForm {
 	pub layout: GtkBox,
 	title_entry: Entry,
@@ -108,7 +101,7 @@ impl MetaForm {
 		self.genre_entry.set_text(state.tag.genre().unwrap_or(""));
 	}
 
-	pub fn state(&self) -> MetaFormData {
+	pub fn form_data(&self) -> MetaFormData {
 		let title = self.title_entry.text();
 		let artist = self.artist_entry.text();
 		let album = self.album_entry.text();

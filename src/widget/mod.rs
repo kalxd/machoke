@@ -5,7 +5,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::emitter::{EmitEvent, Emitter};
-use crate::value::AppState;
+use crate::value::{AppState, SaveData};
 
 mod cover;
 mod form;
@@ -103,7 +103,21 @@ impl MainWindow {
 				EmitEvent::ChangeCover(path) => {
 					main_window.widget.cover.update_cover_from_path(&path);
 				}
-				EmitEvent::Save => {}
+				EmitEvent::Save => {
+					if let Some(state) = main_window.app_state.borrow_mut().as_mut() {
+						let (mime_type, pic_data) = main_window.widget.get_data();
+						let form_data = main_window.widget.form.form_data();
+						let cover = mime_type.as_ref().zip(pic_data);
+
+						let save_data = SaveData {
+							base: form_data,
+							cover,
+						};
+
+						let result = state.save(save_data).map(|_| String::from("保存成功！"));
+						tx.alert(dbg!(result));
+					}
+				}
 				EmitEvent::Alert(result) => {
 					let (mtype, msg) = match result {
 						Ok(s) => (MessageType::Info, s),
@@ -112,6 +126,7 @@ impl MainWindow {
 
 					main_window.infobar.set_message_type(mtype);
 					main_window.infolabel.set_text(&msg);
+					main_window.infobar.show();
 				}
 			};
 			glib::Continue(true)
