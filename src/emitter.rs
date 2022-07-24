@@ -12,6 +12,26 @@ pub enum EmitEvent {
 	Alert(Result<String, String>),
 }
 
+pub enum CoverMimeType {
+	PNG,
+	JPEG,
+}
+
+impl AsRef<str> for CoverMimeType {
+	fn as_ref(&self) -> &str {
+		match self {
+			CoverMimeType::PNG => "image/png",
+			_ => "image/jpeg",
+		}
+	}
+}
+
+impl ToString for CoverMimeType {
+	fn to_string(&self) -> String {
+		self.as_ref().into()
+	}
+}
+
 pub struct Emitter(glib::Sender<EmitEvent>);
 
 impl Emitter {

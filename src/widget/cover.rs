@@ -18,7 +18,6 @@ pub struct CoverWidget {
 	image: Image,
 	change_btn: Button,
 	remove_btn: Button,
-	cover_path: Rc<RefCell<Option<PathBuf>>>,
 
 	tx: Rc<Emitter>,
 }
