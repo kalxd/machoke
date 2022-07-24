@@ -53,7 +53,7 @@ impl SongWidget {
 
 	pub fn update(&self, tag: id3::Tag) {
 		self.layout.set_sensitive(true);
-		self.cover.update(&tag);
+		self.cover.update_with_tag(&tag);
 		self.form.update(&tag);
 		// self.data.replace(Some(SongMetaData { filepath, tag }));
 	}

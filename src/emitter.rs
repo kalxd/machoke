@@ -1,7 +1,7 @@
 //! 发送者
-use gtk::glib;
+use std::path::Path;
 
-use std::ops::Deref;
+use gtk::glib;
 
 pub enum EmitEvent {
 	/// 打开新音频
@@ -15,6 +15,23 @@ pub enum EmitEvent {
 pub enum CoverMimeType {
 	PNG,
 	JPEG,
+}
+
+impl CoverMimeType {
+	pub fn from_path<P: AsRef<Path>>(path: P) -> Self {
+		path.as_ref()
+			.extension()
+			.filter(|ext| ext == &"png")
+			.map(|_| CoverMimeType::PNG)
+			.unwrap_or(CoverMimeType::JPEG)
+	}
+
+	pub fn from_mine_type<S: AsRef<str>>(t: S) -> Self {
+		match t.as_ref() {
+			"mine/png" => CoverMimeType::PNG,
+			_ => CoverMimeType::JPEG,
+		}
+	}
 }
 
 impl AsRef<str> for CoverMimeType {
@@ -54,13 +71,5 @@ impl Emitter {
 
 	pub fn send(&self, event: EmitEvent) {
 		self.0.send(event).unwrap();
-	}
-}
-
-impl Deref for Emitter {
-	type Target = glib::Sender<EmitEvent>;
-
-	fn deref(&self) -> &Self::Target {
-		&self.0
 	}
 }

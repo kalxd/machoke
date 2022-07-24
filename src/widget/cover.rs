@@ -7,7 +7,7 @@ use gtk::{prelude::*, Box as GtkBox, Button, Image, Orientation};
 use gtk::{FileChooserDialog, FileFilter, ResponseType};
 use id3::frame::PictureType;
 
-use crate::emitter::Emitter;
+use crate::emitter::{CoverMimeType, Emitter};
 
 const COVER_SIZE: i32 = 128;
 
@@ -19,6 +19,7 @@ pub struct CoverWidget {
 	change_btn: Button,
 	remove_btn: Button,
 
+	mime_type: Rc<RefCell<Option<CoverMimeType>>>,
 	tx: Rc<Emitter>,
 }
 
@@ -59,7 +60,7 @@ impl CoverWidget {
 			image,
 			change_btn,
 			remove_btn,
-			cover_path: Default::default(),
+			mime_type: Default::default(),
 			tx,
 		};
 
@@ -73,7 +74,8 @@ impl CoverWidget {
 			let tx = self.tx.clone();
 			move |_| {
 				let filter = FileFilter::new();
-				filter.add_mime_type("image/*");
+				filter.add_mime_type(CoverMimeType::PNG.as_ref());
+				filter.add_mime_type(CoverMimeType::JPEG.as_ref());
 				let dialog = FileChooserDialog::builder()
 					.title("选择新的封面")
 					.filter(&filter)
@@ -102,7 +104,7 @@ impl CoverWidget {
 		self.info_layout.hide();
 	}
 
-	pub fn update(&self, tag: &id3::Tag) {
+	pub fn update_with_tag(&self, tag: &id3::Tag) {
 		self.info_layout.show();
 
 		let picture = tag
@@ -128,7 +130,6 @@ impl CoverWidget {
 		match Pixbuf::from_file(&path) {
 			Err(e) => self.tx.error(e),
 			Ok(pixbuf) => {
-				self.cover_path.replace(Some(path.clone()));
 				self.set_pixbuf(Some(pixbuf));
 			}
 		}
@@ -136,7 +137,6 @@ impl CoverWidget {
 
 	pub fn remove_cover(&self) {
 		self.image.set_pixbuf(None);
-		self.cover_path.replace(None);
 	}
 
 	pub fn get_pixbuf_bytes(&self) -> Option<Vec<u8>> {
