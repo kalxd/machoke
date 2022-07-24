@@ -5,7 +5,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::emitter::{EmitEvent, Emitter};
-use crate::value::AppState;
+use crate::value::{AppState, CoverMimeType};
 
 mod cover;
 mod form;
@@ -101,7 +101,11 @@ impl MainWindow {
 					Err(e) => tx.error(e),
 				},
 				EmitEvent::ChangeCover(path) => {
-					main_window.widget.cover.update_cover_from_path(path);
+					let mime_type = CoverMimeType::from_path(&path);
+					main_window.widget.cover.update_cover_from_path(&path);
+					main_window.app_state.borrow_mut().as_mut().map(|s| {
+						s.mime_type = Some(mime_type);
+					});
 				}
 				EmitEvent::Save => main_window.widget.save_file(),
 				EmitEvent::Alert(result) => {

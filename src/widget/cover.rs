@@ -1,4 +1,3 @@
-use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
 
@@ -20,7 +19,6 @@ pub struct CoverWidget {
 	change_btn: Button,
 	remove_btn: Button,
 
-	mime_type: Rc<RefCell<Option<CoverMimeType>>>,
 	tx: Rc<Emitter>,
 }
 
@@ -61,7 +59,6 @@ impl CoverWidget {
 			image,
 			change_btn,
 			remove_btn,
-			mime_type: Default::default(),
 			tx,
 		};
 
@@ -113,9 +110,6 @@ impl CoverWidget {
 			.find(|p| p.picture_type == PictureType::CoverFront);
 
 		if let Some(picture) = picture {
-			self.mime_type
-				.replace(Some(CoverMimeType::from_mine_type(&picture.mime_type)));
-
 			let loader = PixbufLoader::new();
 
 			let pixbuf = loader
@@ -130,11 +124,7 @@ impl CoverWidget {
 		}
 	}
 
-	pub fn update_cover_from_path(&self, path: PathBuf) {
-		let mime_type = CoverMimeType::from_path(&path);
-
-		self.mime_type.replace(Some(mime_type));
-
+	pub fn update_cover_from_path(&self, path: &PathBuf) {
 		match Pixbuf::from_file(&path) {
 			Err(e) => self.tx.error(e),
 			Ok(pixbuf) => {
