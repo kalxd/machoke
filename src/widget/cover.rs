@@ -4,10 +4,9 @@ use std::rc::Rc;
 use gtk::gdk_pixbuf::{Pixbuf, PixbufLoader};
 use gtk::{prelude::*, Box as GtkBox, Button, Image, Orientation};
 use gtk::{FileChooserDialog, FileFilter, ResponseType};
-use id3::frame::PictureType;
 
 use crate::emitter::{EmitEvent, Emitter};
-use crate::value::CoverMimeType;
+use crate::value::{AppState, CoverMimeType};
 
 const COVER_SIZE: i32 = 128;
 
@@ -102,14 +101,10 @@ impl CoverWidget {
 		self.info_layout.hide();
 	}
 
-	pub fn update_with_tag(&self, tag: &id3::Tag) {
+	pub fn update_with_tag(&self, state: &AppState) {
 		self.info_layout.show();
 
-		let picture = tag
-			.pictures()
-			.find(|p| p.picture_type == PictureType::CoverFront);
-
-		if let Some(picture) = picture {
+		if let Some(picture) = state.front_cover() {
 			let loader = PixbufLoader::new();
 
 			let pixbuf = loader

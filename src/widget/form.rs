@@ -4,6 +4,8 @@ use gtk::{
 };
 use id3::TagLike;
 
+use crate::value::AppState;
+
 const GENRE: &[&'static str] = &[
 	"袁派", "王派", "傅派", "戚派", "金派", "张派", "吕派", "徐派", "范派", "陆派", "毕派", "尹派",
 ];
@@ -99,11 +101,11 @@ impl MetaForm {
 		}
 	}
 
-	pub fn update(&self, tag: &id3::Tag) {
-		self.title_entry.set_text(tag.title().unwrap_or(""));
-		self.artist_entry.set_text(tag.artist().unwrap_or(""));
-		self.album_entry.set_text(tag.album().unwrap_or(""));
-		self.genre_entry.set_text(tag.genre().unwrap_or(""));
+	pub fn update(&self, state: &AppState) {
+		self.title_entry.set_text(state.tag.title().unwrap_or(""));
+		self.artist_entry.set_text(state.tag.artist().unwrap_or(""));
+		self.album_entry.set_text(state.tag.album().unwrap_or(""));
+		self.genre_entry.set_text(state.tag.genre().unwrap_or(""));
 	}
 
 	pub fn state(&self) -> MetaFormData {

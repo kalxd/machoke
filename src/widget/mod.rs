@@ -5,7 +5,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::emitter::{EmitEvent, Emitter};
-use crate::value::{AppState, CoverMimeType};
+use crate::value::AppState;
 
 mod cover;
 mod form;
@@ -94,20 +94,16 @@ impl MainWindow {
 			match msg {
 				EmitEvent::OpenTag(path) => match AppState::try_from(path) {
 					Ok(app_data) => {
-						main_window.widget.update(&app_data.tag);
+						main_window.widget.update(&app_data);
 						main_window.title_bar.save_btn.set_sensitive(true);
 						main_window.app_state.replace(Some(app_data));
 					}
 					Err(e) => tx.error(e),
 				},
 				EmitEvent::ChangeCover(path) => {
-					let mime_type = CoverMimeType::from_path(&path);
 					main_window.widget.cover.update_cover_from_path(&path);
-					main_window.app_state.borrow_mut().as_mut().map(|s| {
-						s.mime_type = Some(mime_type);
-					});
 				}
-				EmitEvent::Save => main_window.widget.save_file(),
+				EmitEvent::Save => {}
 				EmitEvent::Alert(result) => {
 					let (mtype, msg) = match result {
 						Ok(s) => (MessageType::Info, s),

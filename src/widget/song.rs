@@ -1,22 +1,18 @@
 use std::path::Path;
-use std::{cell::RefCell, path::PathBuf, rc::Rc};
+use std::{cell::RefCell, rc::Rc};
 
 use gtk::{prelude::*, Box as GtkBox, Frame};
 use id3::{Tag, TagLike};
 
 use super::{cover::CoverWidget, form::MetaForm};
 use crate::emitter::Emitter;
-
-struct SongMetaData {
-	filepath: PathBuf,
-	tag: id3::Tag,
-}
+use crate::value::{AppState, CoverMimeType};
 
 pub struct SongWidget {
 	pub cover: CoverWidget,
 	pub form: MetaForm,
 	pub layout: GtkBox,
-	data: Rc<RefCell<Option<SongMetaData>>>,
+	mime_type: Rc<RefCell<Option<CoverMimeType>>>,
 	tx: Rc<Emitter>,
 }
 
@@ -42,7 +38,7 @@ impl SongWidget {
 			cover,
 			form,
 			layout,
-			data: Default::default(),
+			mime_type: Default::default(),
 			tx,
 		}
 	}
@@ -51,18 +47,19 @@ impl SongWidget {
 		self.cover.hide_something();
 	}
 
-	pub fn update(&self, tag: &id3::Tag) {
+	pub fn update(&self, state: &AppState) {
 		self.layout.set_sensitive(true);
-		self.cover.update_with_tag(&tag);
-		self.form.update(&tag);
-		// self.data.replace(Some(SongMetaData { filepath, tag }));
+		self.cover.update_with_tag(&state);
+		self.form.update(&state);
 	}
 
+	/*
 	pub fn save_file(&self) {
 		if let Some(SongMetaData { filepath, tag }) = self.data.borrow_mut().as_mut() {
 			self.save_to(tag, filepath);
 		}
 	}
+	 */
 
 	fn save_to<T: AsRef<Path>>(&self, tag: &mut Tag, path: T) {
 		let pic_bytes = self.cover.get_pixbuf_bytes();

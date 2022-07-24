@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use gtk::glib::GString;
-use id3::frame::PictureType;
+use id3::frame::{Picture, PictureType};
 
 pub struct MetaFormData {
 	pub title: GString,
@@ -24,7 +24,7 @@ impl CoverMimeType {
 			.unwrap_or(CoverMimeType::JPEG)
 	}
 
-	pub fn from_mine_type<S: AsRef<str>>(t: S) -> Self {
+	pub fn from_mime_type<S: AsRef<str>>(t: S) -> Self {
 		match t.as_ref() {
 			"mine/png" => CoverMimeType::PNG,
 			_ => CoverMimeType::JPEG,
@@ -51,7 +51,14 @@ impl ToString for CoverMimeType {
 pub struct AppState {
 	pub tag: id3::Tag,
 	pub audio_path: PathBuf,
-	pub mime_type: Option<CoverMimeType>,
+}
+
+impl AppState {
+	pub fn front_cover(&self) -> Option<&Picture> {
+		self.tag
+			.pictures()
+			.find(|p| p.picture_type == PictureType::CoverFront)
+	}
 }
 
 impl TryFrom<PathBuf> for AppState {
@@ -59,15 +66,10 @@ impl TryFrom<PathBuf> for AppState {
 
 	fn try_from(path: PathBuf) -> Result<Self, Self::Error> {
 		let tag = id3::Tag::read_from_path(&path)?;
-		let mime_type = tag
-			.pictures()
-			.find(|p| p.picture_type == PictureType::CoverFront)
-			.map(|p| CoverMimeType::from_mine_type(&p.mime_type));
 
 		Ok(Self {
 			tag,
 			audio_path: path,
-			mime_type,
 		})
 	}
 }
