@@ -49,7 +49,9 @@ impl MainWindow {
 			.visible(false)
 			.build();
 		let infolabel = Label::new(None);
-		infobar.pack_start(&infolabel, false, false, 0);
+		infobar
+			.content_area()
+			.pack_start(&infolabel, false, false, 0);
 		main_layout.pack_start(&infobar, false, true, 0);
 		infobar.connect_response(|infobar, _| {
 			infobar.hide();
