@@ -27,10 +27,6 @@ impl Emitter {
 		self.0.send(EmitEvent::Alert(Err(msg.to_string()))).unwrap();
 	}
 
-	pub fn info<S: ToString>(&self, msg: S) {
-		self.0.send(EmitEvent::Alert(Ok(msg.to_string()))).unwrap();
-	}
-
 	pub fn alert<S1: ToString, S2: ToString>(&self, msg: Result<S1, S2>) {
 		let s = msg.map(|s| s.to_string()).map_err(|e| e.to_string());
 		self.0.send(EmitEvent::Alert(s)).unwrap();
