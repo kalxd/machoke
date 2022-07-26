@@ -105,6 +105,7 @@ impl MainWindow {
 				EmitEvent::ChangeCover(path) => {
 					main_window.widget.cover.update_cover_from_path(&path);
 				}
+				EmitEvent::RemoveCover => main_window.widget.remove_cover(),
 				EmitEvent::Save => {
 					if let Some(state) = main_window.app_state.borrow_mut().as_mut() {
 						let (mime_type, pic_data) = main_window.widget.get_data();

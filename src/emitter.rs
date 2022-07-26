@@ -10,6 +10,8 @@ pub enum EmitEvent {
 	Save,
 	/// 更改封面
 	ChangeCover(PathBuf),
+	/// 移除封面
+	RemoveCover,
 	/// 交互信息
 	Alert(Result<String, String>),
 }

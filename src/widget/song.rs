@@ -65,6 +65,11 @@ impl SongWidget {
 		(mime_type, pic_data)
 	}
 
+	pub fn remove_cover(&self) {
+		self.cover.remove_cover();
+		self.mime_type.replace(None);
+	}
+
 	/*
 	pub fn save_file(&self) {
 		if let Some(SongMetaData { filepath, tag }) = self.data.borrow_mut().as_mut() {

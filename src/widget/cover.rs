@@ -91,9 +91,7 @@ impl CoverWidget {
 
 		self.remove_btn.connect_clicked({
 			let tx = self.tx.clone();
-			move |_| {
-				// tx.send(AppAction::RemoveCover).unwrap();
-			}
+			move |_| tx.send(EmitEvent::RemoveCover)
 		});
 	}
 
