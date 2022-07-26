@@ -117,7 +117,7 @@ impl MainWindow {
 						};
 
 						let result = state.save(save_data).map(|_| String::from("保存成功！"));
-						tx.alert(dbg!(result));
+						tx.alert(result);
 					}
 				}
 				EmitEvent::Alert(result) => {
