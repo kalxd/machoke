@@ -99,6 +99,7 @@ impl MainWindow {
 						main_window.widget.update(&app_data);
 						main_window.title_bar.save_btn.set_sensitive(true);
 						main_window.app_state.replace(Some(app_data));
+						main_window.infobar.hide();
 					}
 					Err(e) => tx.error(e),
 				},
