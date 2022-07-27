@@ -1,4 +1,5 @@
 use std::cell::Ref;
+use std::path::PathBuf;
 use std::{cell::RefCell, rc::Rc};
 
 use gtk::{prelude::*, Box as GtkBox, Frame};
@@ -59,6 +60,13 @@ impl SongWidget {
 		let mime_type = self.mime_type.borrow();
 		let pic_data = self.cover.get_pixbuf_bytes();
 		(mime_type, pic_data)
+	}
+
+	pub fn change_cover(&self, path: &PathBuf) {
+		self.cover.update_cover_from_path(&path);
+
+		let mime_type = CoverMimeType::from_path(&path);
+		self.mime_type.replace(Some(mime_type));
 	}
 
 	pub fn remove_cover(&self) {

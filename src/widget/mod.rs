@@ -103,9 +103,7 @@ impl MainWindow {
 					}
 					Err(e) => tx.error(e),
 				},
-				EmitEvent::ChangeCover(path) => {
-					main_window.widget.cover.update_cover_from_path(&path);
-				}
+				EmitEvent::ChangeCover(path) => main_window.widget.change_cover(&path),
 				EmitEvent::RemoveCover => main_window.widget.remove_cover(),
 				EmitEvent::Save => {
 					if let Some(state) = main_window.app_state.borrow_mut().as_mut() {

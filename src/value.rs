@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use gtk::glib::GString;
 use id3::{
@@ -19,6 +19,14 @@ pub enum CoverMimeType {
 }
 
 impl CoverMimeType {
+	pub fn from_path<P: AsRef<Path>>(path: P) -> Self {
+		path.as_ref()
+			.extension()
+			.filter(|s| s == &"png")
+			.map(|_| CoverMimeType::PNG)
+			.unwrap_or(CoverMimeType::JPEG)
+	}
+
 	pub fn from_mime_type<S: AsRef<str>>(t: S) -> Self {
 		match t.as_ref() {
 			"mine/png" => CoverMimeType::PNG,
