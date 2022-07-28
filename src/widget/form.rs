@@ -70,7 +70,7 @@ impl MetaForm {
 
 		let form_row = FormRow::new();
 
-		let title_entry = form_row.add_row("歌手");
+		let title_entry = form_row.add_row("标题");
 		let artist_entry = form_row.add_row("艺术家");
 		let album_entry = form_row.add_row("专辑");
 		let genre_entry = form_row.add_row("流派");
