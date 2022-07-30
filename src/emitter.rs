@@ -23,6 +23,10 @@ impl Emitter {
 		Self(tx)
 	}
 
+	pub fn info<S: ToString>(&self, msg: S) {
+		self.0.send(EmitEvent::Alert(Ok(msg.to_string()))).unwrap();
+	}
+
 	pub fn error<S: ToString>(&self, msg: S) {
 		self.0.send(EmitEvent::Alert(Err(msg.to_string()))).unwrap();
 	}

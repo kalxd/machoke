@@ -5,7 +5,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::emitter::{EmitEvent, Emitter};
-use crate::value::{AppState, SaveData};
+use crate::value::{AppState, AppStateBox, SaveData};
 
 mod cover;
 mod form;
@@ -94,8 +94,12 @@ impl MainWindow {
 
 		main_window.rx.attach(None, move |msg| {
 			match msg {
-				EmitEvent::OpenTag(path) => match AppState::try_from(path) {
-					Ok(app_data) => {
+				EmitEvent::OpenTag(path) => match AppStateBox::try_from(path.clone()) {
+					Ok(AppStateBox((msg, app_data))) => {
+						if let Some(msg) = msg {
+							tx.info(msg);
+						}
+
 						main_window.widget.update(&app_data);
 						main_window.title_bar.save_btn.set_sensitive(true);
 						main_window.app_state.replace(Some(app_data));

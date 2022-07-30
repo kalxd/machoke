@@ -96,15 +96,34 @@ impl AppState {
 	}
 }
 
-impl TryFrom<PathBuf> for AppState {
+pub struct AppStateBox(pub (Option<String>, AppState));
+
+impl TryFrom<PathBuf> for AppStateBox {
 	type Error = id3::Error;
 
 	fn try_from(path: PathBuf) -> Result<Self, Self::Error> {
-		let tag = id3::Tag::read_from_path(&path)?;
-
-		Ok(Self {
-			tag,
-			audio_path: path,
-		})
+		match id3::Tag::read_from_path(&path) {
+			Ok(tag) => Ok(Self((
+				None,
+				AppState {
+					tag,
+					audio_path: path,
+				},
+			))),
+			Err(e) => {
+				if e.partial_tag.is_none() {
+					// 无法解析出tag
+					Ok(Self((
+						Some("无法解析tag，我亲自为你生成一个！".into()),
+						AppState {
+							tag: Default::default(),
+							audio_path: path,
+						},
+					)))
+				} else {
+					Err(e)
+				}
+			}
+		}
 	}
 }
