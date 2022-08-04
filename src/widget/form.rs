@@ -1,6 +1,6 @@
 use gtk::{
-	prelude::*, Box as GtkBox, Entry, EntryCompletion, Label, ListStore, Orientation, SizeGroup,
-	SizeGroupMode,
+	prelude::*, Box as GtkBox, Button, Entry, EntryCompletion, Label, ListStore, Orientation,
+	SizeGroup, SizeGroupMode,
 };
 use id3::TagLike;
 
@@ -84,6 +84,38 @@ impl MetaForm {
 		genre_completion.set_text_column(0);
 
 		layout.add(&form_row.layout);
+
+		{
+			// 测试用的
+			let label = Label::new(Some("sb"));
+			let row = GtkBox::builder()
+				.spacing(10)
+				.orientation(Orientation::Horizontal)
+				.build();
+			row.pack_start(&label, false, false, 0);
+
+			let v = GtkBox::builder()
+				.spacing(10)
+				.orientation(Orientation::Vertical)
+				.build();
+			{
+				let vl = GtkBox::builder()
+					.spacing(10)
+					.orientation(Orientation::Horizontal)
+					.build();
+
+				let entry = Entry::new();
+				vl.pack_start(&entry, true, true, 0);
+
+				let b = Button::with_label("+");
+				vl.pack_start(&b, false, false, 0);
+
+				v.pack_start(&vl, false, false, 0);
+			}
+			row.pack_start(&v, false, true, 0);
+
+			layout.pack_start(&row, false, false, 10);
+		}
 
 		Self {
 			layout,
