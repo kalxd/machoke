@@ -1,6 +1,6 @@
 use gtk::{
-	prelude::*, Box as GtkBox, Button, Entry, EntryCompletion, Image, Label, ListStore,
-	Orientation, SizeGroup, SizeGroupMode,
+	prelude::*, Box as GtkBox, Entry, EntryCompletion, Label, ListStore, Orientation, SizeGroup,
+	SizeGroupMode,
 };
 use id3::TagLike;
 
@@ -22,53 +22,6 @@ impl GenreStore {
 		});
 
 		Self(store)
-	}
-}
-
-// 单行的编辑器
-struct MultiRowEntry {
-	entry: Entry,
-	remove_btn: Button,
-	layout: GtkBox,
-}
-
-impl MultiRowEntry {
-	fn new() -> Self {
-		let layout = GtkBox::new(Orientation::Horizontal, 10);
-
-		let entry = Entry::new();
-		layout.pack_start(&entry, true, true, 0);
-
-		let remove_btn = Button::builder()
-			.image(&Image::builder().icon_name("list-remove").build())
-			.build();
-		layout.pack_start(&remove_btn, false, false, 0);
-
-		Self {
-			entry,
-			remove_btn,
-			layout,
-		}
-	}
-}
-
-// 多行编辑器
-struct MultiEntry {
-	entry_list: Vec<Entry>,
-	layout: GtkBox,
-}
-
-impl MultiEntry {
-	fn new() -> Self {
-		let main_layout = GtkBox::builder()
-			.spacing(10)
-			.orientation(Orientation::Vertical)
-			.build();
-
-		Self {
-			entry_list: vec![],
-			layout: main_layout,
-		}
 	}
 }
 
@@ -131,38 +84,6 @@ impl MetaForm {
 		genre_completion.set_text_column(0);
 
 		layout.add(&form_row.layout);
-
-		{
-			// 测试用的
-			let label = Label::new(Some("sb"));
-			let row = GtkBox::builder()
-				.spacing(10)
-				.orientation(Orientation::Horizontal)
-				.build();
-			row.pack_start(&label, false, false, 0);
-
-			let v = GtkBox::builder()
-				.spacing(10)
-				.orientation(Orientation::Vertical)
-				.build();
-			{
-				let vl = GtkBox::builder()
-					.spacing(10)
-					.orientation(Orientation::Horizontal)
-					.build();
-
-				let entry = Entry::new();
-				vl.pack_start(&entry, true, true, 0);
-
-				let b = Button::with_label("+");
-				vl.pack_start(&b, false, false, 0);
-
-				v.pack_start(&vl, false, false, 0);
-			}
-			row.pack_start(&v, false, true, 0);
-
-			layout.pack_start(&row, false, false, 10);
-		}
 
 		Self {
 			layout,
