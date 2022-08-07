@@ -3,7 +3,6 @@ use std::path::PathBuf;
 use std::{cell::RefCell, rc::Rc};
 
 use gtk::{prelude::*, Box as GtkBox, Frame};
-use id3::TagLike;
 
 use super::{cover::CoverWidget, form::MetaForm};
 use crate::emitter::Emitter;
@@ -47,7 +46,6 @@ impl SongWidget {
 	}
 
 	pub fn update(&self, state: &AppState) {
-		dbg!(&state.tag.artists());
 		self.layout.set_sensitive(true);
 		self.cover.update_with_tag(&state);
 		self.form.update(&state);

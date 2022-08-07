@@ -86,10 +86,7 @@ impl AppState {
 		}
 
 		self.tag.set_title(data.base.title);
-		{
-			let text = id3::frame::Content::new_text_values(["hello", "world"]);
-			self.tag.set_artist(text.text().unwrap_or(""));
-		}
+		self.tag.set_artist(data.base.artist);
 		self.tag.set_album(data.base.album);
 		self.tag.set_genre(data.base.genre);
 
