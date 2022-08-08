@@ -88,6 +88,18 @@ impl MultiEntry {
 					layout.pack_start(&row.layout, false, false, 0);
 					row.layout.show_all();
 
+					row.btn.connect_clicked({
+						let layout = layout.clone();
+						let row_layout = row.layout.clone();
+						let entry_list = entry_list.clone();
+						move |_| {
+							layout.remove(&row_layout);
+							let mut xs = entry_list.borrow_mut();
+							xs.retain(|x: &MultiEntryRow| x.layout != row_layout);
+							dbg!(&xs.len());
+						}
+					});
+
 					let mut xs = entry_list.borrow_mut();
 					xs.push(row);
 				}
