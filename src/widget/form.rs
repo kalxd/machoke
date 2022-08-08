@@ -40,6 +40,7 @@ impl MultiEntryRow {
 		let entry = Entry::new();
 		let btn = Button::builder()
 			.image(&Image::builder().icon_name("list-remove").build())
+			.tooltip_text("删除该列")
 			.build();
 
 		layout.pack_start(&entry, true, true, 0);
