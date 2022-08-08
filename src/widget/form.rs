@@ -4,6 +4,9 @@ use gtk::{
 };
 use id3::TagLike;
 
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use crate::value::{AppState, MetaFormData, FAV_SPACING};
 
 const GENRE: &[&'static str] = &[
@@ -33,7 +36,7 @@ struct MultiEntryRow {
 
 impl MultiEntryRow {
 	fn new() -> Self {
-		let layout = GtkBox::new(Orientation::Horizontal, 0);
+		let layout = GtkBox::new(Orientation::Horizontal, FAV_SPACING);
 		let entry = Entry::new();
 		let btn = Button::builder()
 			.image(&Image::builder().icon_name("list-remove").build())
@@ -53,8 +56,7 @@ impl MultiEntryRow {
 // 多行文本
 struct MultiEntry {
 	entry: Entry,
-	entry_list: Vec<MultiEntryRow>,
-	add_btn: Button,
+	entry_list: Rc<RefCell<Vec<MultiEntryRow>>>,
 	layout: GtkBox,
 }
 
@@ -63,23 +65,38 @@ impl MultiEntry {
 		let layout = GtkBox::builder()
 			.orientation(Orientation::Vertical)
 			.spacing(10)
-			.halign(Align::Start)
 			.build();
 
 		let entry = Entry::new();
-		let entry_list = vec![];
+
+		let entry_list = Rc::new(RefCell::new(vec![]));
 		let add_btn = Button::builder()
 			.image(&Image::builder().icon_name("list-add").build())
 			.tooltip_text("添加一列新内容")
 			.build();
 
 		layout.pack_start(&entry, true, true, 0);
-		layout.pack_start(&add_btn, false, false, 0);
+		layout.pack_end(&add_btn, false, false, 0);
+
+		{
+			// 添加新的一列
+			add_btn.connect_clicked({
+				let entry_list = entry_list.clone();
+				let layout = layout.clone();
+				move |_| {
+					let row = MultiEntryRow::new();
+					layout.pack_start(&row.layout, false, false, 0);
+					row.layout.show_all();
+
+					let mut xs = entry_list.borrow_mut();
+					xs.push(row);
+				}
+			});
+		}
 
 		Self {
 			entry,
 			entry_list,
-			add_btn,
 			layout,
 		}
 	}
@@ -129,7 +146,7 @@ impl FormRow {
 		let mutil_entry = MultiEntry::new();
 		row_layout.pack_start(&mutil_entry.layout, true, true, 0);
 
-		self.layout.pack_start(&row_layout, true, true, 0);
+		self.layout.pack_start(&row_layout, false, true, 0);
 		return mutil_entry;
 	}
 }
