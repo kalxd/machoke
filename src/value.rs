@@ -6,6 +6,9 @@ use id3::{
 	TagLike,
 };
 
+/// 我们最爱的间距。
+pub const FAV_SPACING: i32 = 10;
+
 pub struct MetaFormData {
 	pub title: GString,
 	pub artist: GString,
