@@ -1,6 +1,6 @@
 use gtk::{
-	prelude::*, Align, Box as GtkBox, Button, Entry, EntryCompletion, Image, Label, ListStore,
-	Orientation, SizeGroup, SizeGroupMode,
+	glib::GString, prelude::*, Align, Box as GtkBox, Button, Entry, EntryCompletion, Image, Label,
+	ListStore, Orientation, SizeGroup, SizeGroupMode,
 };
 use id3::TagLike;
 
@@ -97,7 +97,6 @@ impl MultiEntry {
 							layout.remove(&row_layout);
 							let mut xs = entry_list.borrow_mut();
 							xs.retain(|x: &MultiEntryRow| x.layout != row_layout);
-							dbg!(&xs.len());
 						}
 					});
 
@@ -112,6 +111,15 @@ impl MultiEntry {
 			entry_list,
 			layout,
 		}
+	}
+
+	fn get_text_list(&self) -> Vec<GString> {
+		self.entry_list
+			.borrow()
+			.iter()
+			.map(|row| row.entry.text())
+			.filter(|text| !text.as_str().trim().is_empty())
+			.collect()
 	}
 }
 
