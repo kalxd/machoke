@@ -113,13 +113,57 @@ impl MultiEntry {
 		}
 	}
 
+	fn reset_row(&self) {
+		for row in self.entry_list.take() {
+			self.layout.remove(&row.layout);
+		}
+	}
+
+	fn add_row<S: AsRef<str>>(&self, text: S) {
+		let layout = self.layout.clone();
+
+		let row = MultiEntryRow::new();
+		row.set_text(text);
+		let row_layout = row.layout.clone();
+		layout.pack_start(&row.layout, false, false, 0);
+		layout.show_all();
+
+		row.btn.connect_clicked({
+			let entry_list = self.entry_list.clone();
+			move |_| {
+				layout.remove(&row_layout);
+				let mut xs = entry_list.borrow_mut();
+				xs.retain(|x| x.layout != row_layout);
+			}
+		});
+
+		let mut xs = self.entry_list.borrow_mut();
+		xs.push(row);
+	}
+
+	fn set_text_list<S: AsRef<str>>(&self, xs: &[S]) {
+		self.reset_row();
+		if let Some((h, xs)) = xs.split_first() {
+			self.entry.set_text(h.as_ref());
+			xs.iter().for_each(|x| self.add_row(x));
+		}
+	}
+
 	fn get_text_list(&self) -> Vec<GString> {
-		self.entry_list
+		let mut xs = vec![];
+		xs.push(self.entry.text());
+
+		let mut ys: Vec<GString> = self
+			.entry_list
 			.borrow()
 			.iter()
 			.map(|row| row.entry.text())
 			.filter(|text| !text.as_str().trim().is_empty())
-			.collect()
+			.collect();
+
+		xs.append(&mut ys);
+
+		return xs;
 	}
 }
 
@@ -175,9 +219,9 @@ impl FormRow {
 pub struct MetaForm {
 	pub layout: GtkBox,
 	title_entry: Entry,
-	artist_entry: Entry,
+	artist_entry: MultiEntry,
 	album_entry: Entry,
-	genre_entry: Entry,
+	genre_entry: MultiEntry,
 }
 
 impl MetaForm {
@@ -187,20 +231,16 @@ impl MetaForm {
 		let form_row = FormRow::new();
 
 		let title_entry = form_row.add_row("标题");
-		let artist_entry = form_row.add_row("艺术家");
+		let artist_entry = form_row.add_multi_entry("艺术家");
 		let album_entry = form_row.add_row("专辑");
-		let genre_entry = form_row.add_row("流派");
-
-		{
-			form_row.add_multi_entry("我的流派");
-		}
+		let genre_entry = form_row.add_multi_entry("流派");
 
 		let genre_store = GenreStore::new();
 		let genre_completion = EntryCompletion::builder()
 			.model(&genre_store.0)
 			.minimum_key_length(0)
 			.build();
-		genre_entry.set_completion(Some(&genre_completion));
+		// genre_entry.set_completion(Some(&genre_completion));
 		genre_completion.set_text_column(0);
 
 		layout.add(&form_row.layout);
@@ -216,16 +256,18 @@ impl MetaForm {
 
 	pub fn update(&self, state: &AppState) {
 		self.title_entry.set_text(state.tag.title().unwrap_or(""));
-		self.artist_entry.set_text(state.tag.artist().unwrap_or(""));
+		self.artist_entry
+			.set_text_list(&state.tag.artists().unwrap_or(vec![]));
 		self.album_entry.set_text(state.tag.album().unwrap_or(""));
-		self.genre_entry.set_text(state.tag.genre().unwrap_or(""));
+		self.genre_entry
+			.set_text_list(&state.tag.genres().unwrap_or(vec![]));
 	}
 
 	pub fn form_data(&self) -> MetaFormData {
 		let title = self.title_entry.text();
-		let artist = self.artist_entry.text();
+		let artist = self.artist_entry.get_text_list();
 		let album = self.album_entry.text();
-		let genre = self.genre_entry.text();
+		let genre = self.genre_entry.get_text_list();
 
 		MetaFormData {
 			title,

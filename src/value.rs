@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use gtk::glib::GString;
 use id3::{
 	frame::{Picture, PictureType},
-	TagLike,
+	Content, TagLike,
 };
 
 /// 我们最爱的间距。
@@ -11,9 +11,9 @@ pub const FAV_SPACING: i32 = 10;
 
 pub struct MetaFormData {
 	pub title: GString,
-	pub artist: GString,
+	pub artist: Vec<GString>,
 	pub album: GString,
-	pub genre: GString,
+	pub genre: Vec<GString>,
 }
 
 pub enum CoverMimeType {
@@ -89,9 +89,15 @@ impl AppState {
 		}
 
 		self.tag.set_title(data.base.title);
-		self.tag.set_artist(data.base.artist);
+		{
+			let c = Content::new_text_values(data.base.artist);
+			self.tag.set_artist(c.text().unwrap_or(""));
+		}
 		self.tag.set_album(data.base.album);
-		self.tag.set_genre(data.base.genre);
+		{
+			let c = Content::new_text_values(data.base.genre);
+			self.tag.set_genre(c.text().unwrap_or(""));
+		}
 
 		let version = self.tag.version();
 
