@@ -1,6 +1,6 @@
 use gtk::{
-	glib::GString, prelude::*, Align, Box as GtkBox, Button, Entry, EntryCompletion, Image, Label,
-	ListStore, Orientation, SizeGroup, SizeGroupMode,
+	glib::GString, prelude::*, Align, Box as GtkBox, Button, Entry, Image, Label, Orientation,
+	SizeGroup, SizeGroupMode,
 };
 use id3::TagLike;
 
@@ -8,25 +8,6 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::value::{AppState, MetaFormData, FAV_SPACING};
-
-const GENRE: &[&'static str] = &[
-	"袁派", "王派", "傅派", "戚派", "金派", "张派", "吕派", "徐派", "范派", "陆派", "毕派", "尹派",
-];
-
-struct GenreStore(ListStore);
-
-impl GenreStore {
-	fn new() -> Self {
-		let store = ListStore::new(&[gtk::glib::types::Type::STRING]);
-
-		GENRE.iter().for_each(|name| {
-			let iter = store.append();
-			store.set(&iter, &[(0, name)]);
-		});
-
-		Self(store)
-	}
-}
 
 struct MultiEntryRow {
 	entry: Entry,
@@ -234,14 +215,6 @@ impl MetaForm {
 		let artist_entry = form_row.add_multi_entry("艺术家");
 		let album_entry = form_row.add_row("专辑");
 		let genre_entry = form_row.add_multi_entry("流派");
-
-		let genre_store = GenreStore::new();
-		let genre_completion = EntryCompletion::builder()
-			.model(&genre_store.0)
-			.minimum_key_length(0)
-			.build();
-		// genre_entry.set_completion(Some(&genre_completion));
-		genre_completion.set_text_column(0);
 
 		layout.add(&form_row.layout);
 
