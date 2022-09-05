@@ -1,4 +1,4 @@
-use gtk::{glib, InfoBar, Label, MessageType};
+use gtk::{glib, InfoBar, Label};
 use gtk::{prelude::*, Application, ApplicationWindow, Box as GtkBox};
 
 use std::cell::RefCell;
@@ -97,7 +97,7 @@ impl MainWindow {
 				EmitEvent::OpenTag(path) => match AppStateBox::try_from(path.clone()) {
 					Ok(AppStateBox((msg, app_data))) => {
 						if let Some(msg) = msg {
-							tx.info(msg);
+							tx.warn(msg);
 						}
 
 						main_window.widget.update(&app_data);
@@ -124,13 +124,8 @@ impl MainWindow {
 						tx.alert(result);
 					}
 				}
-				EmitEvent::Alert(result) => {
-					let (mtype, msg) = match result {
-						Ok(s) => (MessageType::Info, s),
-						Err(e) => (MessageType::Error, e),
-					};
-
-					main_window.infobar.set_message_type(mtype);
+				EmitEvent::Alert((msg_type, msg)) => {
+					main_window.infobar.set_message_type(msg_type);
 					main_window.infolabel.set_text(&msg);
 					main_window.infobar.show();
 				}

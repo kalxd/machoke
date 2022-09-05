@@ -1,7 +1,7 @@
 //! 发送者
 use std::path::PathBuf;
 
-use gtk::glib;
+use gtk::{glib, MessageType};
 
 pub enum EmitEvent {
 	/// 打开新音频
@@ -13,7 +13,7 @@ pub enum EmitEvent {
 	/// 移除封面
 	RemoveCover,
 	/// 交互信息
-	Alert(Result<String, String>),
+	Alert((MessageType, String)),
 }
 
 pub struct Emitter(glib::Sender<EmitEvent>);
@@ -24,16 +24,28 @@ impl Emitter {
 	}
 
 	pub fn info<S: ToString>(&self, msg: S) {
-		self.0.send(EmitEvent::Alert(Ok(msg.to_string()))).unwrap();
+		self.0
+			.send(EmitEvent::Alert((MessageType::Info, msg.to_string())))
+			.unwrap();
 	}
 
 	pub fn error<S: ToString>(&self, msg: S) {
-		self.0.send(EmitEvent::Alert(Err(msg.to_string()))).unwrap();
+		self.0
+			.send(EmitEvent::Alert((MessageType::Error, msg.to_string())))
+			.unwrap();
+	}
+
+	pub fn warn<S: ToString>(&self, msg: S) {
+		self.0
+			.send(EmitEvent::Alert((MessageType::Warning, msg.to_string())))
+			.unwrap();
 	}
 
 	pub fn alert<S1: ToString, S2: ToString>(&self, msg: Result<S1, S2>) {
-		let s = msg.map(|s| s.to_string()).map_err(|e| e.to_string());
-		self.0.send(EmitEvent::Alert(s)).unwrap();
+		match msg {
+			Ok(s) => self.info(s),
+			Err(e) => self.error(e),
+		}
 	}
 
 	pub fn send(&self, event: EmitEvent) {
