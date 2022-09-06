@@ -123,11 +123,12 @@ impl MultiEntry {
 	}
 
 	fn set_text_list<S: AsRef<str>>(&self, xs: &[S]) {
-		self.entry.set_text("");
 		self.reset_row();
 		if let Some((h, xs)) = xs.split_first() {
 			self.entry.set_text(h.as_ref());
 			xs.iter().for_each(|x| self.add_row(x));
+		} else {
+			self.entry.set_text("");
 		}
 	}
 
