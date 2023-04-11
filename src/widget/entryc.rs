@@ -1,5 +1,7 @@
 use gtk::glib::{types::Type, value::Value};
-use gtk::prelude::{EntryCompletionExt, EntryExt, GtkListStoreExt, GtkListStoreExtManual};
+use gtk::prelude::{
+	EntryCompletionExt, EntryExt, GtkListStoreExt, GtkListStoreExtManual, TreeModelExt,
+};
 use gtk::{Entry, EntryCompletion, ListStore};
 
 use std::convert::AsRef;
@@ -25,8 +27,15 @@ impl EntryC {
 	pub fn set_text(&self, text: &str) {
 		self.entry.set_text(text);
 
-		let iter = self.store.append();
-		self.store.set_value(&iter, 0, &Value::from(text));
+		let is_contains = (0..self.store.iter_n_children(None))
+			.map(|i| self.store.iter_nth_child(None, i))
+			.map(|miter| miter.and_then(|iter| self.store.value(&iter, 0).get::<'_, String>().ok()))
+			.any(|ma| ma.map(|a| a == text).unwrap_or(false));
+
+		if !is_contains {
+			let iter = self.store.append();
+			self.store.set_value(&iter, 0, &Value::from(text));
+		}
 	}
 }
 
