@@ -8,6 +8,7 @@ use crate::emitter::{EmitEvent, Emitter};
 use crate::value::{AppState, AppStateBox, SaveData};
 
 mod cover;
+mod entryc;
 mod form;
 mod headerbar;
 mod song;

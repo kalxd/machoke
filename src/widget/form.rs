@@ -1,12 +1,15 @@
 use gtk::{
-	glib::GString, prelude::*, Align, Box as GtkBox, Button, Entry, Image, Label, Orientation,
-	SizeGroup, SizeGroupMode,
+	glib::{object::IsA, GString},
+	prelude::*,
+	Align, Box as GtkBox, Button, Entry, EntryCompletion, Image, Label, Orientation, SizeGroup,
+	SizeGroupMode, Widget,
 };
 use id3::TagLike;
 
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use super::entryc::EntryC;
 use crate::value::{AppState, MetaFormData, FAV_SPACING};
 
 struct MultiEntryRow {
@@ -16,9 +19,10 @@ struct MultiEntryRow {
 }
 
 impl MultiEntryRow {
-	fn new() -> Self {
+	fn new(entry_completion: Option<&EntryCompletion>) -> Self {
 		let layout = GtkBox::new(Orientation::Horizontal, FAV_SPACING);
 		let entry = Entry::new();
+		entry.set_completion(entry_completion);
 		let btn = Button::builder()
 			.image(&Image::builder().icon_name("list-remove").build())
 			.tooltip_text("删除该列")
@@ -39,6 +43,7 @@ impl MultiEntryRow {
 struct MultiEntry {
 	entry: Entry,
 	entry_list: Rc<RefCell<Vec<MultiEntryRow>>>,
+	entry_completion: EntryCompletion,
 	layout: GtkBox,
 }
 
@@ -49,7 +54,9 @@ impl MultiEntry {
 			.spacing(10)
 			.build();
 
+		let entry_completion = EntryCompletion::new();
 		let entry = Entry::new();
+		entry.set_completion(Some(&entry_completion));
 
 		let entry_list = Rc::new(RefCell::new(vec![]));
 		let add_btn = Button::builder()
@@ -64,9 +71,10 @@ impl MultiEntry {
 			// 添加新的一列
 			add_btn.connect_clicked({
 				let entry_list = entry_list.clone();
+				let entry_completion = entry_completion.clone();
 				let layout = layout.clone();
 				move |_| {
-					let row = MultiEntryRow::new();
+					let row = MultiEntryRow::new(Some(&entry_completion));
 					layout.pack_start(&row.layout, false, false, 0);
 					row.layout.show_all();
 
@@ -90,6 +98,7 @@ impl MultiEntry {
 		Self {
 			entry,
 			entry_list,
+			entry_completion,
 			layout,
 		}
 	}
@@ -103,7 +112,7 @@ impl MultiEntry {
 	fn add_row<S: AsRef<str>>(&self, text: S) {
 		let layout = self.layout.clone();
 
-		let row = MultiEntryRow::new();
+		let row = MultiEntryRow::new(Some(&self.entry_completion));
 		row.set_text(text);
 		let row_layout = row.layout.clone();
 		layout.pack_start(&row.layout, false, false, 0);
@@ -166,18 +175,26 @@ impl FormRow {
 		Self { size_group, layout }
 	}
 
-	fn add_row(&self, label: &str) -> Entry {
+	fn add_row_with(&self, label: &str, w: &impl IsA<Widget>) {
 		let row_layout = GtkBox::new(Orientation::Horizontal, FAV_SPACING);
 		let label = Label::new(Some(label));
 		row_layout.pack_start(&label, false, false, 0);
 		self.size_group.add_widget(&label);
 
-		let entry = Entry::new();
-		row_layout.pack_start(&entry, true, true, 0);
-
+		row_layout.pack_start(w, true, true, 0);
 		self.layout.pack_start(&row_layout, false, true, 10);
+	}
 
+	fn add_row(&self, label: &str) -> Entry {
+		let entry = Entry::new();
+		self.add_row_with(label, &entry);
 		return entry;
+	}
+
+	fn add_row_entryc(&self, label: &str) -> EntryC {
+		let entryc = EntryC::new();
+		self.add_row_with(label, entryc.as_ref());
+		return entryc;
 	}
 
 	fn add_multi_entry(&self, label: &str) -> MultiEntry {
@@ -203,7 +220,7 @@ pub struct MetaForm {
 	pub layout: GtkBox,
 	title_entry: Entry,
 	artist_entry: MultiEntry,
-	album_entry: Entry,
+	album_entry: EntryC,
 	genre_entry: MultiEntry,
 }
 
@@ -215,7 +232,7 @@ impl MetaForm {
 
 		let title_entry = form_row.add_row("标题");
 		let artist_entry = form_row.add_multi_entry("艺术家");
-		let album_entry = form_row.add_row("专辑");
+		let album_entry = form_row.add_row_entryc("专辑");
 		let genre_entry = form_row.add_multi_entry("流派");
 
 		layout.add(&form_row.layout);
@@ -241,7 +258,7 @@ impl MetaForm {
 	pub fn form_data(&self) -> MetaFormData {
 		let title = self.title_entry.text();
 		let artist = self.artist_entry.get_text_list();
-		let album = self.album_entry.text();
+		let album = self.album_entry.as_ref().text();
 		let genre = self.genre_entry.get_text_list();
 
 		MetaFormData {
