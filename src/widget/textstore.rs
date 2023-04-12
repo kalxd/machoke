@@ -12,6 +12,10 @@ impl TextStore {
 	}
 
 	pub fn set_text(&self, text: &str) {
+		if text.trim().is_empty() {
+			return;
+		}
+
 		let is_contains = (0..self.0.iter_n_children(None))
 			.map(|i| self.0.iter_nth_child(None, i))
 			.map(|miter| miter.and_then(|iter| self.0.value(&iter, 0).get::<'_, String>().ok()))

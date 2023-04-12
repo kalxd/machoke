@@ -185,12 +185,6 @@ impl FormRow {
 		self.layout.pack_start(&row_layout, false, true, 10);
 	}
 
-	fn add_row(&self, label: &str) -> Entry {
-		let entry = Entry::new();
-		self.add_row_with(label, &entry);
-		return entry;
-	}
-
 	fn add_row_entryc(&self, label: &str) -> EntryC {
 		let entryc = EntryC::new();
 		self.add_row_with(label, entryc.as_ref());
@@ -218,7 +212,7 @@ impl FormRow {
 
 pub struct MetaForm {
 	pub layout: GtkBox,
-	title_entry: Entry,
+	title_entry: EntryC,
 	artist_entry: MultiEntry,
 	album_entry: EntryC,
 	genre_entry: MultiEntry,
@@ -230,7 +224,7 @@ impl MetaForm {
 
 		let form_row = FormRow::new();
 
-		let title_entry = form_row.add_row("标题");
+		let title_entry = form_row.add_row_entryc("标题");
 		let artist_entry = form_row.add_multi_entry("艺术家");
 		let album_entry = form_row.add_row_entryc("专辑");
 		let genre_entry = form_row.add_multi_entry("流派");
@@ -256,7 +250,7 @@ impl MetaForm {
 	}
 
 	pub fn form_data(&self) -> MetaFormData {
-		let title = self.title_entry.text();
+		let title = self.title_entry.as_ref().text();
 		let artist = self.artist_entry.get_text_list();
 		let album = self.album_entry.as_ref().text();
 		let genre = self.genre_entry.get_text_list();
