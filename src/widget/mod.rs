@@ -12,6 +12,7 @@ mod entryc;
 mod form;
 mod headerbar;
 mod song;
+mod textstore;
 
 pub struct MainWindow {
 	window: ApplicationWindow,
