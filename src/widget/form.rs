@@ -9,7 +9,7 @@ use id3::TagLike;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use super::entryc::EntryC;
+use super::element::entry::EntryC;
 use crate::value::{AppState, MetaFormData, FAV_SPACING};
 
 struct MultiEntryRow {

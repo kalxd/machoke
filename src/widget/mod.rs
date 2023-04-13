@@ -8,11 +8,10 @@ use crate::emitter::{EmitEvent, Emitter};
 use crate::value::{AppState, AppStateBox, SaveData};
 
 mod cover;
-mod entryc;
+mod element;
 mod form;
 mod headerbar;
 mod song;
-mod textstore;
 
 pub struct MainWindow {
 	window: ApplicationWindow,
