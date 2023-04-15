@@ -35,7 +35,7 @@ impl FormRow {
 
 	fn add_row_entryc(&self, label: &str) -> EntryC {
 		let entryc = EntryC::new();
-		self.add_row_with(label, entryc.as_ref());
+		self.add_row_with(label, &*entryc);
 		return entryc;
 	}
 
@@ -98,9 +98,9 @@ impl MetaForm {
 	}
 
 	pub fn form_data(&self) -> MetaFormData {
-		let title = self.title_entry.as_ref().text();
+		let title = self.title_entry.text();
 		let artist = self.artist_entry.get_text_list();
-		let album = self.album_entry.as_ref().text();
+		let album = self.album_entry.text();
 		let genre = self.genre_entry.get_text_list();
 
 		MetaFormData {

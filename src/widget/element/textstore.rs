@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use gtk::glib::{types::Type, value::Value};
 use gtk::prelude::{GtkListStoreExt, GtkListStoreExtManual, TreeModelExt};
 use gtk::ListStore;
@@ -28,8 +30,10 @@ impl TextStore {
 	}
 }
 
-impl AsRef<ListStore> for TextStore {
-	fn as_ref(&self) -> &ListStore {
+impl Deref for TextStore {
+	type Target = ListStore;
+
+	fn deref(&self) -> &Self::Target {
 		&self.0
 	}
 }

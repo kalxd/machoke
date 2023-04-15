@@ -1,4 +1,5 @@
 use std::cell::RefCell;
+use std::ops::Deref;
 use std::rc::Rc;
 
 use gtk::glib::GString;
@@ -17,7 +18,7 @@ impl EntryC {
 	pub fn new() -> Self {
 		let store = TextStore::new();
 		let entry_completion = EntryCompletion::builder()
-			.model(store.as_ref())
+			.model(&*store)
 			.minimum_key_length(0)
 			.build();
 		entry_completion.set_text_column(0);
@@ -34,8 +35,10 @@ impl EntryC {
 	}
 }
 
-impl AsRef<Entry> for EntryC {
-	fn as_ref(&self) -> &Entry {
+impl Deref for EntryC {
+	type Target = Entry;
+
+	fn deref(&self) -> &Self::Target {
 		&self.entry
 	}
 }
