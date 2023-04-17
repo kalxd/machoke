@@ -19,6 +19,7 @@ impl TextStore {
 		let entry_completion = EntryCompletion::builder()
 			.model(&self.0)
 			.minimum_key_length(0)
+			.popup_completion(true)
 			.build();
 		entry_completion.set_text_column(0);
 

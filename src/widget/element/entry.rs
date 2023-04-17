@@ -4,7 +4,7 @@ use std::rc::Rc;
 
 use gtk::glib::GString;
 use gtk::prelude::{BoxExt, ButtonExt, ContainerExt, EntryExt, WidgetExt};
-use gtk::{Box as GtkBox, Button, Entry, EntryCompletion, Image, Orientation};
+use gtk::{Box as GtkBox, Button, Entry, Image, Orientation};
 
 use super::textstore::TextStore;
 use crate::value::FAV_SPACING;
@@ -42,10 +42,9 @@ struct MultiEntryRow {
 }
 
 impl MultiEntryRow {
-	fn new(entry_completion: Option<&EntryCompletion>) -> Self {
+	fn new(store: Rc<TextStore>) -> Self {
 		let layout = GtkBox::new(Orientation::Horizontal, FAV_SPACING);
-		let entry = Entry::new();
-		entry.set_completion(entry_completion);
+		let entry = store.new_entry();
 		let btn = Button::builder()
 			.image(&Image::builder().icon_name("list-remove").build())
 			.tooltip_text("删除该列")
@@ -66,7 +65,7 @@ impl MultiEntryRow {
 pub struct MultiEntry {
 	entry: Entry,
 	entry_list: Rc<RefCell<Vec<MultiEntryRow>>>,
-	entry_completion: EntryCompletion,
+	store: Rc<TextStore>,
 	pub layout: GtkBox,
 }
 
@@ -77,9 +76,8 @@ impl MultiEntry {
 			.spacing(10)
 			.build();
 
-		let entry_completion = EntryCompletion::new();
-		let entry = Entry::new();
-		entry.set_completion(Some(&entry_completion));
+		let store = Rc::new(TextStore::new());
+		let entry = store.new_entry();
 
 		let entry_list = Rc::new(RefCell::new(vec![]));
 		let add_btn = Button::builder()
@@ -94,10 +92,10 @@ impl MultiEntry {
 			// 添加新的一列
 			add_btn.connect_clicked({
 				let entry_list = entry_list.clone();
-				let entry_completion = entry_completion.clone();
+				let store = store.clone();
 				let layout = layout.clone();
 				move |_| {
-					let row = MultiEntryRow::new(Some(&entry_completion));
+					let row = MultiEntryRow::new(store.clone());
 					layout.pack_start(&row.layout, false, false, 0);
 					row.layout.show_all();
 
@@ -121,7 +119,7 @@ impl MultiEntry {
 		Self {
 			entry,
 			entry_list,
-			entry_completion,
+			store,
 			layout,
 		}
 	}
@@ -135,7 +133,7 @@ impl MultiEntry {
 	fn add_row<S: AsRef<str>>(&self, text: S) {
 		let layout = self.layout.clone();
 
-		let row = MultiEntryRow::new(Some(&self.entry_completion));
+		let row = MultiEntryRow::new(self.store.clone());
 		row.set_text(text);
 		let row_layout = row.layout.clone();
 		layout.pack_start(&row.layout, false, false, 0);
@@ -161,6 +159,10 @@ impl MultiEntry {
 			xs.iter().for_each(|x| self.add_row(x));
 		} else {
 			self.entry.set_text("");
+		}
+
+		for x in xs {
+			self.store.set_text(x.as_ref());
 		}
 	}
 
