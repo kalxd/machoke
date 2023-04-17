@@ -1,8 +1,10 @@
 use std::ops::Deref;
 
 use gtk::glib::{types::Type, value::Value};
-use gtk::prelude::{GtkListStoreExt, GtkListStoreExtManual, TreeModelExt};
-use gtk::ListStore;
+use gtk::prelude::{
+	EntryCompletionExt, EntryExt, GtkListStoreExt, GtkListStoreExtManual, TreeModelExt,
+};
+use gtk::{Entry, EntryCompletion, ListStore};
 
 pub struct TextStore(ListStore);
 
@@ -11,6 +13,19 @@ impl TextStore {
 		let store = ListStore::new(&[Type::STRING]);
 
 		Self(store)
+	}
+
+	pub fn new_entry(&self) -> Entry {
+		let entry_completion = EntryCompletion::builder()
+			.model(&self.0)
+			.minimum_key_length(0)
+			.build();
+		entry_completion.set_text_column(0);
+
+		let entry = Entry::new();
+		entry.set_completion(Some(&entry_completion));
+
+		return entry;
 	}
 
 	pub fn set_text(&self, text: &str) {
@@ -35,5 +50,11 @@ impl Deref for TextStore {
 
 	fn deref(&self) -> &Self::Target {
 		&self.0
+	}
+}
+
+impl Default for TextStore {
+	fn default() -> Self {
+		Self::new()
 	}
 }

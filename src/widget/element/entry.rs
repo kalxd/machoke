@@ -3,7 +3,7 @@ use std::ops::Deref;
 use std::rc::Rc;
 
 use gtk::glib::GString;
-use gtk::prelude::{BoxExt, ButtonExt, ContainerExt, EntryCompletionExt, EntryExt, WidgetExt};
+use gtk::prelude::{BoxExt, ButtonExt, ContainerExt, EntryExt, WidgetExt};
 use gtk::{Box as GtkBox, Button, Entry, EntryCompletion, Image, Orientation};
 
 use super::textstore::TextStore;
@@ -17,15 +17,7 @@ pub struct EntryC {
 impl EntryC {
 	pub fn new() -> Self {
 		let store = TextStore::new();
-		let entry_completion = EntryCompletion::builder()
-			.model(&*store)
-			.minimum_key_length(0)
-			.build();
-		entry_completion.set_text_column(0);
-
-		let entry = Entry::new();
-		entry.set_completion(Some(&entry_completion));
-
+		let entry = store.new_entry();
 		Self { entry, store }
 	}
 
