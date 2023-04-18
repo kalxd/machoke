@@ -11,7 +11,7 @@ use crate::value::FAV_SPACING;
 
 pub struct EntryC {
 	entry: Entry,
-	store: TextStore,
+	pub store: TextStore,
 }
 
 impl EntryC {
@@ -65,7 +65,7 @@ impl MultiEntryRow {
 pub struct MultiEntry {
 	entry: Entry,
 	entry_list: Rc<RefCell<Vec<MultiEntryRow>>>,
-	store: Rc<TextStore>,
+	pub store: Rc<TextStore>,
 	pub layout: GtkBox,
 }
 
@@ -161,9 +161,7 @@ impl MultiEntry {
 			self.entry.set_text("");
 		}
 
-		for x in xs {
-			self.store.set_text(x.as_ref());
-		}
+		self.store.set_text_list(xs);
 	}
 
 	pub fn get_text_list(&self) -> Vec<GString> {

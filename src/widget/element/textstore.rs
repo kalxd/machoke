@@ -29,7 +29,8 @@ impl TextStore {
 		return entry;
 	}
 
-	pub fn set_text(&self, text: &str) {
+	pub fn set_text<S: AsRef<str>>(&self, text: S) {
+		let text = text.as_ref();
 		if text.trim().is_empty() {
 			return;
 		}
@@ -42,6 +43,12 @@ impl TextStore {
 		if !is_contains {
 			let iter = self.0.append();
 			self.0.set_value(&iter, 0, &Value::from(text));
+		}
+	}
+
+	pub fn set_text_list<S: AsRef<str>>(&self, texts: &[S]) {
+		for text in texts {
+			self.set_text(text);
 		}
 	}
 }

@@ -118,6 +118,8 @@ impl MainWindow {
 					if let Some(state) = main_window.app_state.borrow_mut().as_mut() {
 						let (mime_type, pic_data) = main_window.widget.get_data();
 						let form_data = main_window.widget.form.form_data();
+						main_window.widget.form.save_to_store(&form_data);
+
 						let cover = mime_type.as_ref().zip(pic_data);
 
 						let save_data = SaveData {
