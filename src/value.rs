@@ -17,8 +17,8 @@ pub struct MetaFormData {
 }
 
 pub enum CoverMimeType {
-	PNG,
-	JPEG,
+	Png,
+	Jpeg,
 }
 
 impl CoverMimeType {
@@ -26,14 +26,14 @@ impl CoverMimeType {
 		path.as_ref()
 			.extension()
 			.filter(|s| s == &"png")
-			.map(|_| CoverMimeType::PNG)
-			.unwrap_or(CoverMimeType::JPEG)
+			.map(|_| CoverMimeType::Png)
+			.unwrap_or(CoverMimeType::Jpeg)
 	}
 
 	pub fn from_mime_type<S: AsRef<str>>(t: S) -> Self {
 		match t.as_ref() {
-			"mine/png" => CoverMimeType::PNG,
-			_ => CoverMimeType::JPEG,
+			"mine/png" => CoverMimeType::Png,
+			_ => CoverMimeType::Jpeg,
 		}
 	}
 }
@@ -41,7 +41,7 @@ impl CoverMimeType {
 impl AsRef<str> for CoverMimeType {
 	fn as_ref(&self) -> &str {
 		match self {
-			CoverMimeType::PNG => "image/png",
+			CoverMimeType::Png => "image/png",
 			_ => "image/jpeg",
 		}
 	}

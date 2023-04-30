@@ -178,6 +178,6 @@ impl MultiEntry {
 
 		xs.append(&mut ys);
 
-		return xs;
+		xs
 	}
 }

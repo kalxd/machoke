@@ -38,12 +38,11 @@ impl TitleBar {
 
 		bar.pack_end(&save_btn);
 
-		let widget = Self {
+		Self {
 			bar,
 			open_chooser_btn,
 			save_btn,
-		};
-		return widget;
+		}
 	}
 
 	pub fn connect_open_song<F: Fn(PathBuf) + 'static>(&self, f: F) {

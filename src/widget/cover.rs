@@ -63,7 +63,7 @@ impl CoverWidget {
 
 		widget.setup_connection();
 
-		return widget;
+		widget
 	}
 
 	fn setup_connection(&self) {
@@ -71,8 +71,8 @@ impl CoverWidget {
 			let tx = self.tx.clone();
 			move |_| {
 				let filter = FileFilter::new();
-				filter.add_mime_type(CoverMimeType::PNG.as_ref());
-				filter.add_mime_type(CoverMimeType::JPEG.as_ref());
+				filter.add_mime_type(CoverMimeType::Png.as_ref());
+				filter.add_mime_type(CoverMimeType::Jpeg.as_ref());
 				let dialog = FileChooserDialog::builder()
 					.title("选择新的封面")
 					.filter(&filter)

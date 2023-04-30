@@ -47,8 +47,8 @@ impl SongWidget {
 
 	pub fn update(&self, state: &AppState) {
 		self.layout.set_sensitive(true);
-		self.cover.update_with_tag(&state);
-		self.form.update(&state);
+		self.cover.update_with_tag(state);
+		self.form.update(state);
 
 		let pic = state
 			.front_cover()
@@ -56,14 +56,14 @@ impl SongWidget {
 		self.mime_type.replace(pic);
 	}
 
-	pub fn get_data<'a>(&'a self) -> (Ref<Option<CoverMimeType>>, Option<Vec<u8>>) {
+	pub fn get_data(&self) -> (Ref<Option<CoverMimeType>>, Option<Vec<u8>>) {
 		let mime_type = self.mime_type.borrow();
 		let pic_data = self.cover.get_pixbuf_bytes();
 		(mime_type, pic_data)
 	}
 
 	pub fn change_cover(&self, path: &PathBuf) {
-		self.cover.update_cover_from_path(&path);
+		self.cover.update_cover_from_path(path);
 
 		let mime_type = CoverMimeType::from_path(&path);
 		self.mime_type.replace(Some(mime_type));

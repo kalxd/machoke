@@ -36,7 +36,7 @@ impl FormRow {
 	fn add_row_entryc(&self, label: &str) -> EntryC {
 		let entryc = EntryC::new();
 		self.add_row_with(label, &*entryc);
-		return entryc;
+		entryc
 	}
 
 	fn add_multi_entry(&self, label: &str) -> MultiEntry {
@@ -54,7 +54,7 @@ impl FormRow {
 		row_layout.pack_start(&mutil_entry.layout, true, true, 0);
 
 		self.layout.pack_start(&row_layout, false, true, 0);
-		return mutil_entry;
+		mutil_entry
 	}
 }
 
@@ -91,10 +91,10 @@ impl MetaForm {
 	pub fn update(&self, state: &AppState) {
 		self.title_entry.set_text(state.tag.title().unwrap_or(""));
 		self.artist_entry
-			.set_text_list(&state.tag.artists().unwrap_or(vec![]));
+			.set_text_list(&state.tag.artists().unwrap_or_default());
 		self.album_entry.set_text(state.tag.album().unwrap_or(""));
 		self.genre_entry
-			.set_text_list(&state.tag.genres().unwrap_or(vec![]));
+			.set_text_list(&state.tag.genres().unwrap_or_default());
 	}
 
 	pub fn form_data(&self) -> MetaFormData {

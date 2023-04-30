@@ -26,7 +26,7 @@ impl TextStore {
 		let entry = Entry::new();
 		entry.set_completion(Some(&entry_completion));
 
-		return entry;
+		entry
 	}
 
 	pub fn set_text<S: AsRef<str>>(&self, text: S) {

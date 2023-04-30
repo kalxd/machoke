@@ -95,7 +95,7 @@ impl MainWindow {
 
 		main_window.rx.attach(None, move |msg| {
 			match msg {
-				EmitEvent::OpenTag(path) => match AppStateBox::try_from(path.clone()) {
+				EmitEvent::OpenTag(path) => match AppStateBox::try_from(path) {
 					Ok(AppStateBox((msg, app_data))) => {
 						if let Some(msg) = msg {
 							tx.warn(msg);
