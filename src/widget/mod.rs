@@ -1,4 +1,5 @@
-use gtk::{glib, InfoBar, Label};
+use gtk::gdk::DragAction;
+use gtk::{glib, DestDefaults, InfoBar, Label, MessageType, TargetEntry, TargetFlags};
 use gtk::{prelude::*, Application, ApplicationWindow, Box as GtkBox};
 
 use std::cell::RefCell;
@@ -64,12 +65,42 @@ impl MainWindow {
 
 		title_bar.connect_open_song({
 			let tx = tx.clone();
-			move |path| tx.send(EmitEvent::OpenTag(path))
+			move |path| tx.send(EmitEvent::OpenTag(dbg!(path)))
 		});
 
 		title_bar.save_btn.connect_clicked({
 			let tx = tx.clone();
 			move |_| tx.send(EmitEvent::Save)
+		});
+
+		// drop files
+		let targets = [TargetEntry::new("text/uri-list", TargetFlags::OTHER_APP, 0)];
+		window.drag_dest_set(DestDefaults::ALL, &targets, DragAction::COPY);
+
+		window.connect_drag_data_received({
+			let tx = tx.clone();
+			move |_, _, _, _, data, _, _| {
+				let tx = tx.clone();
+				let f = move || {
+					let uris = data.uris();
+					let file = uris.first()?;
+					let localpath = {
+						let s = glib::uri_unescape_string(file, None::<&str>)?;
+						s.strip_prefix("file://")?.to_string()
+					};
+					let path = std::path::Path::new(&localpath);
+					if path.exists() && path.extension()? == "mp3" {
+						tx.send(EmitEvent::OpenTag(path.to_path_buf()));
+					} else {
+						tx.send(EmitEvent::Alert((
+							MessageType::Warning,
+							"不支持该文件类型！".into(),
+						)));
+					}
+					Some(())
+				};
+				f();
+			}
 		});
 
 		Self {
