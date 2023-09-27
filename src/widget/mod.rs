@@ -27,7 +27,7 @@ pub struct MainWindow {
 
 impl MainWindow {
 	fn new(app: &Application) -> Self {
-		let (tx, rx) = glib::MainContext::channel::<EmitEvent>(glib::PRIORITY_DEFAULT);
+		let (tx, rx) = glib::MainContext::channel::<EmitEvent>(glib::source::Priority::DEFAULT);
 		let tx = Rc::new(Emitter::new(tx));
 
 		let window = ApplicationWindow::builder()
@@ -137,7 +137,7 @@ impl MainWindow {
 					main_window.infobar.show();
 				}
 			};
-			glib::Continue(true)
+			glib::ControlFlow::Continue
 		});
 	}
 }
