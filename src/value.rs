@@ -1,6 +1,9 @@
 use std::path::{Path, PathBuf};
 
-use gtk::glib::GString;
+use gtk::{
+	glib::{uri_unescape_string, GString},
+	SelectionData,
+};
 use id3::{
 	frame::{Picture, PictureType},
 	Content, TagLike,
@@ -134,5 +137,18 @@ impl TryFrom<PathBuf> for AppStateBox {
 				}
 			}
 		}
+	}
+}
+
+pub fn get_drag_drop_filepath(sel: &SelectionData) -> Option<PathBuf> {
+	let uris = sel.uris();
+	let file = uris.first()?;
+	let path = uri_unescape_string(file, None::<&str>)?;
+	let path = Path::new(path.as_str().strip_prefix("file://")?);
+	dbg!(&path);
+	if path.exists() && path.extension()? == "mp3" {
+		Some(path.into())
+	} else {
+		None
 	}
 }

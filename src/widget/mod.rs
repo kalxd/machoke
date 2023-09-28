@@ -6,7 +6,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::emitter::{EmitEvent, Emitter};
-use crate::value::{AppState, AppStateBox, SaveData};
+use crate::value::{get_drag_drop_filepath, AppState, AppStateBox, SaveData};
 
 mod cover;
 mod element;
@@ -79,27 +79,12 @@ impl MainWindow {
 
 		window.connect_drag_data_received({
 			let tx = tx.clone();
-			move |_, _, _, _, data, _, _| {
-				let tx = tx.clone();
-				let f = move || {
-					let uris = data.uris();
-					let file = uris.first()?;
-					let localpath = {
-						let s = glib::uri_unescape_string(file, None::<&str>)?;
-						s.strip_prefix("file://")?.to_string()
-					};
-					let path = std::path::Path::new(&localpath);
-					if path.exists() && path.extension()? == "mp3" {
-						tx.send(EmitEvent::OpenTag(path.to_path_buf()));
-					} else {
-						tx.send(EmitEvent::Alert((
-							MessageType::Warning,
-							"不支持该文件类型！".into(),
-						)));
-					}
-					Some(())
-				};
-				f();
+			move |_, _, _, _, data, _, _| match get_drag_drop_filepath(&data) {
+				Some(p) => tx.send(EmitEvent::OpenTag(p)),
+				None => tx.send(EmitEvent::Alert((
+					MessageType::Warning,
+					"不支持该文件类型！".into(),
+				))),
 			}
 		});
 
