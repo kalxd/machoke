@@ -1,3 +1,6 @@
+use futures::channel::mpsc;
+use futures::future::ready;
+use futures::StreamExt;
 use gtk::gdk::DragAction;
 use gtk::{glib, DestDefaults, InfoBar, Label, MessageType, TargetEntry, TargetFlags};
 use gtk::{prelude::*, Application, ApplicationWindow, Box as GtkBox};
@@ -22,14 +25,14 @@ pub struct MainWindow {
 	infolabel: Label,
 	app_state: Rc<RefCell<Option<AppState>>>,
 
-	tx: Rc<Emitter>,
-	rx: glib::Receiver<EmitEvent>,
+	tx: Emitter,
+	rx: mpsc::Receiver<EmitEvent>,
 }
 
 impl MainWindow {
 	fn new(app: &Application) -> Self {
-		let (tx, rx) = glib::MainContext::channel::<EmitEvent>(glib::source::Priority::DEFAULT);
-		let tx = Rc::new(Emitter::new(tx));
+		let (tx, rx) = mpsc::channel(10);
+		let tx = Emitter::new(tx);
 
 		let window = ApplicationWindow::builder()
 			.application(app)
@@ -109,51 +112,57 @@ impl MainWindow {
 
 		let tx = main_window.tx;
 
-		main_window.rx.attach(None, move |msg| {
-			match msg {
-				EmitEvent::OpenTag(path) => match AppStateBox::try_from(path) {
-					Ok(AppStateBox((msg, app_data))) => {
-						if let Some(msg) = msg {
-							tx.warn(msg);
+		glib::MainContext::default().spawn_local(async move {
+			main_window
+				.rx
+				.for_each(|msg| {
+					match msg {
+						EmitEvent::OpenTag(path) => match AppStateBox::try_from(path) {
+							Ok(AppStateBox((msg, app_data))) => {
+								if let Some(msg) = msg {
+									tx.warn(msg);
+								}
+
+								main_window.widget.update(&app_data);
+								main_window.title_bar.save_btn.set_sensitive(true);
+								main_window
+									.title_bar
+									.bar
+									.set_subtitle(app_data.audio_path.to_str());
+								main_window.app_state.replace(Some(app_data));
+								main_window.infobar.hide();
+							}
+							Err(e) => tx.error(e),
+						},
+						EmitEvent::ChangeCover(path) => main_window.widget.change_cover(&path),
+						EmitEvent::RemoveCover => main_window.widget.remove_cover(),
+						EmitEvent::Save => {
+							if let Some(state) = main_window.app_state.borrow_mut().as_mut() {
+								let (mime_type, pic_data) = main_window.widget.get_data();
+								let form_data = main_window.widget.form.form_data();
+								main_window.widget.form.save_to_store(&form_data);
+
+								let cover = mime_type.as_ref().zip(pic_data);
+
+								let save_data = SaveData {
+									base: form_data,
+									cover,
+								};
+
+								let result =
+									state.save(save_data).map(|_| String::from("保存成功！"));
+								tx.alert(result);
+							}
 						}
-
-						main_window.widget.update(&app_data);
-						main_window.title_bar.save_btn.set_sensitive(true);
-						main_window
-							.title_bar
-							.bar
-							.set_subtitle(app_data.audio_path.to_str());
-						main_window.app_state.replace(Some(app_data));
-						main_window.infobar.hide();
-					}
-					Err(e) => tx.error(e),
-				},
-				EmitEvent::ChangeCover(path) => main_window.widget.change_cover(&path),
-				EmitEvent::RemoveCover => main_window.widget.remove_cover(),
-				EmitEvent::Save => {
-					if let Some(state) = main_window.app_state.borrow_mut().as_mut() {
-						let (mime_type, pic_data) = main_window.widget.get_data();
-						let form_data = main_window.widget.form.form_data();
-						main_window.widget.form.save_to_store(&form_data);
-
-						let cover = mime_type.as_ref().zip(pic_data);
-
-						let save_data = SaveData {
-							base: form_data,
-							cover,
-						};
-
-						let result = state.save(save_data).map(|_| String::from("保存成功！"));
-						tx.alert(result);
-					}
-				}
-				EmitEvent::Alert((msg_type, msg)) => {
-					main_window.infobar.set_message_type(msg_type);
-					main_window.infolabel.set_text(&msg);
-					main_window.infobar.show();
-				}
-			};
-			glib::ControlFlow::Continue
+						EmitEvent::Alert((msg_type, msg)) => {
+							main_window.infobar.set_message_type(msg_type);
+							main_window.infolabel.set_text(&msg);
+							main_window.infobar.show();
+						}
+					};
+					ready(())
+				})
+				.await;
 		});
 	}
 }

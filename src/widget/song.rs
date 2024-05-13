@@ -16,7 +16,7 @@ pub struct SongWidget {
 }
 
 impl SongWidget {
-	pub fn new(tx: Rc<Emitter>) -> Self {
+	pub fn new(tx: Emitter) -> Self {
 		let layout = GtkBox::builder()
 			.orientation(gtk::Orientation::Vertical)
 			.sensitive(false)

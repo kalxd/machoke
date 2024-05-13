@@ -1,7 +1,9 @@
-//! 发送者
 use std::path::PathBuf;
+use std::sync::{Arc, Mutex};
 
-use gtk::{glib, MessageType};
+use futures::channel::mpsc::Sender;
+
+use gtk::MessageType;
 
 pub enum EmitEvent {
 	/// 打开新音频
@@ -16,28 +18,35 @@ pub enum EmitEvent {
 	Alert((MessageType, String)),
 }
 
-pub struct Emitter(glib::Sender<EmitEvent>);
+#[derive(Clone)]
+pub struct Emitter(Arc<Mutex<Sender<EmitEvent>>>);
 
 impl Emitter {
-	pub fn new(tx: glib::Sender<EmitEvent>) -> Self {
-		Self(tx)
+	pub fn new(tx: Sender<EmitEvent>) -> Self {
+		Self(Arc::new(Mutex::new(tx)))
 	}
 
 	pub fn info<S: ToString>(&self, msg: S) {
 		self.0
-			.send(EmitEvent::Alert((MessageType::Info, msg.to_string())))
+			.lock()
+			.unwrap()
+			.try_send(EmitEvent::Alert((MessageType::Info, msg.to_string())))
 			.unwrap();
 	}
 
 	pub fn error<S: ToString>(&self, msg: S) {
 		self.0
-			.send(EmitEvent::Alert((MessageType::Error, msg.to_string())))
+			.lock()
+			.unwrap()
+			.try_send(EmitEvent::Alert((MessageType::Error, msg.to_string())))
 			.unwrap();
 	}
 
 	pub fn warn<S: ToString>(&self, msg: S) {
 		self.0
-			.send(EmitEvent::Alert((MessageType::Warning, msg.to_string())))
+			.lock()
+			.unwrap()
+			.try_send(EmitEvent::Alert((MessageType::Warning, msg.to_string())))
 			.unwrap();
 	}
 
@@ -49,6 +58,6 @@ impl Emitter {
 	}
 
 	pub fn send(&self, event: EmitEvent) {
-		self.0.send(event).unwrap();
+		self.0.lock().unwrap().try_send(event).unwrap();
 	}
 }

@@ -1,5 +1,4 @@
 use std::path::PathBuf;
-use std::rc::Rc;
 
 use gtk::gdk_pixbuf::{Pixbuf, PixbufLoader};
 use gtk::{prelude::*, Box as GtkBox, Button, Image, Orientation};
@@ -18,11 +17,11 @@ pub struct CoverWidget {
 	change_btn: Button,
 	remove_btn: Button,
 
-	tx: Rc<Emitter>,
+	tx: Emitter,
 }
 
 impl CoverWidget {
-	pub fn new(tx: Rc<Emitter>) -> Self {
+	pub fn new(tx: Emitter) -> Self {
 		let layout = GtkBox::builder()
 			.orientation(Orientation::Horizontal)
 			.spacing(20)
