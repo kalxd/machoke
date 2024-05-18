@@ -68,7 +68,7 @@ impl MainWindow {
 
 		title_bar.connect_open_song({
 			let tx = tx.clone();
-			move |path| tx.send(EmitEvent::OpenTag(dbg!(path)))
+			move |path| tx.send(EmitEvent::OpenTag(path))
 		});
 
 		title_bar.save_btn.connect_clicked({
