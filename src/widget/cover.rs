@@ -29,9 +29,8 @@ fn open_cover_chooser_dialog() -> Option<PathBuf> {
 }
 
 pub struct CoverWidget {
-	pub info_layout: GtkBox,
 	pub layout: GtkBox,
-
+	info_layout: GtkBox,
 	image: Image,
 	change_btn: Button,
 	remove_btn: Button,
