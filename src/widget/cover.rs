@@ -9,6 +9,25 @@ use crate::value::{AppState, CoverMimeType};
 
 const COVER_SIZE: i32 = 128;
 
+fn open_cover_chooser_dialog() -> Option<PathBuf> {
+	let filter = FileFilter::new();
+	filter.add_mime_type(CoverMimeType::Png.as_ref());
+	filter.add_mime_type(CoverMimeType::Jpeg.as_ref());
+	let dialog = FileChooserDialog::builder()
+		.title("选择新的封面")
+		.filter(&filter)
+		.build();
+	dialog.add_button("确定", ResponseType::Accept);
+
+	let rsp = dialog.run();
+	dialog.emit_close();
+
+	match rsp {
+		ResponseType::Accept => dialog.filename(),
+		_ => None,
+	}
+}
+
 pub struct CoverWidget {
 	pub info_layout: GtkBox,
 	pub layout: GtkBox,
@@ -69,22 +88,9 @@ impl CoverWidget {
 		self.change_btn.connect_clicked({
 			let tx = self.tx.clone();
 			move |_| {
-				let filter = FileFilter::new();
-				filter.add_mime_type(CoverMimeType::Png.as_ref());
-				filter.add_mime_type(CoverMimeType::Jpeg.as_ref());
-				let dialog = FileChooserDialog::builder()
-					.title("选择新的封面")
-					.filter(&filter)
-					.build();
-				dialog.add_button("确定", ResponseType::Accept);
-
-				if ResponseType::Accept == dialog.run() {
-					if let Some(path) = dialog.filename() {
-						tx.send(EmitEvent::ChangeCover(path));
-					}
+				if let Some(path) = open_cover_chooser_dialog() {
+					tx.send(EmitEvent::ChangeCover(path));
 				}
-
-				dialog.emit_close();
 			}
 		});
 
