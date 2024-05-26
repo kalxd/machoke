@@ -50,9 +50,9 @@ impl AsRef<str> for CoverMimeType {
 	}
 }
 
-impl ToString for CoverMimeType {
-	fn to_string(&self) -> String {
-		self.as_ref().into()
+impl std::fmt::Display for CoverMimeType {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		write!(f, "{}", self.as_ref())
 	}
 }
 

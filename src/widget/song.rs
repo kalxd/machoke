@@ -33,13 +33,19 @@ impl SongWidget {
 		frame.add(&form.layout);
 		layout.pack_start(&frame, false, false, 10);
 
-		Self {
+		let widget = Self {
 			cover,
 			form,
 			layout,
 			mime_type: Default::default(),
-		}
+		};
+
+		widget.connect_signal();
+
+		widget
 	}
+
+	fn connect_signal(&self) {}
 
 	pub fn hide_something(&self) {
 		self.cover.hide_something();
@@ -65,7 +71,7 @@ impl SongWidget {
 	pub fn change_cover(&self, path: &PathBuf) {
 		self.cover.update_cover_from_path(path);
 
-		let mime_type = CoverMimeType::from_path(&path);
+		let mime_type = CoverMimeType::from_path(path);
 		self.mime_type.replace(Some(mime_type));
 	}
 

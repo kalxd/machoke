@@ -82,7 +82,7 @@ impl MainWindow {
 
 		window.connect_drag_data_received({
 			let tx = tx.clone();
-			move |_, _, _, _, data, _, _| match get_drag_drop_filepath(&data) {
+			move |_, _, _, _, data, _, _| match get_drag_drop_filepath(data) {
 				Some(p) => tx.send(EmitEvent::OpenTag(p)),
 				None => tx.send(EmitEvent::Alert((
 					MessageType::Warning,

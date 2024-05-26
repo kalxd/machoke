@@ -122,7 +122,7 @@ impl CoverWidget {
 	}
 
 	pub fn update_cover_from_path(&self, path: &PathBuf) {
-		match Pixbuf::from_file(&path) {
+		match Pixbuf::from_file(path) {
 			Err(e) => self.tx.error(e),
 			Ok(pixbuf) => {
 				self.set_pixbuf(Some(pixbuf));
