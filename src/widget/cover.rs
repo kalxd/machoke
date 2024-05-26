@@ -69,16 +69,14 @@ impl CoverWidget {
 		info_layout.pack_start(&btn_layout, false, false, 0);
 		layout.pack_start(&info_layout, false, false, 0);
 
-		let widget = Self {
+		Self {
 			info_layout,
 			layout,
 			image,
 			change_btn,
 			remove_btn,
 			tx,
-		};
-
-		widget
+		}
 	}
 
 	pub fn connect_change_cover<F>(&self, f: F)
