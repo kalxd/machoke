@@ -4,7 +4,7 @@ use gtk::gdk_pixbuf::{Pixbuf, PixbufLoader};
 use gtk::{prelude::*, Box as GtkBox, Button, Image, Orientation};
 use gtk::{FileChooserDialog, FileFilter, ResponseType};
 
-use crate::emitter::{EmitEvent, Emitter};
+use crate::emitter::Emitter;
 use crate::value::{AppState, CoverMimeType};
 
 const COVER_SIZE: i32 = 128;
@@ -78,25 +78,25 @@ impl CoverWidget {
 			tx,
 		};
 
-		widget.setup_connection();
-
 		widget
 	}
 
-	fn setup_connection(&self) {
-		self.change_btn.connect_clicked({
-			let tx = self.tx.clone();
-			move |_| {
-				if let Some(path) = open_cover_chooser_dialog() {
-					tx.send(EmitEvent::ChangeCover(path));
-				}
+	pub fn connect_change_cover<F>(&self, f: F)
+	where
+		F: Fn(PathBuf) + 'static,
+	{
+		self.change_btn.connect_clicked(move |_| {
+			if let Some(path) = open_cover_chooser_dialog() {
+				f(path);
 			}
 		});
+	}
 
-		self.remove_btn.connect_clicked({
-			let tx = self.tx.clone();
-			move |_| tx.send(EmitEvent::RemoveCover)
-		});
+	pub fn connect_remove_cover<F>(&self, f: F)
+	where
+		F: Fn() + 'static,
+	{
+		self.remove_btn.connect_clicked(move |_| f());
 	}
 
 	pub fn hide_something(&self) {

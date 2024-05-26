@@ -5,7 +5,7 @@ use std::{cell::RefCell, rc::Rc};
 use gtk::{prelude::*, Box as GtkBox, Frame};
 
 use super::{cover::CoverWidget, form::MetaForm};
-use crate::emitter::Emitter;
+use crate::emitter::{EmitEvent, Emitter};
 use crate::value::{AppState, CoverMimeType};
 
 pub struct SongWidget {
@@ -23,7 +23,7 @@ impl SongWidget {
 			.spacing(10)
 			.build();
 
-		let cover = CoverWidget::new(tx);
+		let cover = CoverWidget::new(tx.clone());
 		let frame = Frame::builder().label("封面").build();
 		frame.add(&cover.layout);
 		layout.pack_start(&frame, false, false, 10);
@@ -40,12 +40,22 @@ impl SongWidget {
 			mime_type: Default::default(),
 		};
 
-		widget.connect_signal();
+		widget.connect_signal(tx);
 
 		widget
 	}
 
-	fn connect_signal(&self) {}
+	fn connect_signal(&self, tx: Emitter) {
+		self.cover.connect_change_cover({
+			let tx = tx.clone();
+			move |path| tx.send(EmitEvent::ChangeCover(path))
+		});
+
+		self.cover.connect_remove_cover({
+			let tx = tx.clone();
+			move || tx.send(EmitEvent::RemoveCover)
+		});
+	}
 
 	pub fn hide_something(&self) {
 		self.cover.hide_something();
