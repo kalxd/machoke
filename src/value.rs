@@ -56,7 +56,7 @@ impl std::fmt::Display for CoverMimeType {
 	}
 }
 
-/// 最终在保存的数据
+/// 最终要保存的数据
 pub struct SaveData<'a> {
 	/// 所有文本记录的信息
 	pub base: MetaFormData,
