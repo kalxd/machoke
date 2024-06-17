@@ -2,7 +2,7 @@ use futures::channel::mpsc;
 use futures::future::ready;
 use futures::StreamExt;
 use gtk::gdk::DragAction;
-use gtk::{glib, DestDefaults, InfoBar, Label, MessageType, TargetEntry, TargetFlags};
+use gtk::{glib, DestDefaults, MessageType, TargetEntry, TargetFlags};
 use gtk::{prelude::*, Application, ApplicationWindow, Box as GtkBox};
 
 use std::cell::RefCell;
@@ -21,8 +21,7 @@ pub struct MainWindow {
 	window: ApplicationWindow,
 	title_bar: headerbar::TitleBar,
 	widget: song::SongWidget,
-	infobar: InfoBar,
-	infolabel: Label,
+	alertbar: element::alert::Alert,
 	app_state: Rc<RefCell<Option<AppState>>>,
 }
 
@@ -43,18 +42,8 @@ impl MainWindow {
 			.margin(10)
 			.build();
 
-		let infobar = InfoBar::builder()
-			.show_close_button(true)
-			.visible(false)
-			.build();
-		let infolabel = Label::new(None);
-		infobar
-			.content_area()
-			.pack_start(&infolabel, false, false, 0);
-		main_layout.pack_start(&infobar, false, true, 0);
-		infobar.connect_response(|infobar, _| {
-			infobar.hide();
-		});
+		let alertbar = element::alert::Alert::new();
+		main_layout.pack_start(&*alertbar, false, true, 0);
 
 		let form = song::SongWidget::new(tx.clone());
 		main_layout.pack_start(&form.layout, false, false, 0);
@@ -89,8 +78,7 @@ impl MainWindow {
 			window,
 			title_bar,
 			widget: form,
-			infobar,
-			infolabel,
+			alertbar,
 			app_state: Default::default(),
 		}
 	}
@@ -103,7 +91,7 @@ impl MainWindow {
 
 		main_window.window.show_all();
 		main_window.widget.hide_something();
-		main_window.infobar.hide();
+		main_window.alertbar.hide();
 
 		glib::MainContext::default().spawn_local(async move {
 			rx.for_each(|msg| {
@@ -121,7 +109,7 @@ impl MainWindow {
 								.bar
 								.set_subtitle(app_data.audio_path.to_str());
 							main_window.app_state.replace(Some(app_data));
-							main_window.infobar.hide();
+							main_window.alertbar.hide();
 						}
 						Err(e) => tx.error(e),
 					},
@@ -145,9 +133,7 @@ impl MainWindow {
 						}
 					}
 					EmitEvent::Alert((msg_type, msg)) => {
-						main_window.infobar.set_message_type(msg_type);
-						main_window.infolabel.set_text(&msg);
-						main_window.infobar.show();
+						main_window.alertbar.show(msg_type, msg);
 					}
 				};
 				ready(())
