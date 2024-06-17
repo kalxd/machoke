@@ -24,16 +24,10 @@ pub struct MainWindow {
 	infobar: InfoBar,
 	infolabel: Label,
 	app_state: Rc<RefCell<Option<AppState>>>,
-
-	tx: Emitter,
-	rx: mpsc::Receiver<EmitEvent>,
 }
 
 impl MainWindow {
-	fn new(app: &Application) -> Self {
-		let (tx, rx) = mpsc::channel(10);
-		let tx = Emitter::new(tx);
-
+	fn new(app: &Application, tx: Emitter) -> Self {
 		let window = ApplicationWindow::builder()
 			.application(app)
 			.default_height(600)
@@ -98,71 +92,67 @@ impl MainWindow {
 			infobar,
 			infolabel,
 			app_state: Default::default(),
-			tx,
-			rx,
 		}
 	}
 
 	pub fn run(app: &Application) {
-		let main_window = Self::new(app);
+		let (tx, rx) = mpsc::channel(10);
+		let tx = Emitter::new(tx);
+
+		let main_window = Self::new(app, tx.clone());
 
 		main_window.window.show_all();
 		main_window.widget.hide_something();
 		main_window.infobar.hide();
 
-		let tx = main_window.tx;
-
 		glib::MainContext::default().spawn_local(async move {
-			main_window
-				.rx
-				.for_each(|msg| {
-					match msg {
-						EmitEvent::OpenTag(path) => match AppStateBox::try_from(path) {
-							Ok(AppStateBox((msg, app_data))) => {
-								if let Some(msg) = msg {
-									tx.warn(msg);
-								}
-
-								main_window.widget.update(&app_data);
-								main_window.title_bar.save_btn.set_sensitive(true);
-								main_window
-									.title_bar
-									.bar
-									.set_subtitle(app_data.audio_path.to_str());
-								main_window.app_state.replace(Some(app_data));
-								main_window.infobar.hide();
+			rx.for_each(|msg| {
+				match msg {
+					EmitEvent::OpenTag(path) => match AppStateBox::try_from(path) {
+						Ok(AppStateBox((msg, app_data))) => {
+							if let Some(msg) = msg {
+								tx.warn(msg);
 							}
-							Err(e) => tx.error(e),
-						},
-						EmitEvent::ChangeCover(path) => main_window.widget.change_cover(&path),
-						EmitEvent::RemoveCover => main_window.widget.remove_cover(),
-						EmitEvent::Save => {
-							if let Some(state) = main_window.app_state.borrow_mut().as_mut() {
-								let (mime_type, pic_data) = main_window.widget.get_data();
-								let form_data = main_window.widget.form.form_data();
-								main_window.widget.form.save_to_store(&form_data);
 
-								let cover = mime_type.as_ref().zip(pic_data);
-
-								let save_data = SaveData {
-									base: form_data,
-									cover,
-								};
-
-								let result =
-									state.save(save_data).map(|_| String::from("保存成功！"));
-								tx.alert(result);
-							}
+							main_window.widget.update(&app_data);
+							main_window.title_bar.save_btn.set_sensitive(true);
+							main_window
+								.title_bar
+								.bar
+								.set_subtitle(app_data.audio_path.to_str());
+							main_window.app_state.replace(Some(app_data));
+							main_window.infobar.hide();
 						}
-						EmitEvent::Alert((msg_type, msg)) => {
-							main_window.infobar.set_message_type(msg_type);
-							main_window.infolabel.set_text(&msg);
-							main_window.infobar.show();
+						Err(e) => tx.error(e),
+					},
+					EmitEvent::ChangeCover(path) => main_window.widget.change_cover(&path),
+					EmitEvent::RemoveCover => main_window.widget.remove_cover(),
+					EmitEvent::Save => {
+						if let Some(state) = main_window.app_state.borrow_mut().as_mut() {
+							let (mime_type, pic_data) = main_window.widget.get_data();
+							let form_data = main_window.widget.form.form_data();
+							main_window.widget.form.save_to_store(&form_data);
+
+							let cover = mime_type.as_ref().zip(pic_data);
+
+							let save_data = SaveData {
+								base: form_data,
+								cover,
+							};
+
+							let result = state.save(save_data).map(|_| String::from("保存成功！"));
+							tx.alert(result);
 						}
-					};
-					ready(())
-				})
-				.await;
+					}
+					EmitEvent::Alert((msg_type, msg)) => {
+						main_window.infobar.set_message_type(msg_type);
+						main_window.infolabel.set_text(&msg);
+						main_window.infobar.show();
+					}
+				};
+				ready(())
+			})
+			.await;
 		});
 	}
 }

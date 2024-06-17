@@ -1,8 +1,6 @@
-use std::path::PathBuf;
-
 use futures::channel::mpsc::Sender;
-
 use gtk::MessageType;
+use std::path::PathBuf;
 
 pub enum EmitEvent {
 	/// 打开新音频
