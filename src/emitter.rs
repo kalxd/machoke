@@ -1,5 +1,4 @@
 use std::path::PathBuf;
-use std::sync::{Arc, Mutex};
 
 use futures::channel::mpsc::Sender;
 
@@ -19,33 +18,30 @@ pub enum EmitEvent {
 }
 
 #[derive(Clone)]
-pub struct Emitter(Arc<Mutex<Sender<EmitEvent>>>);
+pub struct Emitter(Sender<EmitEvent>);
 
 impl Emitter {
 	pub fn new(tx: Sender<EmitEvent>) -> Self {
-		Self(Arc::new(Mutex::new(tx)))
+		Self(tx)
 	}
 
 	pub fn info<S: ToString>(&self, msg: S) {
 		self.0
-			.lock()
-			.unwrap()
+			.clone()
 			.try_send(EmitEvent::Alert((MessageType::Info, msg.to_string())))
 			.unwrap();
 	}
 
 	pub fn error<S: ToString>(&self, msg: S) {
 		self.0
-			.lock()
-			.unwrap()
+			.clone()
 			.try_send(EmitEvent::Alert((MessageType::Error, msg.to_string())))
 			.unwrap();
 	}
 
 	pub fn warn<S: ToString>(&self, msg: S) {
 		self.0
-			.lock()
-			.unwrap()
+			.clone()
 			.try_send(EmitEvent::Alert((MessageType::Warning, msg.to_string())))
 			.unwrap();
 	}
@@ -58,6 +54,6 @@ impl Emitter {
 	}
 
 	pub fn send(&self, event: EmitEvent) {
-		self.0.lock().unwrap().try_send(event).unwrap();
+		self.0.clone().try_send(event).unwrap();
 	}
 }
