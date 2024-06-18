@@ -1,4 +1,4 @@
-use futures::channel::mpsc;
+use futures::channel::mpsc::{self, Sender};
 use futures::future::ready;
 use futures::StreamExt;
 use gtk::gdk::DragAction;
@@ -83,6 +83,47 @@ impl MainWindow {
 		}
 	}
 
+	fn event_loop(&self, msg: EmitEvent, tx: Emitter) {
+		match msg {
+			EmitEvent::OpenTag(path) => match AppStateBox::try_from(path) {
+				Ok(AppStateBox((msg, app_data))) => {
+					if let Some(msg) = msg {
+						tx.warn(msg);
+					}
+
+					self.widget.update(&app_data);
+					self.title_bar.save_btn.set_sensitive(true);
+					self.title_bar
+						.bar
+						.set_subtitle(app_data.audio_path.to_str());
+					self.app_state.replace(Some(app_data));
+					self.alertbar.hide();
+				}
+				Err(e) => tx.error(e),
+			},
+			EmitEvent::ChangeCover(path) => self.widget.change_cover(&path),
+			EmitEvent::RemoveCover => self.widget.remove_cover(),
+			EmitEvent::Save => {
+				if let Some(state) = self.app_state.borrow_mut().as_mut() {
+					let (mime_type, pic_data) = self.widget.get_data();
+					let form_data = self.widget.form.form_data();
+					self.widget.form.save_to_store(&form_data);
+
+					let cover = mime_type.as_ref().zip(pic_data);
+
+					let save_data = SaveData {
+						base: form_data,
+						cover,
+					};
+
+					let result = state.save(save_data).map(|_| String::from("保存成功！"));
+					tx.alert(result);
+				}
+			}
+			EmitEvent::Alert((msg_type, msg)) => self.alertbar.show(msg_type, msg),
+		};
+	}
+
 	pub fn run(app: &Application) {
 		let (tx, rx) = mpsc::channel(10);
 		let tx = Emitter::new(tx);
@@ -95,47 +136,7 @@ impl MainWindow {
 
 		glib::MainContext::default().spawn_local(async move {
 			rx.for_each(|msg| {
-				match msg {
-					EmitEvent::OpenTag(path) => match AppStateBox::try_from(path) {
-						Ok(AppStateBox((msg, app_data))) => {
-							if let Some(msg) = msg {
-								tx.warn(msg);
-							}
-
-							main_window.widget.update(&app_data);
-							main_window.title_bar.save_btn.set_sensitive(true);
-							main_window
-								.title_bar
-								.bar
-								.set_subtitle(app_data.audio_path.to_str());
-							main_window.app_state.replace(Some(app_data));
-							main_window.alertbar.hide();
-						}
-						Err(e) => tx.error(e),
-					},
-					EmitEvent::ChangeCover(path) => main_window.widget.change_cover(&path),
-					EmitEvent::RemoveCover => main_window.widget.remove_cover(),
-					EmitEvent::Save => {
-						if let Some(state) = main_window.app_state.borrow_mut().as_mut() {
-							let (mime_type, pic_data) = main_window.widget.get_data();
-							let form_data = main_window.widget.form.form_data();
-							main_window.widget.form.save_to_store(&form_data);
-
-							let cover = mime_type.as_ref().zip(pic_data);
-
-							let save_data = SaveData {
-								base: form_data,
-								cover,
-							};
-
-							let result = state.save(save_data).map(|_| String::from("保存成功！"));
-							tx.alert(result);
-						}
-					}
-					EmitEvent::Alert((msg_type, msg)) => {
-						main_window.alertbar.show(msg_type, msg);
-					}
-				};
+				main_window.event_loop(msg, tx.clone());
 				ready(())
 			})
 			.await;
