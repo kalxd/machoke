@@ -1,4 +1,4 @@
-use futures::channel::mpsc::{self, Sender};
+use futures::channel::mpsc;
 use futures::future::ready;
 use futures::StreamExt;
 use gtk::gdk::DragAction;
@@ -89,6 +89,8 @@ impl MainWindow {
 				Ok(AppStateBox((msg, app_data))) => {
 					if let Some(msg) = msg {
 						tx.warn(msg);
+					} else {
+						self.alertbar.hide();
 					}
 
 					self.widget.update(&app_data);
@@ -97,7 +99,6 @@ impl MainWindow {
 						.bar
 						.set_subtitle(app_data.audio_path.to_str());
 					self.app_state.replace(Some(app_data));
-					self.alertbar.hide();
 				}
 				Err(e) => tx.error(e),
 			},
