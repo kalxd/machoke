@@ -25,7 +25,6 @@ impl TextStore {
 
 		let entry = Entry::new();
 		entry.set_completion(Some(&entry_completion));
-
 		entry
 	}
 
@@ -38,7 +37,7 @@ impl TextStore {
 		let is_contains = (0..self.0.iter_n_children(None))
 			.map(|i| self.0.iter_nth_child(None, i))
 			.map(|miter| miter.and_then(|iter| self.0.value(&iter, 0).get::<'_, String>().ok()))
-			.any(|ma| ma.map(|a| a == text).unwrap_or(false));
+			.any(|ma| ma.as_deref() == Some(text));
 
 		if !is_contains {
 			let iter = self.0.append();
