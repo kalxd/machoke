@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 use std::ops::Deref;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
 use gtk::glib::GString;
@@ -82,9 +82,9 @@ impl PathEntry {
 		&self.layout
 	}
 
-	pub fn set_text_with_path(&self, msg: &str, path: &PathBuf) {
+	pub fn set_text_with_path(&self, msg: &str, path: &Path) {
 		self.entry.set_text(msg);
-		self.path.replace(Some(path.clone()));
+		self.path.replace(Some(path.to_path_buf()));
 	}
 }
 
