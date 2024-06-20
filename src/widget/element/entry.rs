@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 use std::ops::Deref;
+use std::path::PathBuf;
 use std::rc::Rc;
 
 use gtk::glib::GString;
@@ -33,6 +34,62 @@ impl EntryC {
 
 impl Deref for EntryC {
 	type Target = Entry;
+
+	fn deref(&self) -> &Self::Target {
+		&self.entry
+	}
+}
+
+/// 能从路径读取文件名的输入框。
+pub struct PathEntry {
+	path: Rc<RefCell<Option<PathBuf>>>,
+	entry: EntryC,
+	layout: GtkBox,
+}
+
+impl PathEntry {
+	pub fn new() -> Self {
+		let layout = GtkBox::new(Orientation::Horizontal, FAV_SPACING);
+
+		let entry = EntryC::new();
+		layout.pack_start(&*entry, true, true, 0);
+		let btn = Button::builder()
+			.image(&Image::builder().icon_name("compass").build())
+			.build();
+		layout.pack_start(&btn, false, false, 0);
+
+		let path: Rc<RefCell<Option<PathBuf>>> = Rc::default();
+
+		btn.connect_clicked({
+			let path = path.clone();
+			let entry = entry.clone();
+			move |_| {
+				if let Some(path) = path.borrow().as_deref() {
+					let filename = path.file_stem().and_then(|s| s.to_str());
+					entry.set_text(filename.unwrap_or_default());
+				}
+			}
+		});
+
+		Self {
+			entry,
+			layout,
+			path,
+		}
+	}
+
+	pub fn container(&self) -> &GtkBox {
+		&self.layout
+	}
+
+	pub fn set_text_with_path(&self, msg: &str, path: &PathBuf) {
+		self.entry.set_text(msg);
+		self.path.replace(Some(path.clone()));
+	}
+}
+
+impl Deref for PathEntry {
+	type Target = EntryC;
 
 	fn deref(&self) -> &Self::Target {
 		&self.entry

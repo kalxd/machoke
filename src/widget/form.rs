@@ -4,7 +4,7 @@ use gtk::{
 };
 use id3::TagLike;
 
-use super::element::entry::{EntryC, MultiEntry};
+use super::element::entry::{EntryC, MultiEntry, PathEntry};
 use crate::value::{AppState, MetaFormData, FAV_SPACING};
 
 struct FormRow {
@@ -39,6 +39,12 @@ impl FormRow {
 		entryc
 	}
 
+	fn add_row_path(&self, label: &str) -> PathEntry {
+		let entry = PathEntry::new();
+		self.add_row_with(label, entry.container());
+		entry
+	}
+
 	fn add_multi_entry(&self, label: &str) -> MultiEntry {
 		let row_layout = GtkBox::new(Orientation::Horizontal, FAV_SPACING);
 
@@ -60,7 +66,7 @@ impl FormRow {
 
 pub struct MetaForm {
 	pub layout: GtkBox,
-	title_entry: EntryC,
+	title_entry: PathEntry,
 	artist_entry: MultiEntry,
 	album_entry: EntryC,
 	genre_entry: MultiEntry,
@@ -72,7 +78,7 @@ impl MetaForm {
 
 		let form_row = FormRow::new();
 
-		let title_entry = form_row.add_row_entryc("标题");
+		let title_entry = form_row.add_row_path("标题");
 		let artist_entry = form_row.add_multi_entry("艺术家");
 		let album_entry = form_row.add_row_entryc("专辑");
 		let genre_entry = form_row.add_multi_entry("流派");
@@ -89,7 +95,8 @@ impl MetaForm {
 	}
 
 	pub fn update(&self, state: &AppState) {
-		self.title_entry.set_text(state.tag.title().unwrap_or(""));
+		self.title_entry
+			.set_text_with_path(state.tag.title().unwrap_or(""), &state.audio_path);
 		self.artist_entry
 			.set_text_list(&state.tag.artists().unwrap_or_default());
 		self.album_entry.set_text(state.tag.album().unwrap_or(""));
