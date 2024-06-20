@@ -112,9 +112,9 @@ impl MetaForm {
 	}
 
 	pub fn save_to_store(&self, data: &MetaFormData) {
-		self.title_entry.store.set_text(&data.title);
-		self.artist_entry.store.set_text_list(&data.artist);
-		self.album_entry.store.set_text(&data.album);
-		self.genre_entry.store.set_text_list(&data.genre);
+		self.title_entry.append_store_text(&data.title);
+		self.artist_entry.appen_text_store(&data.artist);
+		self.album_entry.append_store_text(&data.album);
+		self.genre_entry.appen_text_store(&data.genre);
 	}
 }
