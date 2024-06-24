@@ -55,6 +55,7 @@ impl PathEntry {
 		layout.pack_start(&*entry, true, true, 0);
 		let btn = Button::builder()
 			.image(&Image::builder().icon_name("compass").build())
+			.tooltip_text("使用文件名作为标题")
 			.build();
 		layout.pack_start(&btn, false, false, 0);
 
