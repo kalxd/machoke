@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use gtk::gdk_pixbuf::{Pixbuf, PixbufLoader};
-use gtk::{prelude::*, Box as GtkBox, Button, Image, Orientation};
+use gtk::{prelude::*, Box as GtkBox, Button, Frame, IconView, Image, Orientation};
 use gtk::{FileChooserDialog, FileFilter, ResponseType};
 
 use crate::emitter::Emitter;
@@ -25,6 +25,22 @@ fn open_cover_chooser_dialog() -> Option<PathBuf> {
 	match rsp {
 		ResponseType::Accept => dialog.filename(),
 		_ => None,
+	}
+}
+
+struct CoverList {
+	icon_view: IconView,
+	frame: Frame,
+}
+
+impl CoverList {
+	fn new() -> Self {
+		let frame = Frame::new(Some("封面列表"));
+		let icon_view = IconView::builder().width_request(200).build();
+
+		frame.add(&icon_view);
+
+		Self { icon_view, frame }
 	}
 }
 
@@ -68,6 +84,9 @@ impl CoverWidget {
 		btn_layout.pack_start(&remove_btn, false, false, 0);
 		info_layout.pack_start(&btn_layout, false, false, 0);
 		layout.pack_start(&info_layout, false, false, 0);
+
+		let cover_list = CoverList::new();
+		layout.pack_end(&cover_list.frame, false, false, 0);
 
 		Self {
 			info_layout,
