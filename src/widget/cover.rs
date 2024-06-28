@@ -1,8 +1,9 @@
+use std::ops::Deref;
 use std::path::PathBuf;
 
-use gtk::gdk_pixbuf::{Pixbuf, PixbufLoader};
+use gtk::gdk_pixbuf::{InterpType, Pixbuf, PixbufLoader};
+use gtk::{glib, FileChooserDialog, FileFilter, ListStore, ResponseType, ScrolledWindow};
 use gtk::{prelude::*, Box as GtkBox, Button, Frame, IconView, Image, Orientation};
-use gtk::{FileChooserDialog, FileFilter, ResponseType};
 
 use crate::emitter::Emitter;
 use crate::value::{AppState, CoverMimeType};
@@ -28,19 +29,61 @@ fn open_cover_chooser_dialog() -> Option<PathBuf> {
 	}
 }
 
+struct CoverListStore(ListStore);
+
+impl CoverListStore {
+	fn new() -> Self {
+		let store = ListStore::new(&[glib::Type::STRING, Pixbuf::static_type()]);
+		Self(store)
+	}
+
+	fn add_history<T: ToValue>(&self, key: T, pixbuf: Pixbuf) {
+		let pixbuf = pixbuf.scale_simple(64, 64, InterpType::Nearest);
+		self.0
+			.insert_with_values(None, &[(0, &key.to_value()), (1, &pixbuf)]);
+	}
+}
+
+impl Deref for CoverListStore {
+	type Target = ListStore;
+
+	fn deref(&self) -> &Self::Target {
+		&self.0
+	}
+}
+
 struct CoverList {
 	icon_view: IconView,
 	frame: Frame,
+	store: CoverListStore,
 }
 
 impl CoverList {
 	fn new() -> Self {
 		let frame = Frame::new(Some("封面列表"));
-		let icon_view = IconView::builder().width_request(200).build();
+		let scrolled_window = ScrolledWindow::builder().build();
 
-		frame.add(&icon_view);
+		let store = CoverListStore::new();
+		let icon_view = IconView::builder()
+			.width_request(200)
+			.model(&*store)
+			.pixbuf_column(1)
+			.selection_mode(gtk::SelectionMode::Single)
+			.build();
+		scrolled_window.add(&icon_view);
+		frame.add(&scrolled_window);
 
-		Self { icon_view, frame }
+		Self {
+			icon_view,
+			frame,
+			store,
+		}
+	}
+
+	fn connect_select(&self) {
+		self.icon_view.connect_selection_changed(|_| {
+			dbg!("do this?");
+		});
 	}
 }
 
@@ -50,6 +93,7 @@ pub struct CoverWidget {
 	image: Image,
 	change_btn: Button,
 	remove_btn: Button,
+	cover_list: CoverList,
 
 	tx: Emitter,
 }
@@ -86,7 +130,9 @@ impl CoverWidget {
 		layout.pack_start(&info_layout, false, false, 0);
 
 		let cover_list = CoverList::new();
-		layout.pack_end(&cover_list.frame, false, false, 0);
+		layout.pack_end(&cover_list.frame, true, true, 0);
+
+		cover_list.connect_select();
 
 		Self {
 			info_layout,
@@ -94,6 +140,7 @@ impl CoverWidget {
 			image,
 			change_btn,
 			remove_btn,
+			cover_list,
 			tx,
 		}
 	}
@@ -132,7 +179,7 @@ impl CoverWidget {
 				.ok()
 				.and_then(|_| loader.pixbuf());
 
-			self.set_pixbuf(pixbuf);
+			self.set_pixbuf(pixbuf.as_ref());
 		} else {
 			self.image.set_pixbuf(None);
 		}
@@ -142,7 +189,8 @@ impl CoverWidget {
 		match Pixbuf::from_file(path) {
 			Err(e) => self.tx.error(e),
 			Ok(pixbuf) => {
-				self.set_pixbuf(Some(pixbuf));
+				self.set_pixbuf(Some(&pixbuf));
+				self.cover_list.store.add_history(path, pixbuf);
 			}
 		}
 	}
@@ -155,7 +203,7 @@ impl CoverWidget {
 		self.image.pixbuf()?.save_to_bufferv("png", &[]).ok()
 	}
 
-	fn set_pixbuf(&self, pixbuf: Option<Pixbuf>) {
+	fn set_pixbuf(&self, pixbuf: Option<&Pixbuf>) {
 		let pixbuf = pixbuf.and_then(|pixbuf| {
 			pixbuf.scale_simple(COVER_SIZE, COVER_SIZE, gtk::gdk_pixbuf::InterpType::Nearest)
 		});
