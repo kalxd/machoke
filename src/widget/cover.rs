@@ -95,16 +95,21 @@ impl CoverList {
 		}
 	}
 
-	fn connect_select(&self) {
+	fn connect_select<F>(&self, f: F)
+	where
+		F: Fn(Pixbuf) + 'static,
+	{
 		let store = self.store.clone();
 		self.icon_view.connect_selection_changed(move |icon_view| {
 			let a = icon_view.selected_items().last().and_then(|path| {
 				store
 					.iter(path)
-					.and_then(|iter| store.value(&iter, 0).get::<'_, String>().ok())
+					.and_then(|iter| store.value(&iter, 2).get::<'_, Pixbuf>().ok())
 			});
 
-			dbg!(a);
+			if let Some(pixbuf) = a {
+				f(pixbuf);
+			}
 		});
 	}
 }
@@ -154,7 +159,9 @@ impl CoverWidget {
 		let cover_list = CoverList::new();
 		layout.pack_end(&cover_list.frame, true, true, 0);
 
-		cover_list.connect_select();
+		cover_list.connect_select(|pixbuf| {
+			dbg!(pixbuf);
+		});
 
 		Self {
 			info_layout,
