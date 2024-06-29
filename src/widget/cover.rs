@@ -132,11 +132,13 @@ impl CoverWidget {
 			.spacing(20)
 			.build();
 
+		let left_layout = GtkBox::new(Orientation::Horizontal, 20);
+
 		let image = Image::builder()
 			.width_request(COVER_SIZE)
 			.height_request(COVER_SIZE)
 			.build();
-		layout.pack_start(&image, false, false, 10);
+		left_layout.pack_start(&image, false, false, 10);
 
 		let info_layout = GtkBox::builder()
 			.orientation(Orientation::Horizontal)
@@ -154,13 +156,16 @@ impl CoverWidget {
 		let remove_btn = Button::with_label("移除封面");
 		btn_layout.pack_start(&remove_btn, false, false, 0);
 		info_layout.pack_start(&btn_layout, false, false, 0);
-		layout.pack_start(&info_layout, false, false, 0);
+		left_layout.pack_start(&info_layout, false, false, 0);
+
+		layout.pack_start(&left_layout, true, true, 0);
 
 		let cover_list = CoverList::new();
 		layout.pack_end(&cover_list.frame, true, true, 0);
 
-		cover_list.connect_select(|pixbuf| {
-			dbg!(pixbuf);
+		cover_list.connect_select({
+			let tx = tx.clone();
+			move |pixbuf| tx.send(crate::emitter::EmitEvent::ApplyCover(pixbuf))
 		});
 
 		Self {
@@ -208,7 +213,12 @@ impl CoverWidget {
 				.ok()
 				.and_then(|_| loader.pixbuf());
 
-			self.set_pixbuf(pixbuf.as_ref());
+			if let Some(pixbuf) = pixbuf {
+				self.set_pixbuf(Some(&pixbuf));
+				self.cover_list
+					.store
+					.add_history(state.audio_path.to_str().unwrap(), pixbuf);
+			}
 		} else {
 			self.image.set_pixbuf(None);
 		}
@@ -234,7 +244,7 @@ impl CoverWidget {
 		self.image.pixbuf()?.save_to_bufferv("png", &[]).ok()
 	}
 
-	fn set_pixbuf(&self, pixbuf: Option<&Pixbuf>) {
+	pub fn set_pixbuf(&self, pixbuf: Option<&Pixbuf>) {
 		let pixbuf = pixbuf.and_then(|pixbuf| {
 			pixbuf.scale_simple(COVER_SIZE, COVER_SIZE, gtk::gdk_pixbuf::InterpType::Nearest)
 		});

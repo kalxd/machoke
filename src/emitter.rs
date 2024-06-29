@@ -1,5 +1,5 @@
 use futures::channel::mpsc::Sender;
-use gtk::MessageType;
+use gtk::{gdk_pixbuf::Pixbuf, MessageType};
 use std::path::PathBuf;
 
 pub enum EmitEvent {
@@ -9,6 +9,8 @@ pub enum EmitEvent {
 	Save,
 	/// 更改封面
 	ChangeCover(PathBuf),
+	/// 应用封面
+	ApplyCover(Pixbuf),
 	/// 移除封面
 	RemoveCover,
 	/// 交互信息

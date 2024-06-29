@@ -104,6 +104,9 @@ impl MainWindow {
 			},
 			EmitEvent::ChangeCover(path) => self.widget.change_cover(&path),
 			EmitEvent::RemoveCover => self.widget.remove_cover(),
+			EmitEvent::ApplyCover(pixbuf) => {
+				self.widget.cover.set_pixbuf(Some(&pixbuf));
+			}
 			EmitEvent::Save => {
 				if let Some(state) = self.app_state.borrow_mut().as_mut() {
 					let (mime_type, pic_data) = self.widget.get_data();
