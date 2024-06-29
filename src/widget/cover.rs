@@ -96,8 +96,15 @@ impl CoverList {
 	}
 
 	fn connect_select(&self) {
-		self.icon_view.connect_selection_changed(|_| {
-			dbg!("do this?");
+		let store = self.store.clone();
+		self.icon_view.connect_selection_changed(move |icon_view| {
+			let a = icon_view.selected_items().last().and_then(|path| {
+				store
+					.iter(path)
+					.and_then(|iter| store.value(&iter, 0).get::<'_, String>().ok())
+			});
+
+			dbg!(a);
 		});
 	}
 }
