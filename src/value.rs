@@ -79,7 +79,6 @@ impl AppState {
 
 	pub fn save<'a>(&'a mut self, data: SaveData<'a>) -> id3::Result<()> {
 		if let Some((mime_type, pic_data)) = data.cover {
-			dbg!("do picture!");
 			let pic = id3::frame::Picture {
 				mime_type: mime_type.to_string(),
 				picture_type: PictureType::CoverFront,
@@ -143,7 +142,6 @@ pub fn get_drag_drop_filepath(sel: &SelectionData) -> Option<PathBuf> {
 	let file = uris.first()?;
 	let path = uri_unescape_string(file, None::<&str>)?;
 	let path = Path::new(path.as_str().strip_prefix("file://")?);
-	dbg!(&path);
 	if path.exists() && path.extension()? == "mp3" {
 		Some(path.into())
 	} else {
