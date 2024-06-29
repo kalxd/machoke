@@ -79,6 +79,7 @@ impl AppState {
 
 	pub fn save<'a>(&'a mut self, data: SaveData<'a>) -> id3::Result<()> {
 		if let Some((mime_type, pic_data)) = data.cover {
+			dbg!("do picture!");
 			let pic = id3::frame::Picture {
 				mime_type: mime_type.to_string(),
 				picture_type: PictureType::CoverFront,
@@ -122,20 +123,17 @@ impl TryFrom<PathBuf> for AppStateBox {
 					audio_path: path,
 				},
 			))),
-			Err(e) => {
-				if e.partial_tag.is_none() {
-					// 无法解析出tag
-					Ok(Self((
-						Some("无法解析tag，我亲自为你生成一个！".into()),
-						AppState {
-							tag: Default::default(),
-							audio_path: path,
-						},
-					)))
-				} else {
-					Err(e)
-				}
+			Err(e) if e.partial_tag.is_none() => {
+				// 无法解析出tag
+				Ok(Self((
+					Some("无法解析tag，我亲自为你生成一个！".into()),
+					AppState {
+						tag: Default::default(),
+						audio_path: path,
+					},
+				)))
 			}
+			Err(e) => Err(e),
 		}
 	}
 }
