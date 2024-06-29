@@ -33,14 +33,29 @@ struct CoverListStore(ListStore);
 
 impl CoverListStore {
 	fn new() -> Self {
-		let store = ListStore::new(&[glib::Type::STRING, Pixbuf::static_type()]);
+		let store = ListStore::new(&[
+			glib::Type::STRING,
+			Pixbuf::static_type(),
+			Pixbuf::static_type(),
+		]);
 		Self(store)
 	}
 
-	fn add_history<T: ToValue>(&self, key: T, pixbuf: Pixbuf) {
-		let pixbuf = pixbuf.scale_simple(64, 64, InterpType::Nearest);
-		self.0
-			.insert_with_values(None, &[(0, &key.to_value()), (1, &pixbuf)]);
+	fn add_history(&self, key: &str, pixbuf: Pixbuf) {
+		let is_contains = (0..self.0.iter_n_children(None))
+			.map(|i| self.0.iter_nth_child(None, i))
+			.map(|miter| miter.and_then(|iter| self.0.value(&iter, 0).get::<'_, String>().ok()))
+			.any(|ma| ma.as_deref() == Some(key));
+
+		if is_contains {
+			return;
+		}
+
+		let scale_pixbuf = pixbuf.scale_simple(64, 64, InterpType::Nearest);
+		self.0.insert_with_values(
+			None,
+			&[(0, &key.to_value()), (1, &scale_pixbuf), (2, &pixbuf)],
+		);
 	}
 }
 
@@ -190,7 +205,9 @@ impl CoverWidget {
 			Err(e) => self.tx.error(e),
 			Ok(pixbuf) => {
 				self.set_pixbuf(Some(&pixbuf));
-				self.cover_list.store.add_history(path, pixbuf);
+				self.cover_list
+					.store
+					.add_history(path.to_str().unwrap(), pixbuf);
 			}
 		}
 	}
