@@ -1,11 +1,14 @@
+use std::cell::RefCell;
 use std::ops::Deref;
 use std::path::PathBuf;
+use std::rc::Rc;
 
 use gtk::gdk_pixbuf::{InterpType, Pixbuf, PixbufLoader};
 use gtk::{glib, FileChooserDialog, FileFilter, ListStore, ResponseType, ScrolledWindow};
 use gtk::{prelude::*, Box as GtkBox, Button, Frame, IconView, Image, Orientation};
+use id3::frame::Picture;
 
-use crate::emitter::Emitter;
+use crate::emitter::{EmitEvent, Emitter};
 use crate::value::{AppState, CoverMimeType};
 
 const COVER_SIZE: i32 = 128;
@@ -27,6 +30,15 @@ fn open_cover_chooser_dialog() -> Option<PathBuf> {
 		ResponseType::Accept => dialog.filename(),
 		_ => None,
 	}
+}
+
+fn picture_to_pixbuf(pic: Option<&Picture>) -> Option<(Pixbuf, CoverMimeType)> {
+	let picture = pic?;
+	let loader = PixbufLoader::new();
+	loader.write(&picture.data).ok()?;
+	let pixbuf = loader.pixbuf()?;
+	let mime_type = CoverMimeType::from_mime_type(&picture.mime_type);
+	Some((pixbuf, mime_type))
 }
 
 struct CoverListStore(ListStore);
@@ -121,6 +133,7 @@ pub struct CoverWidget {
 	change_btn: Button,
 	remove_btn: Button,
 	cover_list: CoverList,
+	mime_type: Rc<RefCell<Option<CoverMimeType>>>,
 
 	tx: Emitter,
 }
@@ -165,7 +178,7 @@ impl CoverWidget {
 
 		cover_list.connect_select({
 			let tx = tx.clone();
-			move |pixbuf| tx.send(crate::emitter::EmitEvent::ApplyCover(pixbuf))
+			move |pixbuf| tx.send(EmitEvent::ApplyCover(pixbuf))
 		});
 
 		Self {
@@ -175,6 +188,7 @@ impl CoverWidget {
 			change_btn,
 			remove_btn,
 			cover_list,
+			mime_type: Default::default(),
 			tx,
 		}
 	}
@@ -204,23 +218,17 @@ impl CoverWidget {
 	pub fn update_with_tag(&self, state: &AppState) {
 		self.info_layout.show();
 
-		if let Some(picture) = state.front_cover() {
-			let loader = PixbufLoader::new();
-
-			let pixbuf = loader
-				.write(&picture.data)
-				.and_then(|_| loader.close())
-				.ok()
-				.and_then(|_| loader.pixbuf());
-
-			if let Some(pixbuf) = pixbuf {
+		match picture_to_pixbuf(state.front_cover()) {
+			Some((pixbuf, mime_type)) => {
 				self.set_pixbuf(Some(&pixbuf));
 				self.cover_list
 					.store
 					.add_history(state.audio_path.to_str().unwrap(), pixbuf);
 			}
-		} else {
-			self.image.set_pixbuf(None);
+			None => {
+				self.image.set_pixbuf(None);
+				self.mime_type.replace(None);
+			}
 		}
 	}
 

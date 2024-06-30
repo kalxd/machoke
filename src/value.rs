@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use gtk::{
-	glib::{uri_unescape_string, GString},
+	glib::{self, uri_unescape_string, GString, StaticType},
 	SelectionData,
 };
 use id3::{
@@ -22,6 +22,25 @@ pub struct MetaFormData {
 pub enum CoverMimeType {
 	Png,
 	Jpeg,
+}
+
+impl glib::ToValue for CoverMimeType {
+	fn to_value(&self) -> glib::Value {
+		self.as_ref().to_value()
+	}
+
+	fn value_type(&self) -> glib::Type {
+		String::static_type()
+	}
+}
+
+unsafe impl<'a> glib::value::FromValue<'a> for CoverMimeType {
+	type Checker = glib::value::GenericValueTypeChecker<String>;
+
+	unsafe fn from_value(value: &'a glib::Value) -> Self {
+		let value = String::from_value(value);
+		Self::from_mime_type(value)
+	}
 }
 
 impl CoverMimeType {
