@@ -104,7 +104,7 @@ struct CoverList {
 
 impl CoverList {
 	fn new() -> Self {
-		let frame = Frame::new(Some("封面列表"));
+		let frame = Frame::new(Some("历史封面"));
 		let scrolled_window = ScrolledWindow::builder().build();
 
 		let store = CoverListStore::new();
@@ -265,7 +265,7 @@ impl CoverWidget {
 		self.image.pixbuf()?.save_to_bufferv("png", &[]).ok()
 	}
 
-	pub fn set_pixbuf(&self, pixbuf: Option<&Pixbuf>) {
+	fn set_pixbuf(&self, pixbuf: Option<&Pixbuf>) {
 		let pixbuf = pixbuf.and_then(|pixbuf| {
 			pixbuf.scale_simple(COVER_SIZE, COVER_SIZE, gtk::gdk_pixbuf::InterpType::Nearest)
 		});
