@@ -2,6 +2,8 @@ use futures::channel::mpsc::Sender;
 use gtk::{gdk_pixbuf::Pixbuf, MessageType};
 use std::path::PathBuf;
 
+use crate::value::CoverMimeType;
+
 pub enum EmitEvent {
 	/// 打开新音频
 	OpenTag(PathBuf),
@@ -10,7 +12,7 @@ pub enum EmitEvent {
 	/// 更改封面
 	ChangeCover(PathBuf),
 	/// 应用封面
-	ApplyCover(Pixbuf),
+	ApplyCover((Pixbuf, CoverMimeType)),
 	/// 移除封面
 	RemoveCover,
 	/// 交互信息

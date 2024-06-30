@@ -1,4 +1,4 @@
-use std::cell::RefCell;
+use std::cell::{Ref, RefCell};
 use std::ops::Deref;
 use std::path::PathBuf;
 use std::rc::Rc;
@@ -36,8 +36,19 @@ fn picture_to_pixbuf(pic: Option<&Picture>) -> Option<(Pixbuf, CoverMimeType)> {
 	let picture = pic?;
 	let loader = PixbufLoader::new();
 	loader.write(&picture.data).ok()?;
+	loader.close().ok()?;
 	let pixbuf = loader.pixbuf()?;
 	let mime_type = CoverMimeType::from_mime_type(&picture.mime_type);
+	Some((pixbuf, mime_type))
+}
+
+fn icon_view_selection(icon_view: &IconView, store: &ListStore) -> Option<(Pixbuf, CoverMimeType)> {
+	let sel_item = icon_view.selected_items();
+	let sel_path = sel_item.last()?;
+	let sel_iter = store.iter(sel_path)?;
+
+	let pixbuf: Pixbuf = store.value(&sel_iter, 2).get().ok()?;
+	let mime_type: CoverMimeType = store.value(&sel_iter, 3).get().ok()?;
 	Some((pixbuf, mime_type))
 }
 
@@ -49,11 +60,12 @@ impl CoverListStore {
 			glib::Type::STRING,
 			Pixbuf::static_type(),
 			Pixbuf::static_type(),
+			glib::Type::STRING,
 		]);
 		Self(store)
 	}
 
-	fn add_history(&self, key: &str, pixbuf: Pixbuf) {
+	fn add_history(&self, key: &str, pixbuf: Pixbuf, mime_type: &CoverMimeType) {
 		let is_contains = (0..self.0.iter_n_children(None))
 			.map(|i| self.0.iter_nth_child(None, i))
 			.map(|miter| miter.and_then(|iter| self.0.value(&iter, 0).get::<'_, String>().ok()))
@@ -66,7 +78,12 @@ impl CoverListStore {
 		let scale_pixbuf = pixbuf.scale_simple(64, 64, InterpType::Nearest);
 		self.0.insert_with_values(
 			None,
-			&[(0, &key.to_value()), (1, &scale_pixbuf), (2, &pixbuf)],
+			&[
+				(0, &key.to_value()),
+				(1, &scale_pixbuf),
+				(2, &pixbuf),
+				(3, mime_type),
+			],
 		);
 	}
 }
@@ -109,18 +126,12 @@ impl CoverList {
 
 	fn connect_select<F>(&self, f: F)
 	where
-		F: Fn(Pixbuf) + 'static,
+		F: Fn(Pixbuf, CoverMimeType) + 'static,
 	{
 		let store = self.store.clone();
 		self.icon_view.connect_selection_changed(move |icon_view| {
-			let a = icon_view.selected_items().last().and_then(|path| {
-				store
-					.iter(path)
-					.and_then(|iter| store.value(&iter, 2).get::<'_, Pixbuf>().ok())
-			});
-
-			if let Some(pixbuf) = a {
-				f(pixbuf);
+			if let Some((pixbuf, mime_type)) = icon_view_selection(icon_view, &store) {
+				f(pixbuf, mime_type);
 			}
 		});
 	}
@@ -178,7 +189,7 @@ impl CoverWidget {
 
 		cover_list.connect_select({
 			let tx = tx.clone();
-			move |pixbuf| tx.send(EmitEvent::ApplyCover(pixbuf))
+			move |pixbuf, mime_type| tx.send(EmitEvent::ApplyCover((pixbuf, mime_type)))
 		});
 
 		Self {
@@ -221,14 +232,13 @@ impl CoverWidget {
 		match picture_to_pixbuf(state.front_cover()) {
 			Some((pixbuf, mime_type)) => {
 				self.set_pixbuf(Some(&pixbuf));
-				self.cover_list
-					.store
-					.add_history(state.audio_path.to_str().unwrap(), pixbuf);
+				self.cover_list.store.add_history(
+					state.audio_path.to_str().unwrap(),
+					pixbuf,
+					&mime_type,
+				);
 			}
-			None => {
-				self.image.set_pixbuf(None);
-				self.mime_type.replace(None);
-			}
+			None => self.remove_cover(),
 		}
 	}
 
@@ -237,15 +247,18 @@ impl CoverWidget {
 			Err(e) => self.tx.error(e),
 			Ok(pixbuf) => {
 				self.set_pixbuf(Some(&pixbuf));
+				let mime_type = CoverMimeType::from_path(path);
 				self.cover_list
 					.store
-					.add_history(path.to_str().unwrap(), pixbuf);
+					.add_history(path.to_str().unwrap(), pixbuf, &mime_type);
+				self.mime_type.replace(Some(mime_type));
 			}
 		}
 	}
 
 	pub fn remove_cover(&self) {
 		self.image.set_pixbuf(None);
+		self.mime_type.replace(None);
 	}
 
 	pub fn get_pixbuf_bytes(&self) -> Option<Vec<u8>> {
@@ -258,5 +271,16 @@ impl CoverWidget {
 		});
 
 		self.image.set_pixbuf(pixbuf.as_ref());
+	}
+
+	pub fn cover(&self) -> (Option<Vec<u8>>, Ref<Option<CoverMimeType>>) {
+		let mime_type = self.mime_type.borrow();
+		let pic = self.get_pixbuf_bytes();
+		(pic, mime_type)
+	}
+
+	pub fn set_cover(&self, pixbuf: Pixbuf, mime_type: CoverMimeType) {
+		self.mime_type.replace(Some(mime_type));
+		self.set_pixbuf(Some(&pixbuf));
 	}
 }

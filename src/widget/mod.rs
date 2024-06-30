@@ -102,14 +102,14 @@ impl MainWindow {
 				}
 				Err(e) => tx.error(e),
 			},
-			EmitEvent::ChangeCover(path) => self.widget.change_cover(&path),
-			EmitEvent::RemoveCover => self.widget.remove_cover(),
-			EmitEvent::ApplyCover(pixbuf) => {
-				self.widget.cover.set_pixbuf(Some(&pixbuf));
+			EmitEvent::ChangeCover(path) => self.widget.cover.update_cover_from_path(&path),
+			EmitEvent::RemoveCover => self.widget.cover.remove_cover(),
+			EmitEvent::ApplyCover((pixbuf, mime_type)) => {
+				self.widget.cover.set_cover(pixbuf, mime_type);
 			}
 			EmitEvent::Save => {
 				if let Some(state) = self.app_state.borrow_mut().as_mut() {
-					let (mime_type, pic_data) = self.widget.get_data();
+					let (pic_data, mime_type) = self.widget.cover.cover();
 					let form_data = self.widget.form.form_data();
 					self.widget.form.save_to_store(&form_data);
 
