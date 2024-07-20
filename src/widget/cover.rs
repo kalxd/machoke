@@ -76,8 +76,9 @@ impl CoverListStore {
 		}
 
 		let scale_pixbuf = pixbuf.scale_simple(64, 64, InterpType::Nearest);
-		self.0.insert_with_values(
-			None,
+		let iter = self.0.prepend();
+		self.0.set(
+			&iter,
 			&[
 				(0, &key.to_value()),
 				(1, &scale_pixbuf),
