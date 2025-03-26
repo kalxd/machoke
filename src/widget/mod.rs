@@ -1,9 +1,10 @@
 use gtk::{
-	prelude::{GtkWindowExt, WidgetExt},
+	prelude::{ContainerExt, GtkWindowExt, WidgetExt},
 	Application, ApplicationWindow,
 };
 
-pub mod titlebar;
+mod placeholder;
+mod titlebar;
 
 pub struct MainWindow {
 	window: ApplicationWindow,
@@ -11,8 +12,6 @@ pub struct MainWindow {
 
 impl MainWindow {
 	fn new(app: &Application) -> Self {
-		let titlebar = titlebar::TitleBar::new();
-
 		let window = ApplicationWindow::builder()
 			.application(app)
 			.default_height(600)
@@ -20,7 +19,11 @@ impl MainWindow {
 			.icon_name("mochoke")
 			.build();
 
+		let titlebar = titlebar::TitleBar::new();
 		window.set_titlebar(Some(&*titlebar));
+
+		let placeholder = placeholder::Placeholder::new();
+		window.set_child(Some(&placeholder.layout));
 
 		Self { window }
 	}
