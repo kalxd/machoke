@@ -1,15 +1,25 @@
-use gtk::{prelude::*, Application};
+use gtk::{
+	prelude::{ApplicationExt, ApplicationExtManual, WidgetExt},
+	Application, ApplicationWindow,
+};
 
-mod emitter;
-mod value;
-mod widget;
+fn setup_ui(app: &Application) {
+	let window = ApplicationWindow::builder()
+		.application(app)
+		.default_height(600)
+		.default_width(800)
+		.icon_name("mochoke")
+		.build();
+
+	window.show();
+}
 
 fn main() {
 	let app = Application::builder()
 		.application_id("person.xgley.machoke")
 		.build();
 
-	app.connect_activate(widget::MainWindow::run);
+	app.connect_activate(setup_ui);
 
 	app.run();
 }
