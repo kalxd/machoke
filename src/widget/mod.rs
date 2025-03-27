@@ -1,4 +1,8 @@
+use std::borrow::BorrowMut;
+
+use futures::{future::ready, SinkExt, StreamExt};
 use gtk::{
+	glib,
 	prelude::{BoxExt, ContainerExt, GtkWindowExt, StackExt, WidgetExt},
 	Application, ApplicationWindow, Box as GtkBox, Stack,
 };
@@ -8,6 +12,8 @@ mod editor;
 mod element;
 mod placeholder;
 mod titlebar;
+
+use crate::value::{self, EventAction, EventSender};
 
 enum StackName {
 	Placeholder,
@@ -29,7 +35,7 @@ pub struct MainWindow {
 }
 
 impl MainWindow {
-	fn new(app: &Application) -> Self {
+	fn new(app: &Application, tx: EventSender) -> Self {
 		let alertbar = alertbar::AlertBar::new();
 
 		let placeholder = placeholder::Placeholder::new();
@@ -59,8 +65,12 @@ impl MainWindow {
 		window.set_titlebar(Some(&*titlebar));
 		window.set_child(Some(&main_layout));
 
-		titlebar.connect_open_audio(move |p| {
-			stack.set_visible_child_name(StackName::Editor.as_str());
+		titlebar.connect_open_audio({
+			let tx = tx.clone();
+			move |p| match value::ParseBox::parse_from_path(p) {
+				Ok(a) => tx.send(EventAction::OpenAudio(a)),
+				Err(e) => tx.error(e),
+			}
 		});
 
 		Self { window, alertbar }
@@ -72,7 +82,25 @@ impl MainWindow {
 	}
 
 	pub fn run(app: &Application) {
-		let main_window = Self::new(app);
+		let (tx, rx) = value::channel();
+
+		let main_window = Self::new(app, tx);
 		main_window.show_all();
+
+		glib::MainContext::default().spawn_local(async move {
+			rx.for_each(|msg| {
+				match msg {
+					EventAction::OpenAudio((t, msg)) => {
+						if let Some(msg) = msg {
+							main_window.alertbar.show(msg.0, msg.1);
+						}
+					}
+					_ => {}
+				};
+
+				ready(())
+			})
+			.await;
+		});
 	}
 }
