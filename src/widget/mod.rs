@@ -21,6 +21,9 @@ impl MainWindow {
 
 		let titlebar = titlebar::TitleBar::new();
 		window.set_titlebar(Some(&*titlebar));
+		titlebar.connect_open_audio(|p| {
+			dbg!(p);
+		});
 
 		let placeholder = placeholder::Placeholder::new();
 		window.set_child(Some(&placeholder.layout));

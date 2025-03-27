@@ -3,6 +3,7 @@ use gtk::{
 	Application,
 };
 
+mod value;
 mod widget;
 
 fn main() {
