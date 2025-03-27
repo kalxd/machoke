@@ -4,8 +4,6 @@ use gtk::{
 	Box as GtkBox, Entry, Frame, Label, Orientation, SizeGroup, Widget,
 };
 
-const LAYOUT_SPACEING: u32 = 10;
-
 use super::element::cover;
 
 struct EditorRow {
