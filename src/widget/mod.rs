@@ -1,6 +1,4 @@
-use std::borrow::BorrowMut;
-
-use futures::{future::ready, SinkExt, StreamExt};
+use futures::{future::ready, StreamExt};
 use gtk::{
 	glib,
 	prelude::{BoxExt, ContainerExt, GtkWindowExt, StackExt, WidgetExt},
@@ -32,28 +30,11 @@ impl StackName {
 pub struct MainWindow {
 	window: ApplicationWindow,
 	alertbar: alertbar::AlertBar,
+	stack: Stack,
 }
 
 impl MainWindow {
 	fn new(app: &Application, tx: EventSender) -> Self {
-		let alertbar = alertbar::AlertBar::new();
-
-		let placeholder = placeholder::Placeholder::new();
-
-		let editor = editor::Editor::new();
-
-		let stack = Stack::builder()
-			.transition_type(gtk::StackTransitionType::Crossfade)
-			.build();
-		stack.add_named(&placeholder.layout, StackName::Placeholder.as_str());
-		stack.add_named(&editor.layout, StackName::Editor.as_str());
-
-		let main_layout = GtkBox::builder()
-			.orientation(gtk::Orientation::Vertical)
-			.build();
-		main_layout.pack_start(&*alertbar, false, false, 0);
-		main_layout.pack_start(&stack, true, true, 0);
-
 		let window = ApplicationWindow::builder()
 			.application(app)
 			.default_height(600)
@@ -61,10 +42,28 @@ impl MainWindow {
 			.icon_name("mochoke")
 			.build();
 
-		let titlebar = titlebar::TitleBar::new();
-		window.set_titlebar(Some(&*titlebar));
+		let main_layout = GtkBox::builder()
+			.orientation(gtk::Orientation::Vertical)
+			.margin(10)
+			.build();
 		window.set_child(Some(&main_layout));
 
+		let alertbar = alertbar::AlertBar::new();
+		main_layout.pack_start(&*alertbar, false, false, 0);
+
+		let stack = Stack::builder()
+			.transition_type(gtk::StackTransitionType::Crossfade)
+			.build();
+		main_layout.pack_start(&stack, true, true, 0);
+
+		let placeholder = placeholder::Placeholder::new();
+		stack.add_named(&placeholder.layout, StackName::Placeholder.as_str());
+
+		let editor = editor::Editor::new();
+		stack.add_named(&editor.layout, StackName::Editor.as_str());
+
+		let titlebar = titlebar::TitleBar::new();
+		window.set_titlebar(Some(&*titlebar));
 		titlebar.connect_open_audio({
 			let tx = tx.clone();
 			move |p| match value::ParseBox::parse_from_path(p) {
@@ -73,7 +72,11 @@ impl MainWindow {
 			}
 		});
 
-		Self { window, alertbar }
+		Self {
+			window,
+			alertbar,
+			stack,
+		}
 	}
 
 	fn show_all(&self) {
@@ -94,6 +97,10 @@ impl MainWindow {
 						if let Some(msg) = msg {
 							main_window.alertbar.show(msg.0, msg.1);
 						}
+
+						main_window
+							.stack
+							.set_visible_child_name(StackName::Editor.as_str());
 					}
 					_ => {}
 				};
