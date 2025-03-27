@@ -1,8 +1,9 @@
 use gtk::{
-	prelude::{ContainerExt, GtkWindowExt, StackExt, WidgetExt},
-	Application, ApplicationWindow, Stack,
+	prelude::{BoxExt, ContainerExt, GtkWindowExt, StackExt, WidgetExt},
+	Application, ApplicationWindow, Box as GtkBox, Stack,
 };
 
+mod alertbar;
 mod editor;
 mod element;
 mod placeholder;
@@ -24,10 +25,13 @@ impl StackName {
 
 pub struct MainWindow {
 	window: ApplicationWindow,
+	alertbar: alertbar::AlertBar,
 }
 
 impl MainWindow {
 	fn new(app: &Application) -> Self {
+		let alertbar = alertbar::AlertBar::new();
+
 		let placeholder = placeholder::Placeholder::new();
 
 		let editor = editor::Editor::new();
@@ -38,6 +42,12 @@ impl MainWindow {
 		stack.add_named(&placeholder.layout, StackName::Placeholder.as_str());
 		stack.add_named(&editor.layout, StackName::Editor.as_str());
 
+		let main_layout = GtkBox::builder()
+			.orientation(gtk::Orientation::Vertical)
+			.build();
+		main_layout.pack_start(&*alertbar, false, false, 0);
+		main_layout.pack_start(&stack, true, true, 0);
+
 		let window = ApplicationWindow::builder()
 			.application(app)
 			.default_height(600)
@@ -47,17 +57,18 @@ impl MainWindow {
 
 		let titlebar = titlebar::TitleBar::new();
 		window.set_titlebar(Some(&*titlebar));
-		window.set_child(Some(&stack));
+		window.set_child(Some(&main_layout));
 
 		titlebar.connect_open_audio(move |p| {
 			stack.set_visible_child_name(StackName::Editor.as_str());
 		});
 
-		Self { window }
+		Self { window, alertbar }
 	}
 
 	fn show_all(&self) {
 		self.window.show_all();
+		self.alertbar.hide();
 	}
 
 	pub fn run(app: &Application) {
