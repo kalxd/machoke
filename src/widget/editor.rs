@@ -1,11 +1,11 @@
 use gtk::{
 	glib::IsA,
-	prelude::{BoxExt, ContainerExt, SizeGroupExt},
+	prelude::{BoxExt, ButtonExt, ContainerExt, SizeGroupExt},
 	Box as GtkBox, Button, ButtonBox, Frame, Label, Orientation, SizeGroup, Widget,
 };
 use id3::TagLike;
 
-use crate::value::ParseBox;
+use crate::value::{EventAction, EventSender, ParseBox};
 
 use super::element::{cover, multi_line::CompletionEntry};
 
@@ -50,7 +50,7 @@ pub struct Editor {
 }
 
 impl Editor {
-	pub fn new() -> Self {
+	pub fn new(tx: EventSender) -> Self {
 		let layout = GtkBox::builder()
 			.orientation(Orientation::Vertical)
 			.spacing(10)
@@ -65,7 +65,7 @@ impl Editor {
 		let cover = cover::Cover::new();
 		cur_album_frame.set_child(Some(&cover.layout));
 
-		let history_alubm_frame = Frame::builder().label("历史封面").margin_start(5).build();
+		let history_alubm_frame = Frame::builder().label("历史封面").build();
 		album_layout.pack_start(&history_alubm_frame, true, true, 0);
 
 		let form_frame = Frame::builder().label("基础信息").build();
@@ -85,6 +85,10 @@ impl Editor {
 
 		let close_btn = Button::with_label("关闭");
 		btn_box.add(&close_btn);
+		close_btn.connect_clicked({
+			let tx = tx.clone();
+			move |_| tx.send(EventAction::Close)
+		});
 
 		let save_btn = Button::with_label("保存");
 		btn_box.add(&save_btn);

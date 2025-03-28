@@ -61,7 +61,7 @@ impl MainWindow {
 		let placeholder = placeholder::Placeholder::new();
 		stack.add_named(&placeholder.layout, StackName::Placeholder.as_str());
 
-		let editor = editor::Editor::new();
+		let editor = editor::Editor::new(tx.clone());
 		stack.add_named(&editor.layout, StackName::Editor.as_str());
 
 		let titlebar = titlebar::TitleBar::new();
@@ -112,6 +112,9 @@ impl MainWindow {
 							.alertbar
 							.show(gtk::MessageType::Error, e.to_string()),
 					},
+					EventAction::Close => main_window
+						.stack
+						.set_visible_child_name(StackName::Placeholder.as_str()),
 					_ => {}
 				};
 

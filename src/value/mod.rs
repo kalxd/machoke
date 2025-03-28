@@ -7,6 +7,7 @@ type AlertMessageBox = (MessageType, String);
 pub enum EventAction {
 	OpenAudio(PathBuf),
 	Alert(AlertMessageBox),
+	Close,
 }
 
 pub struct ParseBox {
