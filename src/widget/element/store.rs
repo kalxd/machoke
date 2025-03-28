@@ -61,7 +61,8 @@ use std::ops::Deref;
 use gtk::{
 	gio,
 	glib::{self, Type, Value},
-	prelude::{GtkListStoreExt, GtkListStoreExtManual, TreeModelExt},
+	prelude::{GtkListStoreExt, GtkListStoreExtManual, ListModelExt, TreeModelExt},
+	subclass::prelude::ObjectSubclassIsExt,
 	ListStore,
 };
 
@@ -70,7 +71,7 @@ glib::wrapper! {
 }
 
 impl MultiLineObject {
-	fn new(value: &str) -> Self {
+	pub fn new(value: &str) -> Self {
 		glib::Object::builder().property("text", value).build()
 	}
 }
@@ -82,6 +83,23 @@ glib::wrapper! {
 impl MultiLineModel {
 	pub(super) fn new() -> Self {
 		glib::Object::new()
+	}
+
+	pub(super) fn add_row(&self, row: MultiLineObject) {
+		let imp = self.imp();
+		let last_index = {
+			let mut raw_data = imp.0.borrow_mut();
+			raw_data.push(row);
+			raw_data.len() - 1
+		};
+
+		self.items_changed(last_index as u32, 0, 1);
+	}
+
+	pub(super) fn remove_row(&self, index: usize) {
+		let imp = self.imp();
+		imp.0.borrow_mut().remove(index);
+		self.items_changed(index as u32, 1, 0);
 	}
 }
 
