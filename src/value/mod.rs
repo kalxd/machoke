@@ -5,7 +5,7 @@ use std::{ops::Deref, path::PathBuf};
 type AlertMessageBox = (MessageType, String);
 
 pub enum EventAction {
-	OpenAudio((Box<ParseBox>, Option<AlertMessageBox>)),
+	OpenAudio(PathBuf),
 	Alert(AlertMessageBox),
 }
 

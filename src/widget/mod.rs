@@ -66,10 +66,7 @@ impl MainWindow {
 		window.set_titlebar(Some(&*titlebar));
 		titlebar.connect_open_audio({
 			let tx = tx.clone();
-			move |p| match value::ParseBox::parse_from_path(p) {
-				Ok(a) => tx.send(EventAction::OpenAudio(a)),
-				Err(e) => tx.error(e),
-			}
+			move |p| tx.send(EventAction::OpenAudio(p))
 		});
 
 		Self {
@@ -93,15 +90,20 @@ impl MainWindow {
 		glib::MainContext::default().spawn_local(async move {
 			rx.for_each(|msg| {
 				match msg {
-					EventAction::OpenAudio((t, msg)) => {
-						if let Some(msg) = msg {
-							main_window.alertbar.show(msg.0, msg.1);
-						}
+					EventAction::OpenAudio(p) => match value::ParseBox::parse_from_path(p) {
+						Ok((t, msg)) => {
+							if let Some(msg) = msg {
+								main_window.alertbar.show(msg.0, msg.1);
+							}
 
-						main_window
-							.stack
-							.set_visible_child_name(StackName::Editor.as_str());
-					}
+							main_window
+								.stack
+								.set_visible_child_name(StackName::Editor.as_str());
+						}
+						Err(e) => main_window
+							.alertbar
+							.show(gtk::MessageType::Error, e.to_string()),
+					},
 					_ => {}
 				};
 
