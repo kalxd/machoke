@@ -85,10 +85,11 @@ impl MultiLineModel {
 	}
 }
 
-pub(super) struct CompletionStore(ListStore);
+#[derive(Clone)]
+pub struct CompletionStore(ListStore);
 
 impl CompletionStore {
-	pub(super) fn new() -> Self {
+	pub fn new() -> Self {
 		let store = ListStore::new(&[Type::STRING]);
 
 		Self(store)

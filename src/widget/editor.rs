@@ -7,7 +7,11 @@ use id3::TagLike;
 
 use crate::value::{EventAction, EventSender, ParseBox};
 
-use super::element::{cover, multi_line::CompletionEntry};
+use super::element::{
+	cover,
+	multi_line::{CompletionEntry, MultiLine},
+	store::CompletionStore,
+};
 
 struct EditorRow {
 	layout: GtkBox,
@@ -37,9 +41,16 @@ impl EditorRow {
 	}
 
 	fn add_row(&self, label: &str) -> CompletionEntry {
-		let entry = CompletionEntry::new();
+		let store = CompletionStore::new();
+		let entry = CompletionEntry::new(store);
 		self.add_row_with(label, &*entry);
 		entry
+	}
+
+	fn add_multi_row(&self, label: &str) -> MultiLine {
+		let multi_line = MultiLine::new();
+		self.add_row_with(label, &multi_line.layout);
+		multi_line
 	}
 }
 
@@ -48,6 +59,7 @@ pub struct Editor {
 
 	title_line: CompletionEntry,
 	album_line: CompletionEntry,
+	artist_line: MultiLine,
 }
 
 impl Editor {
@@ -76,6 +88,7 @@ impl Editor {
 		form_frame.set_child(Some(&form_row.layout));
 
 		let title_line = form_row.add_row("标题");
+		let artist_line = form_row.add_multi_row("艺术家");
 		let album_line = form_row.add_row("专辑");
 
 		let btn_box = ButtonBox::builder()
@@ -97,6 +110,7 @@ impl Editor {
 		Self {
 			layout,
 			title_line,
+			artist_line,
 			album_line,
 		}
 	}
