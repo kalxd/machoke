@@ -58,8 +58,9 @@ pub struct Editor {
 	pub layout: GtkBox,
 
 	title_line: CompletionEntry,
-	album_line: CompletionEntry,
 	artist_line: MultiLine,
+	album_line: CompletionEntry,
+	genre_line: MultiLine,
 }
 
 impl Editor {
@@ -90,6 +91,7 @@ impl Editor {
 		let title_line = form_row.add_row("标题");
 		let artist_line = form_row.add_multi_row("艺术家");
 		let album_line = form_row.add_row("专辑");
+		let genre_line = form_row.add_multi_row("流派");
 
 		let btn_box = ButtonBox::builder()
 			.layout_style(gtk::ButtonBoxStyle::End)
@@ -112,6 +114,7 @@ impl Editor {
 			title_line,
 			artist_line,
 			album_line,
+			genre_line,
 		}
 	}
 
@@ -119,7 +122,13 @@ impl Editor {
 		let title = state.audio_tag.title();
 		self.title_line.set_text(title.unwrap_or_default());
 
+		let artist = state.audio_tag.artists();
+		self.artist_line.set_text(&artist.unwrap_or_default());
+
 		let album = state.audio_tag.album();
 		self.album_line.set_text(album.unwrap_or_default());
+
+		let genre = state.audio_tag.genres();
+		self.genre_line.set_text(&genre.unwrap_or_default());
 	}
 }

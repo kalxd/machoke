@@ -5,6 +5,7 @@ use gtk::{
 };
 use std::{cell::RefCell, ops::Deref, rc::Rc};
 
+#[derive(Clone)]
 pub struct CompletionEntry {
 	entry: Entry,
 	store: CompletionStore,
@@ -43,6 +44,7 @@ impl Deref for CompletionEntry {
 	}
 }
 
+#[derive(Clone)]
 struct MultiLineRow {
 	layout: GtkBox,
 	entry: CompletionEntry,
@@ -77,6 +79,7 @@ impl MultiLineRow {
 	}
 }
 
+#[derive(Clone)]
 pub struct MultiLine {
 	pub layout: GtkBox,
 	store: CompletionStore,
@@ -104,38 +107,67 @@ impl MultiLine {
 			.build();
 		layout.pack_end(&add_btn, false, false, 0);
 
-		add_btn.connect_clicked({
-			let store = store.clone();
-			let layout = layout.clone();
-			let entry_list = entry_list.clone();
-			move |_| {
-				let row = MultiLineRow::new(&store);
-				layout.pack_start(&row.layout, false, false, 0);
-				row.layout.show_all();
-				row.entry.grab_focus();
-
-				let xs = entry_list.clone();
-
-				row.connect_click_remove({
-					let layout = layout.clone();
-					let row_layout = row.layout.clone();
-					let xs = entry_list.clone();
-					move || {
-						layout.remove(&row_layout);
-						xs.borrow_mut()
-							.retain(|item: &MultiLineRow| item.layout != row_layout);
-					}
-				});
-
-				xs.borrow_mut().push(row);
-			}
-		});
-
-		Self {
+		let myself = Self {
 			layout,
 			store,
 			add_entry,
 			entry_list,
+		};
+
+		add_btn.connect_clicked({
+			let myself = myself.clone();
+			move |_| {
+				let row = myself.add_row("");
+				row.entry.grab_focus();
+			}
+		});
+
+		myself
+	}
+
+	fn add_row<S: AsRef<str>>(&self, text: S) -> MultiLineRow {
+		let row = MultiLineRow::new(&self.store);
+		self.layout.pack_start(&row.layout, false, false, 0);
+		row.layout.show_all();
+		row.entry.set_text(text.as_ref());
+
+		let xs = self.entry_list.clone();
+
+		row.connect_click_remove({
+			let layout = self.layout.clone();
+			let row_layout = row.layout.clone();
+			let xs = self.entry_list.clone();
+			move || {
+				layout.remove(&row_layout);
+				xs.borrow_mut()
+					.retain(|item: &MultiLineRow| item.layout != row_layout);
+			}
+		});
+
+		xs.borrow_mut().push(row.clone());
+
+		row
+	}
+
+	fn clear(&self) {
+		for row in self.entry_list.borrow().iter() {
+			self.layout.remove(&row.layout);
+		}
+
+		self.entry_list.borrow_mut().clear();
+	}
+
+	pub fn set_text<S: AsRef<str>>(&self, text: &[S]) {
+		self.clear();
+
+		if let Some((h, xs)) = text.split_first() {
+			self.add_entry.set_text(&h.as_ref());
+
+			for x in xs {
+				self.add_row(x.as_ref());
+			}
+		} else {
+			self.add_entry.set_text("");
 		}
 	}
 }
