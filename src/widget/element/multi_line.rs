@@ -1,13 +1,9 @@
-use super::store::{CompletionStore, MultiLineModel, MultiLineObject};
+use super::store::CompletionStore;
 use gtk::{
-	glib::{self, clone, Cast},
-	prelude::{
-		BoxExt, ButtonExt, ContainerExt, EntryCompletionExt, EntryExt, ListBoxExt, ListBoxRowExt,
-		WidgetExt,
-	},
-	Box as GtkBox, Button, Entry, EntryCompletion, Image, ListBox, ListBoxRow,
+	prelude::{BoxExt, ButtonExt, ContainerExt, EntryCompletionExt, EntryExt, WidgetExt},
+	Box as GtkBox, Button, Entry, EntryCompletion, Image,
 };
-use std::{borrow::Borrow, ops::Deref};
+use std::{cell::RefCell, ops::Deref, rc::Rc};
 
 pub struct CompletionEntry {
 	entry: Entry,
@@ -47,86 +43,99 @@ impl Deref for CompletionEntry {
 	}
 }
 
+struct MultiLineRow {
+	layout: GtkBox,
+	entry: CompletionEntry,
+	remove_btn: Button,
+}
+
+impl MultiLineRow {
+	fn new(store: &CompletionStore) -> Self {
+		let layout = GtkBox::builder().spacing(10).build();
+
+		let entry = CompletionEntry::new(store.clone());
+		layout.pack_start(&*entry, true, true, 0);
+
+		let remove_btn = Button::builder()
+			.image(&Image::builder().icon_name("list-remove").build())
+			.tooltip_text("删除该列")
+			.build();
+		layout.pack_start(&remove_btn, false, false, 0);
+
+		Self {
+			entry,
+			remove_btn,
+			layout,
+		}
+	}
+
+	fn connect_click_remove<F>(&self, f: F)
+	where
+		F: Fn() + 'static,
+	{
+		self.remove_btn.connect_clicked(move |_| f());
+	}
+}
+
 pub struct MultiLine {
 	pub layout: GtkBox,
-	list_box: ListBox,
-	model: MultiLineModel,
+	store: CompletionStore,
+	add_entry: CompletionEntry,
+	entry_list: Rc<RefCell<Vec<MultiLineRow>>>,
 }
 
 impl MultiLine {
 	pub fn new() -> Self {
-		let model = MultiLineModel::new();
 		let store = CompletionStore::new();
+
+		let entry_list = Rc::new(RefCell::new(Vec::default()));
 
 		let layout = GtkBox::builder()
 			.orientation(gtk::Orientation::Vertical)
 			.spacing(10)
 			.build();
 
-		let list_box = ListBox::builder()
-			.selection_mode(gtk::SelectionMode::Single)
-			.build();
-		list_box.bind_model(Some(&model), {
-			let list_box = list_box.clone();
-			let model = model.clone();
-			let store = store.clone();
-			move |item| {
-				let obj = item.downcast_ref::<MultiLineObject>().unwrap();
-				let layout = ListBoxRow::new();
-
-				let hlayout = GtkBox::builder().spacing(10).build();
-				layout.add(&hlayout);
-
-				let entry = CompletionEntry::new(store.clone());
-				entry.set_text(&obj.text());
-				hlayout.pack_start(&*entry, true, true, 0);
-
-				let remove_btn = Button::builder()
-					.image(&Image::builder().icon_name("list-list").build())
-					.tooltip_text("删除该列")
-					.build();
-				hlayout.pack_start(&remove_btn, false, false, 0);
-				remove_btn.connect_clicked(clone!(@weak list_box, @weak model => move |_| {
-					let sel = list_box.selected_row();
-					if let Some(sel) = dbg!(sel) {
-						let index = sel.index();
-						model.remove_row(index as usize);
-					}
-				}));
-
-				layout.show_all();
-				layout.upcast()
-			}
-		});
-		layout.pack_start(&list_box, false, true, 0);
-
-		let blank_entry = CompletionEntry::new(store);
-		layout.pack_start(&*blank_entry, false, true, 0);
+		let add_entry = CompletionEntry::new(store.clone());
+		layout.pack_start(&*add_entry, false, false, 0);
 
 		let add_btn = Button::builder()
 			.image(&Image::builder().icon_name("list-add").build())
-			.tooltip_text("添加新一列内容")
+			.tooltip_text("添加一列")
 			.build();
-		layout.pack_start(&add_btn, false, true, 0);
+		layout.pack_end(&add_btn, false, false, 0);
+
 		add_btn.connect_clicked({
-			let model = model.clone();
-			let black_entry = blank_entry.clone();
+			let store = store.clone();
+			let layout = layout.clone();
+			let entry_list = entry_list.clone();
 			move |_| {
-				let text = black_entry.text();
-				let text = text.trim();
-				if !text.is_empty() {
-					let blank = MultiLineObject::new(text);
-					model.add_row(blank);
-				}
-				black_entry.set_text("");
-				black_entry.grab_focus();
+				let row = MultiLineRow::new(&store);
+				layout.pack_start(&row.layout, false, false, 0);
+				row.layout.show_all();
+				row.entry.grab_focus();
+
+				let xs = entry_list.clone();
+
+				row.connect_click_remove({
+					let layout = layout.clone();
+					let row_layout = row.layout.clone();
+					let xs = entry_list.clone();
+					move || {
+						layout.remove(&row_layout);
+						xs.borrow_mut()
+							.retain(|item: &MultiLineRow| item.layout != row_layout);
+					}
+				});
+
+				xs.borrow_mut().push(row);
 			}
 		});
 
 		Self {
-			list_box,
-			model,
 			layout,
+			store,
+			add_entry,
+			entry_list,
 		}
 	}
 }
