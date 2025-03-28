@@ -1,10 +1,10 @@
 use gtk::{
 	glib::IsA,
 	prelude::{BoxExt, ContainerExt, SizeGroupExt},
-	Box as GtkBox, Entry, Frame, Label, Orientation, SizeGroup, Widget,
+	Box as GtkBox, Frame, Label, Orientation, SizeGroup, Widget,
 };
 
-use super::element::cover;
+use super::element::{cover, multi_line::CompletionEntry};
 
 struct EditorRow {
 	layout: GtkBox,
@@ -33,9 +33,9 @@ impl EditorRow {
 		self.layout.pack_start(&row_layout, false, true, 10);
 	}
 
-	fn add_row(&self, label: &str) -> Entry {
-		let entry = Entry::new();
-		self.add_row_with(label, &entry);
+	fn add_row(&self, label: &str) -> CompletionEntry {
+		let entry = CompletionEntry::new();
+		self.add_row_with(label, &*entry);
 		entry
 	}
 }
@@ -67,6 +67,7 @@ impl Editor {
 		form_frame.set_child(Some(&form_row.layout));
 
 		let title_line = form_row.add_row("标题");
+		form_row.add_row("other");
 
 		Self { layout }
 	}
