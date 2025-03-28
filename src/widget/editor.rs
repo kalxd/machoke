@@ -47,6 +47,7 @@ pub struct Editor {
 	pub layout: GtkBox,
 
 	title_line: CompletionEntry,
+	album_line: CompletionEntry,
 }
 
 impl Editor {
@@ -75,7 +76,7 @@ impl Editor {
 		form_frame.set_child(Some(&form_row.layout));
 
 		let title_line = form_row.add_row("标题");
-		form_row.add_row("other");
+		let album_line = form_row.add_row("专辑");
 
 		let btn_box = ButtonBox::builder()
 			.layout_style(gtk::ButtonBoxStyle::End)
@@ -93,11 +94,18 @@ impl Editor {
 		let save_btn = Button::with_label("保存");
 		btn_box.add(&save_btn);
 
-		Self { layout, title_line }
+		Self {
+			layout,
+			title_line,
+			album_line,
+		}
 	}
 
 	pub fn update_state(&self, state: &ParseBox) {
 		let title = state.audio_tag.title();
 		self.title_line.set_text(title.unwrap_or_default());
+
+		let album = state.audio_tag.album();
+		self.album_line.set_text(album.unwrap_or_default());
 	}
 }
