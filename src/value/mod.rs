@@ -15,20 +15,20 @@ pub struct ParseBox {
 }
 
 impl ParseBox {
-	pub fn parse_from_path(path: PathBuf) -> id3::Result<(Box<Self>, Option<AlertMessageBox>)> {
+	pub fn parse_from_path(path: PathBuf) -> id3::Result<(Self, Option<AlertMessageBox>)> {
 		match id3::Tag::read_from_path(&path) {
 			Ok(tag) => Ok((
-				Box::new(Self {
+				Self {
 					audio_src: path,
 					audio_tag: tag,
-				}),
+				},
 				None,
 			)),
 			Err(e) if e.partial_tag.is_none() => Ok((
-				Box::new(Self {
+				Self {
 					audio_src: path,
 					audio_tag: id3::Tag::default(),
-				}),
+				},
 				Some((
 					MessageType::Warning,
 					String::from("无法解析tag，我亲自为你生成一个！"),

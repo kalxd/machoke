@@ -11,7 +11,7 @@ mod element;
 mod placeholder;
 mod titlebar;
 
-use crate::value::{self, EventAction, EventSender};
+use crate::value::{self, EventAction, EventSender, ParseBox};
 
 enum StackName {
 	Placeholder,
@@ -31,6 +31,8 @@ pub struct MainWindow {
 	window: ApplicationWindow,
 	alertbar: alertbar::AlertBar,
 	stack: Stack,
+
+	editor: editor::Editor,
 }
 
 impl MainWindow {
@@ -73,12 +75,17 @@ impl MainWindow {
 			window,
 			alertbar,
 			stack,
+			editor,
 		}
 	}
 
 	fn show_all(&self) {
 		self.window.show_all();
 		self.alertbar.hide();
+	}
+
+	fn update_state(&self, state: ParseBox) {
+		self.editor.update_state(&state);
 	}
 
 	pub fn run(app: &Application) {
@@ -96,6 +103,7 @@ impl MainWindow {
 								main_window.alertbar.show(msg.0, msg.1);
 							}
 
+							main_window.update_state(t);
 							main_window
 								.stack
 								.set_visible_child_name(StackName::Editor.as_str());
