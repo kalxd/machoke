@@ -32,7 +32,11 @@ impl EditorRow {
 
 	fn add_row_with(&self, label: &str, w: &impl IsA<Widget>) {
 		let row_layout = GtkBox::new(Orientation::Horizontal, 10);
-		let label = Label::new(Some(label));
+		let label = Label::builder()
+			.label(label)
+			.valign(gtk::Align::Start)
+			.margin_top(8)
+			.build();
 		row_layout.pack_start(&label, false, false, 0);
 		self.size_group.add_widget(&label);
 
