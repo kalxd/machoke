@@ -70,17 +70,17 @@ impl Editor {
 			.spacing(10)
 			.build();
 
-		let album_layout = GtkBox::builder().spacing(10).build();
-		layout.pack_start(&album_layout, false, true, 0);
+		let cover_layout = GtkBox::builder().spacing(10).build();
+		layout.pack_start(&cover_layout, false, true, 0);
 
-		let cur_album_frame = Frame::builder().label("封面").build();
-		album_layout.pack_start(&cur_album_frame, true, true, 0);
+		let cur_cover_frame = Frame::builder().label("封面").build();
+		cover_layout.pack_start(&cur_cover_frame, true, true, 0);
 
 		let cover = cover::Cover::new();
-		cur_album_frame.set_child(Some(&cover.layout));
+		cur_cover_frame.set_child(Some(&cover.layout));
 
-		let history_alubm_frame = Frame::builder().label("历史封面").build();
-		album_layout.pack_start(&history_alubm_frame, true, true, 0);
+		let history_cover_frame = Frame::builder().label("历史封面").build();
+		cover_layout.pack_start(&history_cover_frame, true, true, 0);
 
 		let form_frame = Frame::builder().label("基础信息").build();
 		layout.pack_start(&form_frame, true, true, 10);
