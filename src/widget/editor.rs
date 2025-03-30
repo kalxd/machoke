@@ -61,6 +61,8 @@ impl EditorRow {
 pub struct Editor {
 	pub layout: GtkBox,
 
+	cover: cover::Cover,
+
 	title_line: CompletionEntry,
 	artist_line: MultiLine,
 	album_line: CompletionEntry,
@@ -75,7 +77,7 @@ impl Editor {
 			.build();
 
 		let cover_layout = GtkBox::builder().spacing(10).build();
-		layout.pack_start(&cover_layout, false, true, 0);
+		layout.pack_start(&cover_layout, true, true, 0);
 
 		let cur_cover_frame = Frame::builder().label("封面").build();
 		cover_layout.pack_start(&cur_cover_frame, true, true, 0);
@@ -87,7 +89,7 @@ impl Editor {
 		cover_layout.pack_start(&history_cover_frame, true, true, 0);
 
 		let form_frame = Frame::builder().label("基础信息").build();
-		layout.pack_start(&form_frame, true, true, 10);
+		layout.pack_start(&form_frame, false, false, 10);
 
 		let form_row = EditorRow::new();
 		form_frame.set_child(Some(&form_row.layout));
@@ -115,6 +117,9 @@ impl Editor {
 
 		Self {
 			layout,
+
+			cover,
+
 			title_line,
 			artist_line,
 			album_line,
@@ -134,5 +139,7 @@ impl Editor {
 
 		let genre = state.audio_tag.genres();
 		self.genre_line.set_text(&genre.unwrap_or_default());
+
+		self.cover.update_state(&state);
 	}
 }
