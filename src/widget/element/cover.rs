@@ -48,6 +48,8 @@ pub struct Cover {
 
 impl Cover {
 	pub fn new() -> Self {
+		let raw_image = Rc::new(RefCell::new(None));
+
 		let layout = GtkBox::builder()
 			.orientation(gtk::Orientation::Vertical)
 			.build();
@@ -66,8 +68,14 @@ impl Cover {
 
 		let remove_btn = Button::with_label("移除");
 		layout.pack_start(&remove_btn, true, true, 0);
-
-		let raw_image = Rc::new(RefCell::new(None));
+		remove_btn.connect_clicked({
+			let raw_image = raw_image.clone();
+			let image = image.clone();
+			move |_| {
+				image.set_pixbuf(None);
+				raw_image.take();
+			}
+		});
 
 		Self {
 			layout,
