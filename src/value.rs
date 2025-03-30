@@ -10,6 +10,34 @@ pub enum EventAction {
 	Close,
 }
 
+pub enum CoverMimeType {
+	Png,
+	Jpg,
+}
+
+impl CoverMimeType {
+	pub const fn as_mime_type(&self) -> &'static str {
+		match self {
+			Self::Jpg => "image/jpeg",
+			Self::Png => "image/png",
+		}
+	}
+
+	pub const fn as_str(&self) -> &'static str {
+		match self {
+			Self::Jpg => "jpeg",
+			_ => "png",
+		}
+	}
+
+	pub fn from_mime_type(lit: &str) -> Self {
+		match lit {
+			"mime/png" => Self::Png,
+			_ => Self::Jpg,
+		}
+	}
+}
+
 pub struct ParseBox {
 	pub audio_tag: id3::Tag,
 	pub audio_src: PathBuf,
@@ -37,6 +65,12 @@ impl ParseBox {
 			)),
 			Err(e) => Err(e),
 		}
+	}
+
+	pub fn front_cover(&self) -> Option<&id3::frame::Picture> {
+		self.audio_tag
+			.pictures()
+			.find(|p| p.picture_type == id3::frame::PictureType::CoverFront)
 	}
 }
 
