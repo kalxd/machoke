@@ -1,18 +1,27 @@
 use gtk::{
-	gdk_pixbuf::Pixbuf,
-	prelude::{BoxExt, ImageExt},
+	gdk_pixbuf::{Pixbuf, PixbufLoader},
+	prelude::{BoxExt, ImageExt, PixbufLoaderExt},
 	Box as GtkBox, Button, Image,
 };
 use std::{cell::RefCell, rc::Rc};
 
-use crate::value::{ParseBox, SlimImage};
+use crate::value::ParseBox;
 
 const COVER_SIZE: i32 = 128;
+
+fn picture_to_pixbuf(pic: &id3::frame::Picture) -> Option<Pixbuf> {
+	let loader = PixbufLoader::new();
+	loader.write(&pic.data).ok()?;
+	loader.close().ok()?;
+	loader
+		.pixbuf()?
+		.scale_simple(COVER_SIZE, COVER_SIZE, gtk::gdk_pixbuf::InterpType::Nearest)
+}
 
 pub struct Cover {
 	pub layout: GtkBox,
 	image: Image,
-	raw_image: Rc<RefCell<Option<SlimImage>>>,
+	raw_image: Rc<RefCell<Option<id3::frame::Picture>>>,
 }
 
 impl Cover {
@@ -45,21 +54,17 @@ impl Cover {
 		}
 	}
 
-	fn update_state_opt(&self, state: &ParseBox) -> Option<(SlimImage, Pixbuf)> {
-		let pic = state.front_cover()?;
-		let slim_image = SlimImage::from(pic);
-		let pixbuf = slim_image.to_pixbuf()?;
-		let pixbuf =
-			pixbuf.scale_simple(COVER_SIZE, COVER_SIZE, gtk::gdk_pixbuf::InterpType::Nearest)?;
-
-		Some((slim_image, pixbuf))
+	fn update_state_opt(&self, state: &ParseBox) -> Option<(id3::frame::Picture, Pixbuf)> {
+		let pic = state.front_cover()?.clone();
+		let pixbuf = picture_to_pixbuf(&pic)?;
+		Some((pic, pixbuf))
 	}
 
 	pub fn update_state(&self, state: &ParseBox) {
 		match self.update_state_opt(state) {
-			Some((slim_image, pixbuf)) => {
+			Some((pic, pixbuf)) => {
 				self.image.set_pixbuf(Some(&pixbuf));
-				self.raw_image.replace(Some(slim_image));
+				self.raw_image.replace(Some(pic));
 			}
 			None => {
 				self.image.set_pixbuf(None);

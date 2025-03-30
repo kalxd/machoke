@@ -1,9 +1,5 @@
 use futures::channel::mpsc;
-use gtk::{
-	gdk_pixbuf::{Pixbuf, PixbufLoader},
-	prelude::PixbufLoaderExt,
-	MessageType,
-};
+use gtk::MessageType;
 use std::{ops::Deref, path::PathBuf};
 
 type AlertMessageBox = (MessageType, String);
@@ -39,32 +35,6 @@ impl CoverMimeType {
 			"mime/png" => Self::Png,
 			_ => Self::Jpg,
 		}
-	}
-}
-
-pub struct SlimImage {
-	raw_data: Vec<u8>,
-	mime_type: CoverMimeType,
-}
-
-impl From<&id3::frame::Picture> for SlimImage {
-	fn from(value: &id3::frame::Picture) -> Self {
-		let raw_data = value.data.clone();
-		let mime_type = CoverMimeType::from_mime_type(&value.mime_type);
-
-		Self {
-			raw_data,
-			mime_type,
-		}
-	}
-}
-
-impl SlimImage {
-	pub fn to_pixbuf(&self) -> Option<Pixbuf> {
-		let loader = PixbufLoader::new();
-		loader.write(&self.raw_data).ok()?;
-		loader.close().ok()?;
-		loader.pixbuf()
 	}
 }
 
