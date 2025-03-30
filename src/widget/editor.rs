@@ -5,7 +5,7 @@ use gtk::{
 };
 use id3::TagLike;
 
-use crate::value::{EventAction, EventSender, ParseBox};
+use crate::value::{read_picture_from_path, EventAction, EventSender, ParseBox};
 
 use super::element::{
 	cover,
@@ -84,6 +84,14 @@ impl Editor {
 
 		let cover = cover::Cover::new();
 		cur_cover_frame.set_child(Some(&cover.layout));
+		cover.connect_cover_change({
+			let cover = cover.clone();
+			let tx = tx.clone();
+			move |path| match read_picture_from_path(path) {
+				Ok(pic) => cover.set_cover_just(pic),
+				Err(e) => tx.error(e.to_string()),
+			}
+		});
 
 		let history_cover_frame = Frame::builder().label("历史封面").build();
 		cover_layout.pack_start(&history_cover_frame, true, true, 0);

@@ -1,6 +1,8 @@
 use futures::channel::mpsc;
 use gtk::MessageType;
-use std::{ops::Deref, path::PathBuf};
+use std::fs;
+use std::ops::Deref;
+use std::path::{Path, PathBuf};
 
 type AlertMessageBox = (MessageType, String);
 
@@ -22,20 +24,25 @@ impl CoverMimeType {
 			Self::Png => "image/png",
 		}
 	}
+}
 
-	pub const fn as_str(&self) -> &'static str {
-		match self {
-			Self::Jpg => "jpeg",
-			_ => "png",
+pub fn read_picture_from_path<P: AsRef<Path>>(path: P) -> std::io::Result<id3::frame::Picture> {
+	let file_ext = {
+		if path.as_ref().extension().and_then(|s| s.to_str()) == Some("png") {
+			CoverMimeType::Png
+		} else {
+			CoverMimeType::Jpg
 		}
-	}
+	};
 
-	fn from_mime_type(lit: &str) -> Self {
-		match lit {
-			"mime/png" => Self::Png,
-			_ => Self::Jpg,
-		}
-	}
+	let content = fs::read(path)?;
+
+	Ok(id3::frame::Picture {
+		description: String::from(""),
+		data: content,
+		mime_type: file_ext.as_mime_type().to_string(),
+		picture_type: id3::frame::PictureType::CoverFront,
+	})
 }
 
 pub struct ParseBox {
