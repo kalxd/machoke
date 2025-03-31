@@ -93,10 +93,6 @@ impl EventSender {
 		self.send(EventAction::Alert((t, msg.to_string())))
 	}
 
-	pub fn warn<S: ToString>(&self, msg: S) {
-		self.alert(MessageType::Warning, msg)
-	}
-
 	pub fn error<S: ToString>(&self, msg: S) {
 		self.alert(MessageType::Error, msg)
 	}

@@ -31,12 +31,6 @@ impl CompletionStore {
 			self.0.set_value(&iter, 0, &Value::from(text));
 		}
 	}
-
-	pub(super) fn set_text_list(&self, text_list: &[&str]) {
-		for s in text_list {
-			self.set_text(s);
-		}
-	}
 }
 
 impl Deref for CompletionStore {

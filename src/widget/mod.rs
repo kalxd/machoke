@@ -115,7 +115,7 @@ impl MainWindow {
 					EventAction::Close => main_window
 						.stack
 						.set_visible_child_name(StackName::Placeholder.as_str()),
-					_ => {}
+					EventAction::Alert((t, msg)) => main_window.alertbar.show(t, msg),
 				};
 
 				ready(())

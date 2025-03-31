@@ -30,10 +30,6 @@ impl CompletionEntry {
 		self.entry.set_text(text);
 		self.store.set_text(text);
 	}
-
-	pub fn set_store_text(&self, text: &str) {
-		self.store.set_text(text);
-	}
 }
 
 impl Deref for CompletionEntry {
