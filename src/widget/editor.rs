@@ -7,10 +7,13 @@ use id3::TagLike;
 
 use crate::value::{read_picture_from_path, EventAction, EventSender, ParseBox, SaveBox};
 
-use super::element::{
-	cover,
-	multi_line::{CompletionEntry, MultiLine},
-	store::CompletionStore,
+use super::{
+	alertbar::PathBar,
+	element::{
+		cover,
+		multi_line::{CompletionEntry, MultiLine},
+		store::CompletionStore,
+	},
 };
 
 struct EditorRow {
@@ -61,6 +64,8 @@ impl EditorRow {
 pub struct Editor {
 	pub layout: GtkBox,
 
+	path_bar: PathBar,
+
 	cover: cover::Cover,
 	history_cover: cover::HistoryCover,
 
@@ -76,6 +81,9 @@ impl Editor {
 			.orientation(Orientation::Vertical)
 			.spacing(10)
 			.build();
+
+		let path_bar = PathBar::new();
+		layout.pack_start(&*path_bar, false, true, 0);
 
 		let cover_layout = GtkBox::builder().spacing(10).build();
 		layout.pack_start(&cover_layout, true, true, 0);
@@ -146,6 +154,8 @@ impl Editor {
 		Self {
 			layout,
 
+			path_bar,
+
 			cover,
 			history_cover,
 
@@ -157,6 +167,9 @@ impl Editor {
 	}
 
 	pub fn update_state(&self, state: &ParseBox) {
+		self.path_bar
+			.set_text(state.audio_src.to_str().unwrap_or_default());
+
 		let title = state.audio_tag.title();
 		self.title_line.set_text(title.unwrap_or_default());
 

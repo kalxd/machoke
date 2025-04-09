@@ -41,3 +41,33 @@ impl Deref for AlertBar {
 		&self.bar
 	}
 }
+
+pub struct PathBar {
+	bar: InfoBar,
+	label: Label,
+}
+
+impl PathBar {
+	pub fn new() -> Self {
+		let bar = InfoBar::builder()
+			.show_close_button(false)
+			.message_type(MessageType::Other)
+			.build();
+		let label = Label::new(Some("hehehe"));
+		bar.content_area().pack_start(&label, true, true, 0);
+
+		Self { bar, label }
+	}
+
+	pub fn set_text(&self, text: &str) {
+		self.label.set_text(text);
+	}
+}
+
+impl Deref for PathBar {
+	type Target = InfoBar;
+
+	fn deref(&self) -> &Self::Target {
+		&self.bar
+	}
+}
