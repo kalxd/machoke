@@ -25,9 +25,9 @@ impl CompletionStore {
 		}
 
 		let is_contains = (0..self.0.iter_n_children(None))
-			.map(|i| self.0.iter_nth_child(None, i))
-			.map(|miter| miter.and_then(|iter| self.0.value(&iter, 0).get::<'_, String>().ok()))
-			.any(|ma| ma.as_deref() == Some(text));
+			.filter_map(|i| self.0.iter_nth_child(None, i))
+			.filter_map(|iter| self.0.value(&iter, 0).get::<'_, String>().ok())
+			.any(|s| s == text);
 
 		if !is_contains {
 			let iter = self.0.append();
