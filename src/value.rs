@@ -1,7 +1,9 @@
 use futures::channel::mpsc;
 use gtk::gdk_pixbuf::{Pixbuf, PixbufLoader};
+use gtk::glib::GString;
 use gtk::prelude::PixbufLoaderExt;
 use gtk::MessageType;
+use id3::TagLike;
 use std::fs;
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
@@ -12,6 +14,7 @@ pub enum EventAction {
 	OpenAudio(PathBuf),
 	Alert(AlertMessageBox),
 	Close,
+	Save,
 }
 
 pub enum CoverMimeType {
@@ -57,6 +60,14 @@ pub fn scale_picture(pic: &id3::frame::Picture, size: i32) -> Option<(Pixbuf, Pi
 	Some((raw_pixbuf, scale_pixbuf))
 }
 
+pub struct SaveBox {
+	pub title: GString,
+	pub artist: Vec<GString>,
+	pub album: GString,
+	pub genre: Vec<GString>,
+	pub picture: Option<id3::frame::Picture>,
+}
+
 pub struct ParseBox {
 	pub audio_tag: id3::Tag,
 	pub audio_src: PathBuf,
@@ -90,6 +101,30 @@ impl ParseBox {
 		self.audio_tag
 			.pictures()
 			.find(|p| p.picture_type == id3::frame::PictureType::CoverFront)
+	}
+
+	pub fn save(&mut self, state: SaveBox) -> id3::Result<()> {
+		if let Some(pic) = state.picture.as_ref() {
+			self.audio_tag.add_frame(pic.clone());
+		} else {
+			self.audio_tag
+				.remove_picture_by_type(id3::frame::PictureType::CoverFront);
+		}
+
+		self.audio_tag.set_title(state.title);
+		{
+			let c = id3::Content::new_text_values(state.artist);
+			self.audio_tag.set_artist(c.text().unwrap_or_default());
+		}
+
+		self.audio_tag.set_album(state.album);
+		{
+			let c = id3::Content::new_text_values(state.genre);
+			self.audio_tag.set_genre(c.text().unwrap_or_default());
+		}
+
+		let v = self.audio_tag.version();
+		self.audio_tag.write_to_path(&self.audio_src, v)
 	}
 }
 

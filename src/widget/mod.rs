@@ -1,3 +1,5 @@
+use std::cell::RefCell;
+
 use futures::{future::ready, StreamExt};
 use gtk::{
 	glib,
@@ -33,10 +35,14 @@ pub struct MainWindow {
 	stack: Stack,
 
 	editor: editor::Editor,
+
+	state: RefCell<Option<ParseBox>>,
 }
 
 impl MainWindow {
 	fn new(app: &Application, tx: EventSender) -> Self {
+		let state = RefCell::new(None);
+
 		let window = ApplicationWindow::builder()
 			.application(app)
 			.default_height(600)
@@ -72,6 +78,8 @@ impl MainWindow {
 		});
 
 		Self {
+			state,
+
 			window,
 			alertbar,
 			stack,
@@ -84,14 +92,14 @@ impl MainWindow {
 		self.alertbar.hide();
 	}
 
-	fn update_state(&self, state: ParseBox) {
+	fn update_state(&self, state: &ParseBox) {
 		self.editor.update_state(&state);
 	}
 
 	pub fn run(app: &Application) {
 		let (tx, rx) = value::channel();
 
-		let main_window = Self::new(app, tx);
+		let mut main_window = Self::new(app, tx);
 		main_window.show_all();
 
 		glib::MainContext::default().spawn_local(async move {
@@ -103,10 +111,11 @@ impl MainWindow {
 								main_window.alertbar.show(msg.0, msg.1);
 							}
 
-							main_window.update_state(t);
+							main_window.update_state(&t);
 							main_window
 								.stack
 								.set_visible_child_name(StackName::Editor.as_str());
+							main_window.state.replace(Some(t));
 						}
 						Err(e) => main_window
 							.alertbar
@@ -116,6 +125,19 @@ impl MainWindow {
 						.stack
 						.set_visible_child_name(StackName::Placeholder.as_str()),
 					EventAction::Alert((t, msg)) => main_window.alertbar.show(t, msg),
+					EventAction::Save => {
+						if let Some(state) = main_window.state.get_mut() {
+							let save_box = main_window.editor.get_state();
+							match state.save(save_box) {
+								Ok(_) => main_window
+									.alertbar
+									.show(gtk::MessageType::Info, "保存成功！"),
+								Err(e) => main_window
+									.alertbar
+									.show(gtk::MessageType::Error, e.to_string()),
+							}
+						}
+					}
 				};
 
 				ready(())

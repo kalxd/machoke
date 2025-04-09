@@ -4,7 +4,12 @@ use gtk::{
 	Box as GtkBox, Button, FileChooserDialog, FileFilter, IconView, Image, ResponseType,
 	ScrolledWindow,
 };
-use std::{cell::RefCell, ops::Deref, path::PathBuf, rc::Rc};
+use std::{
+	cell::{Ref, RefCell},
+	ops::Deref,
+	path::PathBuf,
+	rc::Rc,
+};
 
 use crate::value::{scale_picture, CoverMimeType, ParseBox};
 
@@ -103,6 +108,10 @@ impl Cover {
 				self.raw_image.take();
 			}
 		}
+	}
+
+	pub fn cover(&self) -> Option<id3::frame::Picture> {
+		self.raw_image.borrow().as_ref().cloned()
 	}
 
 	pub fn connect_cover_change<F>(&self, f: F)

@@ -1,5 +1,6 @@
 use super::store::CompletionStore;
 use gtk::{
+	glib::GString,
 	prelude::{BoxExt, ButtonExt, ContainerExt, EntryCompletionExt, EntryExt, WidgetExt},
 	Box as GtkBox, Button, Entry, EntryCompletion, Image,
 };
@@ -165,5 +166,17 @@ impl MultiLine {
 		} else {
 			self.add_entry.set_text("");
 		}
+	}
+
+	pub fn text(&self) -> Vec<GString> {
+		let entry_list = self.entry_list.borrow();
+		let mut iter = vec![self.add_entry.text()];
+		let line_iter = entry_list.iter().map(|row| row.entry.text());
+
+		iter.extend(line_iter);
+
+		iter.into_iter()
+			.filter_map(|s| if s.trim().is_empty() { None } else { Some(s) })
+			.collect()
 	}
 }

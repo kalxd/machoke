@@ -1,11 +1,11 @@
 use gtk::{
 	glib::IsA,
-	prelude::{BoxExt, ButtonExt, ContainerExt, SizeGroupExt},
+	prelude::{BoxExt, ButtonExt, ContainerExt, EntryExt, SizeGroupExt},
 	Box as GtkBox, Button, ButtonBox, Frame, Label, Orientation, SizeGroup, Widget,
 };
 use id3::TagLike;
 
-use crate::value::{read_picture_from_path, EventAction, EventSender, ParseBox};
+use crate::value::{read_picture_from_path, EventAction, EventSender, ParseBox, SaveBox};
 
 use super::element::{
 	cover,
@@ -126,6 +126,10 @@ impl Editor {
 
 		let save_btn = Button::with_label("保存");
 		btn_box.add(&save_btn);
+		save_btn.connect_clicked({
+			let tx = tx.clone();
+			move |_| tx.send(EventAction::Save)
+		});
 
 		Self {
 			layout,
@@ -155,5 +159,21 @@ impl Editor {
 
 		self.cover.update_state(&state);
 		self.history_cover.update_state(&state);
+	}
+
+	pub fn get_state(&self) -> SaveBox {
+		let title = self.title_line.text();
+		let artist = self.artist_line.text();
+		let album = self.album_line.text();
+		let genre = self.genre_line.text();
+		let picture = self.cover.cover();
+
+		SaveBox {
+			title,
+			artist,
+			album,
+			genre,
+			picture,
+		}
 	}
 }
