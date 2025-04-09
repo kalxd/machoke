@@ -1,4 +1,6 @@
 use futures::channel::mpsc;
+use gtk::gdk_pixbuf::{Pixbuf, PixbufLoader};
+use gtk::prelude::PixbufLoaderExt;
 use gtk::MessageType;
 use std::fs;
 use std::ops::Deref;
@@ -43,6 +45,16 @@ pub fn read_picture_from_path<P: AsRef<Path>>(path: P) -> std::io::Result<id3::f
 		mime_type: file_ext.as_mime_type().to_string(),
 		picture_type: id3::frame::PictureType::CoverFront,
 	})
+}
+
+pub fn scale_picture(pic: &id3::frame::Picture, size: i32) -> Option<(Pixbuf, Pixbuf)> {
+	let loader = PixbufLoader::new();
+	loader.write(&pic.data).ok()?;
+	loader.close().ok()?;
+	let raw_pixbuf = loader.pixbuf()?;
+	let scale_pixbuf = raw_pixbuf.scale_simple(size, size, gtk::gdk_pixbuf::InterpType::Nearest)?;
+
+	Some((raw_pixbuf, scale_pixbuf))
 }
 
 pub struct ParseBox {

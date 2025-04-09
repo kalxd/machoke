@@ -1,22 +1,16 @@
 use gtk::{
-	gdk_pixbuf::{Pixbuf, PixbufLoader},
-	prelude::{BoxExt, ButtonExt, DialogExt, FileChooserExt, ImageExt, PixbufLoaderExt},
-	Box as GtkBox, Button, FileChooserDialog, FileFilter, Image, ResponseType,
+	gdk_pixbuf::Pixbuf,
+	prelude::{BoxExt, ButtonExt, ContainerExt, DialogExt, FileChooserExt, ImageExt},
+	Box as GtkBox, Button, FileChooserDialog, FileFilter, IconView, Image, ResponseType,
+	ScrolledWindow,
 };
-use std::{cell::RefCell, path::PathBuf, rc::Rc};
+use std::{cell::RefCell, ops::Deref, path::PathBuf, rc::Rc};
 
-use crate::value::{CoverMimeType, ParseBox};
+use crate::value::{scale_picture, CoverMimeType, ParseBox};
+
+use super::store::HistoryStore;
 
 const COVER_SIZE: i32 = 256;
-
-fn picture_to_pixbuf(pic: &id3::frame::Picture) -> Option<Pixbuf> {
-	let loader = PixbufLoader::new();
-	loader.write(&pic.data).ok()?;
-	loader.close().ok()?;
-	loader
-		.pixbuf()?
-		.scale_simple(COVER_SIZE, COVER_SIZE, gtk::gdk_pixbuf::InterpType::Nearest)
-}
 
 fn open_cover_chooser_dialog() -> Option<PathBuf> {
 	let filter = FileFilter::new();
@@ -87,12 +81,12 @@ impl Cover {
 
 	fn update_state_opt(&self, state: &ParseBox) -> Option<(id3::frame::Picture, Pixbuf)> {
 		let pic = state.front_cover()?.clone();
-		let pixbuf = picture_to_pixbuf(&pic)?;
+		let (_, pixbuf) = scale_picture(&pic, COVER_SIZE)?;
 		Some((pic, pixbuf))
 	}
 
 	pub fn set_cover_just(&self, pic: id3::frame::Picture) {
-		if let Some(pixbuf) = picture_to_pixbuf(&pic) {
+		if let Some((_, pixbuf)) = scale_picture(&pic, COVER_SIZE) {
 			self.image.set_pixbuf(Some(&pixbuf));
 			self.raw_image.replace(Some(pic));
 		}
@@ -120,5 +114,46 @@ impl Cover {
 				f(path);
 			}
 		});
+	}
+}
+
+pub struct HistoryCover {
+	pub layout: ScrolledWindow,
+	store: HistoryStore,
+	icon_view: IconView,
+}
+
+impl HistoryCover {
+	pub fn new() -> Self {
+		let store = HistoryStore::new();
+
+		let layout = ScrolledWindow::builder().build();
+
+		let icon_view = IconView::builder()
+			.model(&*store)
+			.pixbuf_column(1)
+			.selection_mode(gtk::SelectionMode::Single)
+			.build();
+		layout.add(&icon_view);
+
+		Self {
+			layout,
+			store,
+			icon_view,
+		}
+	}
+
+	pub fn update_state(&self, state: &ParseBox) {
+		if let Some((pic, path)) = state.front_cover().zip(state.audio_src.to_str()) {
+			self.store.add_item(path, pic);
+		}
+	}
+}
+
+impl Deref for HistoryCover {
+	type Target = IconView;
+
+	fn deref(&self) -> &Self::Target {
+		&self.icon_view
 	}
 }

@@ -62,6 +62,7 @@ pub struct Editor {
 	pub layout: GtkBox,
 
 	cover: cover::Cover,
+	history_cover: cover::HistoryCover,
 
 	title_line: CompletionEntry,
 	artist_line: MultiLine,
@@ -96,6 +97,9 @@ impl Editor {
 		let history_cover_frame = Frame::builder().label("历史封面").build();
 		cover_layout.pack_start(&history_cover_frame, true, true, 0);
 
+		let history_cover = cover::HistoryCover::new();
+		history_cover_frame.add(&history_cover.layout);
+
 		let form_frame = Frame::builder().label("基础信息").build();
 		layout.pack_start(&form_frame, false, false, 10);
 
@@ -127,6 +131,7 @@ impl Editor {
 			layout,
 
 			cover,
+			history_cover,
 
 			title_line,
 			artist_line,
@@ -149,5 +154,6 @@ impl Editor {
 		self.genre_line.set_text(&genre.unwrap_or_default());
 
 		self.cover.update_state(&state);
+		self.history_cover.update_state(&state);
 	}
 }
