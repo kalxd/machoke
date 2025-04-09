@@ -1,15 +1,13 @@
 use gtk::{
 	gdk_pixbuf::Pixbuf,
-	prelude::{BoxExt, ButtonExt, ContainerExt, DialogExt, FileChooserExt, ImageExt},
+	prelude::{
+		BoxExt, ButtonExt, ContainerExt, DialogExt, FileChooserExt, IconViewExt, ImageExt,
+		TreeModelExt,
+	},
 	Box as GtkBox, Button, FileChooserDialog, FileFilter, IconView, Image, ResponseType,
 	ScrolledWindow,
 };
-use std::{
-	cell::{Ref, RefCell},
-	ops::Deref,
-	path::PathBuf,
-	rc::Rc,
-};
+use std::{cell::RefCell, ops::Deref, path::PathBuf, rc::Rc};
 
 use crate::value::{scale_picture, CoverMimeType, ParseBox};
 
@@ -126,6 +124,24 @@ impl Cover {
 	}
 }
 
+fn icon_view_selection(view: &IconView, store: &HistoryStore) -> Option<id3::frame::Picture> {
+	let sel_item = view.selected_items();
+	let sel_iter = store.iter(sel_item.first()?)?;
+
+	let pixbuf: Pixbuf = store.value(&sel_iter, 2).get().ok()?;
+	let mime_type: String = store.value(&sel_iter, 3).get().ok()?;
+	let mime_type = CoverMimeType::from_mime_type(&mime_type);
+	Some(id3::frame::Picture {
+		data: pixbuf
+			.save_to_bufferv(&mime_type.as_extension(), &[])
+			.ok()?,
+		description: String::from(""),
+		mime_type: mime_type.as_mime_type().to_string(),
+		picture_type: id3::frame::PictureType::CoverFront,
+	})
+}
+
+#[derive(Clone)]
 pub struct HistoryCover {
 	pub layout: ScrolledWindow,
 	store: HistoryStore,
@@ -156,6 +172,26 @@ impl HistoryCover {
 		if let Some((pic, path)) = state.front_cover().zip(state.audio_src.to_str()) {
 			self.store.add_item(path, pic);
 		}
+	}
+
+	pub fn set_cover_just(&self, path: &PathBuf, pic: &id3::frame::Picture) {
+		if let Some(key) = path.to_str() {
+			self.store.add_item(key, pic);
+		}
+	}
+
+	pub fn connect_select<F>(&self, f: F)
+	where
+		F: Fn(id3::frame::Picture) + 'static,
+	{
+		self.icon_view.connect_selection_changed({
+			let store = self.store.clone();
+			move |view| {
+				if let Some(pic) = icon_view_selection(view, &store) {
+					f(pic)
+				}
+			}
+		});
 	}
 }
 

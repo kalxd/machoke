@@ -6,7 +6,7 @@ use gtk::{
 };
 use std::ops::Deref;
 
-use crate::value::{scale_picture, CoverMimeType};
+use crate::value::scale_picture;
 
 #[derive(Clone)]
 pub struct CompletionStore(ListStore);
@@ -44,6 +44,7 @@ impl Deref for CompletionStore {
 	}
 }
 
+#[derive(Clone)]
 pub struct HistoryStore(ListStore);
 
 impl HistoryStore {

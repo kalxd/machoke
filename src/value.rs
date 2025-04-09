@@ -29,6 +29,20 @@ impl CoverMimeType {
 			Self::Png => "image/png",
 		}
 	}
+
+	pub const fn as_extension(&self) -> &'static str {
+		match self {
+			Self::Jpg => "jpg",
+			Self::Png => "png",
+		}
+	}
+
+	pub fn from_mime_type(t: &str) -> Self {
+		match t {
+			"image/jpeg" | "image/jpg" => Self::Jpg,
+			_ => Self::Png,
+		}
+	}
 }
 
 pub fn read_picture_from_path<P: AsRef<Path>>(path: P) -> std::io::Result<id3::frame::Picture> {

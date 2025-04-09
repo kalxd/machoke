@@ -85,20 +85,32 @@ impl Editor {
 
 		let cover = cover::Cover::new();
 		cur_cover_frame.set_child(Some(&cover.layout));
-		cover.connect_cover_change({
-			let cover = cover.clone();
-			let tx = tx.clone();
-			move |path| match read_picture_from_path(path) {
-				Ok(pic) => cover.set_cover_just(pic),
-				Err(e) => tx.error(e.to_string()),
-			}
-		});
 
 		let history_cover_frame = Frame::builder().label("历史封面").build();
 		cover_layout.pack_start(&history_cover_frame, true, true, 0);
 
 		let history_cover = cover::HistoryCover::new();
 		history_cover_frame.add(&history_cover.layout);
+
+		{
+			history_cover.connect_select({
+				let cover = cover.clone();
+				move |pic| cover.set_cover_just(pic)
+			});
+
+			cover.connect_cover_change({
+				let cover = cover.clone();
+				let history_cover = history_cover.clone();
+				let tx = tx.clone();
+				move |path| match read_picture_from_path(&path) {
+					Ok(pic) => {
+						history_cover.set_cover_just(&path, &pic);
+						cover.set_cover_just(pic);
+					}
+					Err(e) => tx.error(e.to_string()),
+				}
+			});
+		}
 
 		let form_frame = Frame::builder().label("基础信息").build();
 		layout.pack_start(&form_frame, false, false, 10);
