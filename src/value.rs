@@ -119,7 +119,6 @@ impl ParseBox {
 	}
 
 	pub fn save(&mut self, state: SaveBox) -> id3::Result<()> {
-		dbg!(&state);
 		if let Some(pic) = state.picture.as_ref() {
 			self.audio_tag.add_frame(pic.clone());
 		} else {
