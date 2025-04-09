@@ -2,9 +2,10 @@ use std::cell::RefCell;
 
 use futures::{future::ready, StreamExt};
 use gtk::{
+	gdk::DragAction,
 	glib,
-	prelude::{BoxExt, ContainerExt, GtkWindowExt, StackExt, WidgetExt},
-	Application, ApplicationWindow, Box as GtkBox, Stack,
+	prelude::{BoxExt, ContainerExt, GtkWindowExt, StackExt, WidgetExt, WidgetExtManual},
+	Application, ApplicationWindow, Box as GtkBox, DestDefaults, Stack, TargetEntry, TargetFlags,
 };
 
 mod alertbar;
@@ -13,7 +14,7 @@ mod element;
 mod placeholder;
 mod titlebar;
 
-use crate::value::{self, EventAction, EventSender, ParseBox};
+use crate::value::{self, get_drag_drop_filepath, EventAction, EventSender, ParseBox};
 
 enum StackName {
 	Placeholder,
@@ -76,6 +77,18 @@ impl MainWindow {
 			let tx = tx.clone();
 			move |p| tx.send(EventAction::OpenAudio(p))
 		});
+
+		{
+			let target = [TargetEntry::new("text/uri-list", TargetFlags::OTHER_APP, 0)];
+			window.drag_dest_set(DestDefaults::ALL, &target, DragAction::COPY);
+			window.connect_drag_data_received({
+				let tx = tx.clone();
+				move |_, _, _, _, data, _, _| match get_drag_drop_filepath(data) {
+					Some(p) => tx.send(EventAction::OpenAudio(p)),
+					None => tx.error(String::from("不支持该文件类型！")),
+				}
+			});
+		}
 
 		Self {
 			state,

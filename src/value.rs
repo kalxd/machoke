@@ -1,8 +1,8 @@
 use futures::channel::mpsc;
 use gtk::gdk_pixbuf::{Pixbuf, PixbufLoader};
-use gtk::glib::GString;
+use gtk::glib::{uri_unescape_string, GString};
 use gtk::prelude::PixbufLoaderExt;
-use gtk::MessageType;
+use gtk::{MessageType, SelectionData};
 use id3::TagLike;
 use std::fs;
 use std::ops::Deref;
@@ -74,6 +74,7 @@ pub fn scale_picture(pic: &id3::frame::Picture, size: i32) -> Option<(Pixbuf, Pi
 	Some((raw_pixbuf, scale_pixbuf))
 }
 
+#[derive(Debug)]
 pub struct SaveBox {
 	pub title: GString,
 	pub artist: Vec<GString>,
@@ -118,6 +119,7 @@ impl ParseBox {
 	}
 
 	pub fn save(&mut self, state: SaveBox) -> id3::Result<()> {
+		dbg!(&state);
 		if let Some(pic) = state.picture.as_ref() {
 			self.audio_tag.add_frame(pic.clone());
 		} else {
@@ -170,4 +172,16 @@ impl Deref for EventSender {
 pub fn channel() -> (EventSender, mpsc::Receiver<EventAction>) {
 	let (a, b) = mpsc::channel(10);
 	(EventSender(a), b)
+}
+
+pub fn get_drag_drop_filepath(sel: &SelectionData) -> Option<PathBuf> {
+	let uris = sel.uris();
+	let file = uris.first()?;
+	let path = uri_unescape_string(file, None::<&str>)?;
+	let path = Path::new(path.as_str().strip_prefix("file://")?);
+	if path.exists() && path.extension()? == "mp3" {
+		Some(path.into())
+	} else {
+		None
+	}
 }
