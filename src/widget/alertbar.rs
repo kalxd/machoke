@@ -53,7 +53,7 @@ impl PathBar {
 			.show_close_button(false)
 			.message_type(MessageType::Other)
 			.build();
-		let label = Label::new(Some("hehehe"));
+		let label = Label::new(None);
 		bar.content_area().pack_start(&label, true, true, 0);
 
 		Self { bar, label }
