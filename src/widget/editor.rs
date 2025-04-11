@@ -84,6 +84,9 @@ impl Editor {
 
 		let path_bar = PathBar::new();
 		layout.pack_start(&*path_bar, false, true, 0);
+		path_bar.connect_apply(|a| {
+			dbg!(a);
+		});
 
 		let cover_layout = GtkBox::builder().spacing(10).build();
 		layout.pack_start(&cover_layout, true, true, 0);
