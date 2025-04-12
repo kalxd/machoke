@@ -63,7 +63,7 @@ fn parse_audio_info<'a, P: AsRef<Path> + ?Sized + 'a>(path: &'a P) -> ParseAudio
 		let title: Option<&str> = if let Some((left, right)) = left_title.zip(right_title) {
 			Some(&filename[left + LEFT_LEN..right])
 		} else {
-			None
+			Some(&filename)
 		};
 
 		let author: Option<&str> = if let Some(right) = right_title {
@@ -148,7 +148,7 @@ mod tests {
 	#[test]
 	fn test_normal_path() {
 		let a = parse_audio_info("/a/b");
-		assert_eq!(None, a.title);
+		assert_eq!(Some("b"), a.title);
 		assert_eq!(None, a.author);
 
 		let a = parse_audio_info("/a/a《今》");
