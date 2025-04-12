@@ -42,48 +42,40 @@ impl Deref for AlertBar {
 	}
 }
 
-struct ParseAudioInfo {
-	title: Option<String>,
-	author: Option<String>,
+struct ParseAudioInfo<'a> {
+	title: Option<&'a str>,
+	author: Option<&'a str>,
 }
 
-fn parse_audio_info<'a, P: AsRef<Path> + ?Sized + 'a>(path: &'a P) -> ParseAudioInfo {
+fn parse_audio_info<'a, P: AsRef<Path> + ?Sized + 'a>(path: &'a P) -> ParseAudioInfo<'a> {
 	if let Some(filename) = path.as_ref().file_name().and_then(|s| s.to_str()) {
-		let mut cs = filename.chars();
+		let mut cs = filename.char_indices();
 
-		let left_title = cs.position(|c| c == '《');
-		let right_title = cs
-			.position(|c| c == '》')
-			.zip(left_title)
-			.map(|(right, left)| right + left + 1);
-		let dot = cs
-			.position(|c| c == '.')
-			.zip(right_title)
-			.map(|(dot, right)| dot + right + 1);
+		const LEFT_P: char = '《';
+		const LEFT_LEN: usize = LEFT_P.len_utf8();
+		const RIGHT_P: char = '》';
+		const RIGHT_LEN: usize = RIGHT_P.len_utf8();
 
-		let title: Option<String> = if let Some((left, right)) = left_title.zip(right_title) {
-			Some(
-				filename
-					.chars()
-					.skip(left + 1)
-					.take(right - left - 1)
-					.collect(),
-			)
-			.filter(|s: &String| !s.is_empty())
+		let left_title = cs.find(|(_, c)| *c == LEFT_P).map(|(i, _)| i);
+		let right_title = cs.find(|(_, c)| *c == RIGHT_P).map(|(i, _)| i);
+		let dot = cs.find(|(_, c)| *c == '.').map(|(i, _)| i);
+
+		let title: Option<&str> = if let Some((left, right)) = left_title.zip(right_title) {
+			Some(&filename[left + LEFT_LEN..right])
 		} else {
 			None
 		};
 
-		let author: Option<String> = if let Some(right) = right_title {
-			let xs: String = {
-				let xs = filename.chars().skip(right + 1);
+		let author: Option<&str> = if let Some(right) = right_title {
+			let xs = {
 				if let Some(dot) = dot {
-					xs.take(dot - right - 1).collect()
+					&filename[right + RIGHT_LEN..dot]
 				} else {
-					xs.collect()
+					&filename[right + RIGHT_LEN..]
 				}
 			};
-			Some(xs).filter(|s: &String| !s.is_empty())
+
+			Some(xs).filter(|s| !s.is_empty())
 		} else {
 			None
 		};
@@ -160,11 +152,11 @@ mod tests {
 		assert_eq!(None, a.author);
 
 		let a = parse_audio_info("/a/a《今》");
-		assert_eq!(Some(String::from("今")), a.title);
+		assert_eq!(Some("今"), a.title);
 		assert_eq!(None, a.author);
 
 		let a = parse_audio_info("/a/从今《不一足》今天下.mp3");
-		assert_eq!(Some(String::from("不一足")), a.title);
-		assert_eq!(Some(String::from("今天下")), a.author);
+		assert_eq!(Some("不一足"), a.title);
+		assert_eq!(Some("今天下"), a.author);
 	}
 }
