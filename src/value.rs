@@ -32,7 +32,7 @@ impl CoverMimeType {
 
 	pub const fn as_extension(&self) -> &'static str {
 		match self {
-			Self::Jpg => "jpg",
+			Self::Jpg => "jpeg",
 			Self::Png => "png",
 		}
 	}
