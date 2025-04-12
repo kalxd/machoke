@@ -84,10 +84,6 @@ impl Editor {
 
 		let path_bar = PathBar::new();
 		layout.pack_start(&*path_bar, false, true, 0);
-		path_bar.connect_apply(|a| {
-			dbg!(a);
-		});
-
 		let cover_layout = GtkBox::builder().spacing(10).build();
 		layout.pack_start(&cover_layout, true, true, 0);
 
@@ -133,6 +129,20 @@ impl Editor {
 		let artist_line = form_row.add_multi_row("艺术家");
 		let album_line = form_row.add_row("专辑");
 		let genre_line = form_row.add_multi_row("流派");
+
+		path_bar.connect_apply({
+			let title_line = title_line.clone();
+			let artist_line = artist_line.clone();
+			move |(title, artist)| {
+				if let Some(title) = title {
+					title_line.set_text(&title);
+				}
+
+				if let Some(artist) = artist {
+					artist_line.set_text(&[artist]);
+				}
+			}
+		});
 
 		let btn_box = ButtonBox::builder()
 			.layout_style(gtk::ButtonBoxStyle::End)
