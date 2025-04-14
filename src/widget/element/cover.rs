@@ -61,10 +61,10 @@ impl Cover {
 		layout.pack_start(&btn_layout, false, false, 0);
 
 		let change_btn = Button::with_label("更换");
-		layout.pack_start(&change_btn, true, true, 0);
+		layout.pack_start(&change_btn, false, true, 0);
 
 		let remove_btn = Button::with_label("移除");
-		layout.pack_start(&remove_btn, true, true, 0);
+		layout.pack_start(&remove_btn, false, true, 0);
 		remove_btn.connect_clicked({
 			let raw_image = raw_image.clone();
 			let image = image.clone();
