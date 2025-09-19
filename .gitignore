@@ -1,7 +1,4 @@
-/node_modules/
-/webextension/dist
-/.log/
-
-# Added by cargo
-
+/.cache
+/build
 /target
+/compile_commands.json
