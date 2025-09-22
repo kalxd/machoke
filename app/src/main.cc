@@ -5,12 +5,15 @@
 int main(int argc, char *argv[]) {
 	QApplication app(argc, argv);
 
-	QMainWindow w;
+    XGApp::MainWindow w;
+    w.show();
 
-	MainWindow::setupUi(w);
+	// QMainWindow w;
 
-	w.resize(600, 400);
-	w.show();
+	// MainWindow::setupUi(w);
+
+	// w.resize(600, 400);
+	// w.show();
 
 	app.exec();
 }
