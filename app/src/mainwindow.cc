@@ -1,7 +1,10 @@
-#include "mainwindow.h"
+#include <QMainWindow>
+#include <QLayout>
+#include <QPushButton>
 
-namespace XGApp {
-	MainWindow::MainWindow(QWidget *parent)
-	: QMainWindow(parent) {
-    }
+namespace MainWindow {
+	void setupUi(QMainWindow &w) {
+		auto button = new QPushButton("click");
+		w.setCentralWidget(button);
+	}
 }
