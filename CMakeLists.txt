@@ -9,4 +9,5 @@ find_package(Qt6 6.5 COMPONENTS Widgets REQUIRED)
 
 qt_standard_project_setup(REQUIRES 6.5)
 
+add_subdirectory(xglib)
 add_subdirectory(app)

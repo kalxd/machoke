@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include <QMainWindow>
 #include <QToolBar>
-#include <QDebug>
+#include "lib.rs.h"
 
 namespace XGApp {
 	MainWindow::MainWindow() {
@@ -18,6 +18,6 @@ namespace XGApp {
 
         auto openAction = new QAction("打开文件");
         toolbar->addAction(openAction);
-        connect(openAction, &QAction::triggered, this, [](){ qDebug() << "yes"; });
+        connect(openAction, &QAction::triggered, this, [](){ XGLib::sayHello(); });
     }
 }
