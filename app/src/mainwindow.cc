@@ -2,10 +2,13 @@
 #include <QMainWindow>
 #include <QToolBar>
 #include "lib.rs.h"
+#include "mainframe.h"
 
 namespace XGApp {
 	MainWindow::MainWindow() {
-		this->setup();
+        this->setup();
+        auto mainWidget = new XGApp::MainFrame;
+        this->setCentralWidget(mainWidget->widget);
         this->resize(600, 400);
 	}
 
