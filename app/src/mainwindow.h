@@ -2,18 +2,16 @@
 #define _XG_MAINWINDOW_
 
 #include <QMainWindow>
-#include <qmainwindow.h>
 
 namespace XGApp {
-	class MainWindow {
+	class MainWindow : public QMainWindow {
+		Q_OBJECT
     public:
 		MainWindow();
         ~MainWindow();
 
-        void show();
-
     private:
-        QMainWindow w;
+        void setup();
 	};
 }
 

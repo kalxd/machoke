@@ -1,14 +1,23 @@
 #include "mainwindow.h"
 #include <QMainWindow>
+#include <QToolBar>
+#include <QDebug>
 
 namespace XGApp {
 	MainWindow::MainWindow() {
-		this->w.resize(600, 400);
+		this->setup();
+        this->resize(600, 400);
 	}
 
-    MainWindow::~MainWindow() { }
+    MainWindow::~MainWindow() {}
 
-    void MainWindow::show() {
-		this->w.show();
+    void MainWindow::setup() {
+		auto toolbar = this->addToolBar("default");
+        toolbar->setFloatable(false);
+        toolbar->setMovable(false);
+
+        auto openAction = new QAction("打开文件");
+        toolbar->addAction(openAction);
+        connect(openAction, &QAction::triggered, this, [](){ qDebug() << "yes"; });
     }
 }
