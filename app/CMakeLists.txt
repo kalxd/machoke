@@ -9,7 +9,7 @@ qt_add_executable(
 if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
   target_link_libraries(machoke
 	PRIVATE Qt6::Widgets
-	${CMAKE_SOURCE_DIR}/xglib/target/release/libxglib.a
+	PRIVATE ${CMAKE_SOURCE_DIR}/xglib/target/release/libxglib.a
   )
 else ()
   message(${CMAKE_SOURCE_DIR}/xglib/target/debug/libxglib.a)
