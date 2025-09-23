@@ -21,6 +21,6 @@ namespace XGApp {
 
         auto openAction = new QAction("打开文件");
         toolbar->addAction(openAction);
-        connect(openAction, &QAction::triggered, this, [](){ XGLib::sayHello(); });
+        connect(openAction, &QAction::triggered, this, [](){ XGLib::readAudioFile("./map.mp3"); });
     }
 }
