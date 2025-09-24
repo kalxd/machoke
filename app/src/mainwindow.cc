@@ -3,7 +3,6 @@
 #include <QToolBar>
 #include "lib.rs.h"
 #include "mainframe.h"
-#include <QDebug>
 #include <QFileDialog>
 
 namespace XGApp {
@@ -36,9 +35,6 @@ namespace XGApp {
         }
 
         auto media = XGLib::readAudioFile(selectFile.toStdString());
-        auto p = media.into_raw();
-        qDebug() << p;
-        delete p;
-		qDebug() << selectFile;
+        this->media = std::move(media);
     }
 }
