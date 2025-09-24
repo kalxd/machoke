@@ -8,12 +8,5 @@ int main(int argc, char *argv[]) {
     XGApp::MainWindow w;
     w.show();
 
-	// QMainWindow w;
-
-	// MainWindow::setupUi(w);
-
-	// w.resize(600, 400);
-	// w.show();
-
 	app.exec();
 }

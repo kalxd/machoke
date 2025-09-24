@@ -13,10 +13,10 @@ pub mod ffi {
 	}
 }
 
-pub struct Media(Tag);
+struct Media(Tag);
 
 fn read_audio_file(filepath: &str) -> Result<Box<Media>> {
-	println!("fuck");
+	println!("fuck!!!!");
 	let tag = Tag::read_from_path(filepath)?;
 	Ok(Box::new(Media(tag)))
 }

@@ -11,7 +11,8 @@ namespace XGApp {
         ~MainWindow();
 
     private:
-        void setup();
+		void setup();
+		void pickMedia();
 	};
 }
 

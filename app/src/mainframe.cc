@@ -4,30 +4,22 @@
 #include <QStackedLayout>
 
 namespace XGApp {
-	WelcomeFrame::WelcomeFrame() {
+	WelcomeFrame::WelcomeFrame(QWidget* parent) : QWidget(parent) {
         auto layout = new QVBoxLayout;
 
         auto label = new QLabel("请选择音频文件，或者将音频文件拖入此处。");
         layout->addWidget(label, 0, Qt::AlignCenter);
 
-        this->widget->setLayout(layout);
-    }
-
-    WelcomeFrame::~WelcomeFrame() {
-		delete this->widget;
+        this->setLayout(layout);
     }
 }
 
 namespace XGApp {
-	MainFrame::MainFrame() {
+	MainFrame::MainFrame(QWidget* parent) : QWidget(parent) {
 		auto stack = new QStackedLayout;
 
         auto welcome = new XGApp::WelcomeFrame;
-        stack->addWidget(welcome->widget);
-        this->widget->setLayout(stack);
+        stack->addWidget(welcome);
+        this->setLayout(stack);
 	}
-
-    MainFrame::~MainFrame() {
-        delete this->widget;
-    }
 }
