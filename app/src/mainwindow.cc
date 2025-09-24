@@ -3,7 +3,7 @@
 #include <QToolBar>
 #include "lib.rs.h"
 #include "mainframe.h"
-#include <iostream>
+#include <QDebug>
 #include <QFileDialog>
 
 namespace XGApp {
@@ -15,8 +15,6 @@ namespace XGApp {
 	}
 
     MainWindow::~MainWindow() {
-		std::cout << this->children().size() << std::endl;
-		std::cout << "finish mainwidnow" << std::endl;
     }
 
     void MainWindow::setup() {
@@ -30,7 +28,17 @@ namespace XGApp {
     }
 
     void MainWindow::pickMedia() {
-		QFileDialog dialog(this);
-		dialog.exec();
+		auto selectFile = QFileDialog::getOpenFileName(this, "打开音频",
+                                                       QString(), "音频 (*.mp3)");
+
+		if (selectFile == nullptr) {
+			return ;
+        }
+
+        auto media = XGLib::readAudioFile(selectFile.toStdString());
+        auto p = media.into_raw();
+        qDebug() << p;
+        delete p;
+		qDebug() << selectFile;
     }
 }
