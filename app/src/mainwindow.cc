@@ -4,6 +4,10 @@
 #include "lib.rs.h"
 #include "mainframe.h"
 #include <QFileDialog>
+#include <exception>
+#include <QDebug>
+#include <QErrorMessage>
+#include <qerrormessage.h>
 
 namespace XGApp {
 	MainWindow::MainWindow() {
@@ -34,7 +38,14 @@ namespace XGApp {
 			return ;
         }
 
-        auto media = XGLib::readAudioFile(selectFile.toStdString());
-        this->media = std::move(media);
+        try {
+			auto media = XGLib::readAudioFile(selectFile.toStdString());
+            this->media = std::move(media);
+        } catch (const std::exception &e) {
+			qDebug() << e.what();
+			QErrorMessage dialog(this);
+            dialog.showMessage(e.what());
+            dialog.exec();
+        }
     }
 }

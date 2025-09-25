@@ -1,4 +1,5 @@
 #include "mainframe.h"
+#include "editor.h"
 #include <QLabel>
 #include <QLayout>
 #include <QStackedLayout>
@@ -20,6 +21,10 @@ namespace XGApp {
 
         auto welcome = new XGApp::WelcomeFrame;
         stack->addWidget(welcome);
+
+        auto editor = new XGApp::Editor;
+        stack->addWidget(editor);
+
         this->setLayout(stack);
 	}
 }
