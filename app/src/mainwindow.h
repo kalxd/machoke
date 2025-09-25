@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <optional>
 #include "lib.rs.h"
+#include "mainframe.h"
 
 namespace XGApp {
 	class MainWindow : public QMainWindow {
@@ -15,6 +16,8 @@ namespace XGApp {
     private:
 		void setup();
         void pickMedia();
+
+        XGApp::MainFrame* mainFrame;
 
         std::optional<rust::Box<XGLib::Media>> media = std::nullopt;
 	};

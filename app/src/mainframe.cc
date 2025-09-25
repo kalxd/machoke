@@ -2,7 +2,7 @@
 #include "editor.h"
 #include <QLabel>
 #include <QLayout>
-#include <QStackedLayout>
+#include <qstackedwidget.h>
 
 namespace XGApp {
 	WelcomeFrame::WelcomeFrame(QWidget* parent) : QWidget(parent) {
@@ -16,15 +16,17 @@ namespace XGApp {
 }
 
 namespace XGApp {
-	MainFrame::MainFrame(QWidget* parent) : QWidget(parent) {
-		auto stack = new QStackedLayout;
-
+	MainFrame::MainFrame(QWidget* parent) : QStackedWidget(parent) {
         auto welcome = new XGApp::WelcomeFrame;
-        stack->addWidget(welcome);
+        this->addWidget(welcome);
 
         auto editor = new XGApp::Editor;
-        stack->addWidget(editor);
+        this->addWidget(editor);
+    }
 
-        this->setLayout(stack);
-	}
+    void MainFrame::showWelcome() { this->setCurrentIndex(0); }
+
+    void MainFrame::showEditor() {
+		this->setCurrentIndex(1);
+    }
 }

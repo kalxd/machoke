@@ -5,15 +5,12 @@
 #include "mainframe.h"
 #include <QFileDialog>
 #include <exception>
-#include <QDebug>
 #include <QErrorMessage>
-#include <qerrormessage.h>
 
 namespace XGApp {
-	MainWindow::MainWindow() {
+	MainWindow::MainWindow() : mainFrame(new XGApp::MainFrame) {
         this->setup();
-        auto mainWidget = new XGApp::MainFrame;
-        this->setCentralWidget(mainWidget);
+        this->setCentralWidget(this->mainFrame);
         this->resize(600, 400);
 	}
 
@@ -42,10 +39,12 @@ namespace XGApp {
 			auto media = XGLib::readAudioFile(selectFile.toStdString());
             this->media = std::move(media);
         } catch (const std::exception &e) {
-			qDebug() << e.what();
 			QErrorMessage dialog(this);
             dialog.showMessage(e.what());
             dialog.exec();
+            return ;
         }
+
+        this->mainFrame->showEditor();
     }
 }
