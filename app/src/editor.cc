@@ -12,7 +12,7 @@ namespace XGApp {
 
         auto layout = new QFormLayout;
 
-        this->titleLine = new QLineEdit;
+        this->titleLine = new XGApp::Input;
         layout->addRow("标题", this->titleLine);
 
         widget->setLayout(layout);

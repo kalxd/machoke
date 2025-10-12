@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QLineEdit>
+#include "input.h"
 
 namespace XGApp {
 	class Editor : public QWidget {
@@ -14,7 +15,7 @@ namespace XGApp {
         QWidget* setupBasicForm();
         void setup();
 
-        QLineEdit* titleLine;
+        XGApp::Input *titleLine;
 	};
 }
 

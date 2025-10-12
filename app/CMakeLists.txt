@@ -6,6 +6,7 @@ qt_add_executable(
   src/mainframe.cc
   src/mainwindow.cc
   src/editor.cc
+  src/input.cc
   src/base.cc
 )
 
