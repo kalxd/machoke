@@ -12,7 +12,10 @@ namespace XGApp {
 		explicit Input(QWidget *parent = nullptr);
 
     private:
+        bool isWordInModel(const QString& word) const;
+        void appendToModel(const QString& word);
 		void setup();
+
         QStringListModel* model = new QStringListModel(this);
         QCompleter* completer = new QCompleter(this->model, this);
 
