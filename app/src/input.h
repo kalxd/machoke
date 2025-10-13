@@ -8,9 +8,6 @@
 namespace XGApp {
 	class Input : public QLineEdit {
 		Q_OBJECT
-    public:
-		explicit Input(QWidget *parent = nullptr);
-
     private:
         bool isWordInModel(const QString& word) const;
         void appendToModel(const QString& word);
@@ -19,7 +16,10 @@ namespace XGApp {
         QStringListModel* model = new QStringListModel(this);
         QCompleter* completer = new QCompleter(this->model, this);
 
-	};
+    public:
+		explicit Input(QWidget *parent = nullptr);
+		QString text();
+    };
 }
 
 #endif

@@ -5,7 +5,7 @@ namespace XGApp {
 
     bool Input::isWordInModel(const QString &word) const {
         auto index = this->model->index(0);
-        auto indexs = this->model->match(index, 1, word);
+        auto indexs = this->model->match(index, Qt::DisplayRole, word);
         return !indexs.empty();
     }
 
@@ -13,10 +13,18 @@ namespace XGApp {
 		if (this->isWordInModel(word)) {
 			return ;
 		}
-		auto total = this->model->rowCount();
+        auto total = this->model->rowCount();
+        if (this->model->insertRow(1)) {
+			auto index = this->model->index(total);
+			this->model->setData(index, word);
+        }
     }
 
-    void Input::setup() {
-        this->setCompleter(this->completer);
+    void Input::setup() { this->setCompleter(this->completer); }
+
+    QString Input::text() {
+		auto lineText = this->QLineEdit::text().trimmed();
+		this->appendToModel(lineText);
+		return lineText;
     }
 }
