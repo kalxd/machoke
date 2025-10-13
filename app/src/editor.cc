@@ -2,6 +2,7 @@
 #include <QBoxLayout>
 #include <QGroupBox>
 #include <QFormLayout>
+#include <QDialogButtonBox>
 
 namespace XGApp {
 	Editor::Editor(QWidget *parent) : QWidget(parent) { this->setup(); }
@@ -21,8 +22,13 @@ namespace XGApp {
 
     void Editor::setup() {
 		auto mainLayout = new QVBoxLayout;
+        auto editorLayout = new QVBoxLayout;
 
-        mainLayout->addWidget(this->setupBasicForm());
+        editorLayout->addWidget(this->setupBasicForm());
+        mainLayout->addLayout(editorLayout, 1);
+
+        auto buttonLayout = new QDialogButtonBox(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
+        mainLayout->addWidget(buttonLayout);
 
         this->setLayout(mainLayout);
     }
