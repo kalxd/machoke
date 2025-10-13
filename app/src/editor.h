@@ -16,6 +16,7 @@ namespace XGApp {
         void setup();
 
         XGApp::Input *titleLine;
+        XGApp::Input *albumLine;
 	};
 }
 

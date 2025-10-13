@@ -16,6 +16,9 @@ namespace XGApp {
         this->titleLine = new XGApp::Input;
         layout->addRow("标题", this->titleLine);
 
+        this->albumLine = new XGApp::Input;
+        layout->addRow("专辑", this->albumLine);
+
         widget->setLayout(layout);
 		return widget;
     }
