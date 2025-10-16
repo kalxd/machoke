@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QLineEdit>
 #include "component/input.h"
+#include "widget/cover.h"
+#include "widget/coverhistory.h"
 
 namespace XGApp {
 	class Editor : public QWidget {
@@ -15,8 +17,10 @@ namespace XGApp {
         QWidget* setupBasicForm();
         void setup();
 
-        XGApp::Input *titleLine;
-        XGApp::Input *albumLine;
+        XGApp::Input* titleLine;
+        XGApp::Input* albumLine;
+        XGWidget::Cover* cover;
+        XGWidget::CoverHistory* coverHistory;
 	};
 }
 

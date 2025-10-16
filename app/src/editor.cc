@@ -25,6 +25,17 @@ namespace XGApp {
 
     void Editor::setup() {
 		auto mainLayout = new QVBoxLayout;
+
+        auto coverLayout = new QHBoxLayout;
+
+        this->cover = new XGWidget::Cover;
+        coverLayout->addWidget(this->cover, 3);
+
+        this->coverHistory = new XGWidget::CoverHistory;
+        coverLayout->addWidget(this->coverHistory, 2);
+
+        mainLayout->addLayout(coverLayout);
+
         auto editorLayout = new QVBoxLayout;
 
         editorLayout->addWidget(this->setupBasicForm());
