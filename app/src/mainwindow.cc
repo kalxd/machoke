@@ -11,7 +11,7 @@ namespace XGApp {
 	MainWindow::MainWindow() : mainFrame(new XGApp::MainFrame) {
         this->setup();
         this->setCentralWidget(this->mainFrame);
-        this->resize(600, 400);
+        this->resize(800, 600);
 	}
 
     MainWindow::~MainWindow() {
