@@ -6,8 +6,7 @@ qt_add_executable(
   src/mainframe.cc
   src/mainwindow.cc
   src/editor.cc
-  src/input.cc
-  src/base.cc
+  src/component/input.cc
 )
 
 target_link_libraries(machoke

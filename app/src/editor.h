@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include <QLineEdit>
-#include "input.h"
+#include "component/input.h"
 
 namespace XGApp {
 	class Editor : public QWidget {
