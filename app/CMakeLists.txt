@@ -7,6 +7,7 @@ qt_add_executable(
   src/mainwindow.cc
   src/editor.cc
   src/component/input.cc
+  src/widget/cover.cc
 )
 
 target_link_libraries(machoke
