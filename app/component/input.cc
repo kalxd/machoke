@@ -16,7 +16,7 @@ namespace XGApp {
 		}
 
         auto total = this->model->rowCount();
-        if (this->model->insertRow(total)) {
+		if (this->model->insertRow(total)) {
 			auto index = this->model->index(total);
 			this->model->setData(index, word);
         }

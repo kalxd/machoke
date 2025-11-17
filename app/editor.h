@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QLineEdit>
 #include "component/input.h"
+#include "component/multiinput.h"
 #include "widget/cover.h"
 #include "widget/coverhistory.h"
 
@@ -17,7 +18,8 @@ namespace XGApp {
         QWidget* setupBasicForm();
         void setup();
 
-        XGApp::Input* titleLine;
+        XGApp::Input *titleLine = new XGApp::Input;
+        XGWidget::MultiInput *authorLines = new XGWidget::MultiInput;
         XGApp::Input* albumLine;
         XGWidget::Cover* cover;
         XGWidget::CoverHistory* coverHistory;

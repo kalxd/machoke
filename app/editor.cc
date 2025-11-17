@@ -13,8 +13,8 @@ namespace XGApp {
 
         auto layout = new QFormLayout;
 
-        this->titleLine = new XGApp::Input;
         layout->addRow("标题", this->titleLine);
+        layout->addRow("作者", this->authorLines);
 
         this->albumLine = new XGApp::Input;
         layout->addRow("专辑", this->albumLine);

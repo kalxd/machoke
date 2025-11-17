@@ -23,6 +23,7 @@ qt_add_executable(machoke
   app/mainframe.cc
   app/editor.cc
   app/component/input.cc
+  app/component/multiinput.cc
   app/widget/cover.cc
   app/widget/coverhistory.cc
 )
