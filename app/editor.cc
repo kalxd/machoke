@@ -18,6 +18,7 @@ namespace XGApp {
 
         this->albumLine = new XGApp::Input;
         layout->addRow("专辑", this->albumLine);
+        layout->addRow("流派", this->genreLines);
 
         widget->setLayout(layout);
 		return widget;

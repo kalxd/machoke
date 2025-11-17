@@ -20,7 +20,8 @@ namespace XGApp {
 
         XGApp::Input *titleLine = new XGApp::Input;
         XGWidget::MultiInput *authorLines = new XGWidget::MultiInput;
-        XGApp::Input* albumLine;
+        XGApp::Input *albumLine;
+        XGWidget::MultiInput *genreLines = new XGWidget::MultiInput;
         XGWidget::Cover* cover;
         XGWidget::CoverHistory* coverHistory;
 	};
