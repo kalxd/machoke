@@ -1,5 +1,4 @@
 /.cache
 /build
-/release
 /xglib/target/
 /compile_commands.json
