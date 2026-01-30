@@ -1,25 +1,20 @@
-#ifndef _XG_MAINWINDOW_
-#define _XG_MAINWINDOW_
+#ifndef XGAPP_MAINWINDOW
+#define XGAPP_MAINWINDOW
 
 #include <QMainWindow>
-#include <optional>
-#include "lib.rs.h"
-#include "mainframe.h"
+#include <memory>
 
 namespace XGApp {
-	class MainWindow : public QMainWindow {
-		Q_OBJECT
+	class MainWindow {
+    private:
+        std::unique_ptr<QMainWindow> mainwindow = std::make_unique<QMainWindow>();
     public:
-		MainWindow();
+		explicit MainWindow();
+        explicit MainWindow(MainWindow &) = delete;
+
         ~MainWindow();
 
-    private:
-		void setup();
-        void pickMedia();
-
-        XGApp::MainFrame* mainFrame;
-
-        std::optional<rust::Box<XGLib::Media>> media = std::nullopt;
+        void show();
 	};
 }
 

@@ -19,6 +19,7 @@ endif()
 
 qt_add_executable(machoke
   app/main.cc
+  app/mainwindow.cc
 )
 
 target_link_libraries(
