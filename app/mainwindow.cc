@@ -5,7 +5,10 @@ namespace XGApp {
 	MainWindow::MainWindow() {
         this->mainwindow->resize(1200, 800);
 
-		this->mainwindow->addDockWidget(Qt::LeftDockWidgetArea, this->fstreeDock->dock);
+        this->mainwindow->addDockWidget(Qt::LeftDockWidgetArea,
+                                        this->fstreeDock->dock);
+        this->mainwindow->addDockWidget(Qt::RightDockWidgetArea,
+                                        this->coverhistory->dock);
 	}
 
     MainWindow::~MainWindow() {}
