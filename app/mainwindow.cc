@@ -9,6 +9,8 @@ namespace XGApp {
                                         this->fstreeDock->dock);
         this->mainwindow->addDockWidget(Qt::RightDockWidgetArea,
                                         this->coverhistory->dock);
+
+        this->mainwindow->setCentralWidget(this->welcome->widget);
 	}
 
     MainWindow::~MainWindow() {}

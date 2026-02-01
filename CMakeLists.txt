@@ -22,6 +22,7 @@ qt_add_executable(machoke
   app/mainwindow.cc
   app/fstree.cc
   app/coverhistory.cc
+  app/welcome.cc
 )
 
 target_link_libraries(
