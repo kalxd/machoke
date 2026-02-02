@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include <qnamespace.h>
+#include <iostream>
 
 namespace XGApp {
 	MainWindow::MainWindow() {
@@ -10,7 +10,7 @@ namespace XGApp {
         this->mainwindow->addDockWidget(Qt::RightDockWidgetArea,
                                         this->coverhistory->dock);
 
-        this->mainwindow->setCentralWidget(this->welcome->widget);
+        this->mainwindow->setCentralWidget(this->welcome);
 	}
 
     MainWindow::~MainWindow() {}

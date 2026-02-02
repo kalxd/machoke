@@ -4,10 +4,9 @@
 #include <QWidget>
 
 namespace XGApp {
-	class Welcome {
+	class Welcome : public QWidget {
     public:
-		QWidget* widget;
-		explicit Welcome(QWidget* parent = nullptr);
+		explicit Welcome(QWidget *parent = nullptr);
 	};
 }
 

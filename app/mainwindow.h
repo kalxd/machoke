@@ -15,7 +15,7 @@ namespace XGApp {
                     std::make_unique<XGApp::FSTree>();
         std::unique_ptr<XGApp::CoverHistory> coverhistory =
             std::make_unique<XGApp::CoverHistory>();
-        std::unique_ptr<XGApp::Welcome> welcome = std::make_unique<XGApp::Welcome>();
+        XGApp::Welcome* welcome = new XGApp::Welcome;
     public:
 		explicit MainWindow();
         explicit MainWindow(MainWindow &) = delete;

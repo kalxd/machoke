@@ -9,7 +9,7 @@ namespace XGApp {
 	class FSTree {
     private:
 		QTreeView *tree;
-		QFileSystemModel* fs;
+        QFileSystemModel *fs;
     public:
 		QDockWidget* dock;
 		explicit FSTree(QWidget* parent = nullptr);
