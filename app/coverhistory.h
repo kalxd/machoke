@@ -4,10 +4,8 @@
 #include <QDockWidget>
 
 namespace XGApp {
-	class CoverHistory {
+	class CoverHistory: public QDockWidget {
     public:
-		QDockWidget *dock;
-
         explicit CoverHistory(QWidget* parent = nullptr);
 	};
 }

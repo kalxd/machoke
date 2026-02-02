@@ -2,7 +2,7 @@
 #include <QHeaderView>
 
 namespace XGApp {
-	FSTree::FSTree(QWidget *parent) {
+	FSTree::FSTree(QWidget *parent) : QDockWidget(parent) {
         this->fs = new QFileSystemModel;
         this->fs->setRootPath(QDir::rootPath());
         this->tree = new QTreeView;
@@ -14,9 +14,9 @@ namespace XGApp {
         this->tree->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
         this->tree->header()->setStretchLastSection(false);
 
-        this->dock = new QDockWidget("目录", parent);
-        this->dock->setAllowedAreas(Qt::LeftDockWidgetArea);
-        this->dock->setFeatures(QDockWidget::NoDockWidgetFeatures);
-        this->dock->setWidget(this->tree);
+        this->setAllowedAreas(Qt::LeftDockWidgetArea);
+        this->setFeatures(QDockWidget::NoDockWidgetFeatures);
+        this->setWidget(this->tree);
+        this->setWindowTitle("目录");
     }
 }

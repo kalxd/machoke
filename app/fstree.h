@@ -6,12 +6,11 @@
 #include <QFileSystemModel>
 
 namespace XGApp {
-	class FSTree {
+	class FSTree: public QDockWidget {
     private:
 		QTreeView *tree;
         QFileSystemModel *fs;
     public:
-		QDockWidget* dock;
 		explicit FSTree(QWidget* parent = nullptr);
 	};
 }
