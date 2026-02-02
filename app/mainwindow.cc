@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include <QDebug>
 
 namespace XGApp {
 	MainWindow::MainWindow() {
@@ -8,5 +9,7 @@ namespace XGApp {
         this->addDockWidget(Qt::RightDockWidgetArea, this->coverhistory);
 
         this->setCentralWidget(this->welcome);
+
+        this->fstreeDock->connectPickFile([](auto f) { qDebug() << f; });
 	}
 }

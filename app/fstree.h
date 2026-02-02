@@ -4,6 +4,7 @@
 #include <QDockWidget>
 #include <QTreeView>
 #include <QFileSystemModel>
+#include <functional>
 
 namespace XGApp {
 	class FSTree: public QDockWidget {
@@ -11,7 +12,9 @@ namespace XGApp {
 		QTreeView *tree;
         QFileSystemModel *fs;
     public:
-		explicit FSTree(QWidget* parent = nullptr);
+		explicit FSTree(QWidget *parent = nullptr);
+
+        void connectPickFile(std::function<void(const QString)> f);
 	};
 }
 

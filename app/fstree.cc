@@ -1,5 +1,6 @@
 #include "fstree.h"
 #include <QHeaderView>
+#include <QDebug>
 
 namespace XGApp {
 	FSTree::FSTree(QWidget *parent) : QDockWidget(parent) {
@@ -19,5 +20,20 @@ namespace XGApp {
         this->setFeatures(QDockWidget::NoDockWidgetFeatures);
         this->setWidget(this->tree);
         this->setWindowTitle("目录");
+    }
+
+    void FSTree::connectPickFile(std::function<void(const QString)> f) {
+      connect(this->tree, &QTreeView::doubleClicked, this,
+              [this, f](const QModelIndex &index) {
+				  if (!index.isValid()) {
+                      return;
+                  }
+
+                  if (this->fs->isDir(index)) {
+                      return ;
+                  }
+
+                  f(this->fs->filePath(index));
+			  });
     }
 }
