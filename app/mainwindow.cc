@@ -10,7 +10,7 @@ namespace XGApp {
         this->addDockWidget(Qt::LeftDockWidgetArea, this->fstreeDock);
         this->addDockWidget(Qt::RightDockWidgetArea, this->coverhistory);
 
-        this->setCentralWidget(this->welcome);
+        this->setCentralWidget(this->mainWidget);
 
         this->fstreeDock->connectPickFile(std::bind(&MainWindow::openAudio,
                                                     this,

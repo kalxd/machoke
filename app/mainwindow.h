@@ -4,14 +4,14 @@
 #include <QMainWindow>
 #include "fstree.h"
 #include "coverhistory.h"
-#include "welcome.h"
+#include "mainwidget.h"
 
 namespace XGApp {
 	class MainWindow: public QMainWindow {
     private:
         XGApp::FSTree* fstreeDock = new XGApp::FSTree;
-        XGApp::CoverHistory* coverhistory = new XGApp::CoverHistory();
-        XGApp::Welcome* welcome = new XGApp::Welcome;
+        XGApp::CoverHistory *coverhistory = new XGApp::CoverHistory();
+        XGApp::MainWidget* mainWidget = new XGApp::MainWidget;
 
         void openAudio(const QString path);
 
