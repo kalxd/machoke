@@ -8,9 +8,8 @@
 #include "welcome.h"
 
 namespace XGApp {
-	class MainWindow {
+	class MainWindow: public QMainWindow {
     private:
-		std::unique_ptr<QMainWindow> mainwindow = std::make_unique<QMainWindow>();
         std::unique_ptr<XGApp::FSTree> fstreeDock =
                     std::make_unique<XGApp::FSTree>();
         std::unique_ptr<XGApp::CoverHistory> coverhistory =
@@ -18,11 +17,6 @@ namespace XGApp {
         XGApp::Welcome* welcome = new XGApp::Welcome;
     public:
 		explicit MainWindow();
-        explicit MainWindow(MainWindow &) = delete;
-
-        ~MainWindow();
-
-        void show();
 	};
 }
 
