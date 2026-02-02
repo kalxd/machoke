@@ -11,6 +11,7 @@ namespace XGApp {
         this->tree->setColumnHidden(1, true); // 文件大小
         this->tree->setColumnHidden(2, true); // 文件类型
         this->tree->setColumnHidden(3, true); // 文件大小
+        this->tree->setHeaderHidden(true);
         this->tree->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
         this->tree->header()->setStretchLastSection(false);
 
