@@ -12,6 +12,9 @@ namespace XGApp {
         XGApp::FSTree* fstreeDock = new XGApp::FSTree;
         XGApp::CoverHistory* coverhistory = new XGApp::CoverHistory();
         XGApp::Welcome* welcome = new XGApp::Welcome;
+
+        void openAudio(const QString path);
+
     public:
 		explicit MainWindow();
 	};
