@@ -2,6 +2,7 @@
 #define XGAPP_MAINWIDGET
 
 #include <QStackedWidget>
+#include <QLineEdit>
 #include <optional>
 
 namespace XGApp {
@@ -13,7 +14,9 @@ namespace XGApp {
         std::optional<Editor*> editor = std::nullopt;
 
     public:
-        explicit MainWidget(QWidget* parent = nullptr);
+		explicit MainWidget(QWidget *parent = nullptr);
+
+        void openEditor();
     };
 
     class MainWidget::Welcome : public QWidget {
@@ -21,7 +24,9 @@ namespace XGApp {
 		explicit Welcome(QWidget* parent = nullptr);
     };
 
-    class MainWidget::Editor : QWidget {
+    class MainWidget::Editor : public QWidget {
+    private:
+		QLineEdit* title;
     public:
 		explicit Editor(QWidget* parent = nullptr);
     };
