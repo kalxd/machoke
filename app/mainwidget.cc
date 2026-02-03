@@ -29,6 +29,9 @@ namespace XGApp {
     MainWidget::Editor::Editor(QWidget *parent) : QWidget(parent) {
 		auto mainLayout = new QVBoxLayout;
 
+        this->cover = new XGWidget::Cover;
+        mainLayout->addWidget(this->cover);
+
         this->title = new QLineEdit;
         mainLayout->addWidget(this->title);
 

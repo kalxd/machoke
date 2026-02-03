@@ -4,6 +4,7 @@
 #include <QStackedWidget>
 #include <QLineEdit>
 #include <optional>
+#include "widget/cover.h"
 
 namespace XGApp {
     class MainWidget : public QStackedWidget {
@@ -26,6 +27,7 @@ namespace XGApp {
 
     class MainWidget::Editor : public QWidget {
     private:
+		XGWidget::Cover* cover;
 		QLineEdit* title;
     public:
 		explicit Editor(QWidget* parent = nullptr);
