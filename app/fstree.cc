@@ -6,6 +6,9 @@ namespace XGApp {
 	FSTree::FSTree(QWidget *parent) : QDockWidget(parent) {
         this->fs = new QFileSystemModel;
         this->fs->setRootPath(QDir::rootPath());
+        this->fs->setReadOnly(true);
+        this->fs->setNameFilters({ "*.mp3" });
+
         this->tree = new QTreeView;
         this->tree->setModel(this->fs);
         this->tree->setCurrentIndex(this->fs->index(QDir::homePath()));
@@ -25,7 +28,7 @@ namespace XGApp {
     void FSTree::connectPickFile(std::function<void(const QString)> f) {
       connect(this->tree, &QTreeView::doubleClicked, this,
               [this, f](const QModelIndex &index) {
-				  if (!index.isValid()) {
+				  if (not index.isValid()) {
                       return;
                   }
 
