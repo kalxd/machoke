@@ -1,5 +1,4 @@
 #include "mainwindow.h"
-#include "lib.rs.h"
 #include <exception>
 #include <QMessageBox>
 
@@ -19,7 +18,8 @@ namespace XGApp {
 
     void MainWindow::openAudio(const QString path) {
 		try {
-			auto media = XGLib::readAudioFile(path.toStdString());
+            auto media = XGLib::readAudioFile(path.toStdString());
+            this->media = std::move(media);
         } catch (const std::exception &e) {
             QMessageBox msg(this);
             msg.setIcon(QMessageBox::Critical);
