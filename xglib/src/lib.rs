@@ -9,16 +9,17 @@ pub mod ffi {
 		fn say_hello();
 
 		#[cxx_name = "readAudioFile"]
-		fn read_audio_file(filepath: &str) -> Result<Box<Media>>;
+		fn read_audio_file(filepath: &str) -> Result<*const Media>;
 	}
 }
 
 struct Media(Tag);
 
-fn read_audio_file(filepath: &str) -> Result<Box<Media>> {
+fn read_audio_file(filepath: &str) -> Result<*const Media> {
 	println!("fuck!!!!");
 	let tag = Tag::read_from_path(filepath)?;
-	Ok(Box::new(Media(tag)))
+	let value = Box::new(Media(tag));
+	Ok(Box::into_raw(value))
 }
 
 fn say_hello() {

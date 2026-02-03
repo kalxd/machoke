@@ -15,7 +15,7 @@ namespace XGApp {
         XGApp::CoverHistory *coverhistory = new XGApp::CoverHistory();
         XGApp::MainWidget *mainWidget = new XGApp::MainWidget;
 
-        std::optional<::rust::Box<XGLib::Media>> media = std::nullopt;
+        std::optional<const XGLib::Media*> media = std::nullopt;
 
         void openAudio(const QString path);
 
