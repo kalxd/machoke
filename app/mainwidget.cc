@@ -18,4 +18,8 @@ namespace XGApp {
 
         this->setLayout(mainLayout);
     }
+
+    MainWidget::Editor::Editor(QWidget *parent) : QWidget(parent) {
+
+    }
 }
