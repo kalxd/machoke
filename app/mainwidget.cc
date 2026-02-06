@@ -1,6 +1,10 @@
 #include "mainwidget.h"
+#include "lib.rs.h"
 #include <QLabel>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QFormLayout>
+#include <QGroupBox>
 #include <QDialogButtonBox>
 
 namespace XGApp {
@@ -10,10 +14,13 @@ namespace XGApp {
         this->addWidget(this->welcome);
     }
 
-    void MainWidget::openEditor() {
-		auto editor = new Editor;
-        this->addWidget(editor);
-        this->setCurrentWidget(editor);
+    void MainWidget::openEditor(const std::optional<XGLib::Media *> &media) {
+		if (!this->editor) {
+			this->editor = new Editor;
+        }
+        (*this->editor)->setValue(media);
+        this->addWidget(*this->editor);
+        this->setCurrentWidget(*this->editor);
     }
 
     MainWidget::Welcome::Welcome(QWidget *parent) : QWidget(parent) {
@@ -32,8 +39,14 @@ namespace XGApp {
         this->cover = new XGWidget::Cover;
         mainLayout->addWidget(this->cover);
 
+        auto mainEditorLayout = new QGroupBox("主信息");
+        mainLayout->addWidget(mainEditorLayout);
+
+        auto editorFormLayout = new QFormLayout;
+        mainEditorLayout->setLayout(editorFormLayout);
+
         this->title = new QLineEdit;
-        mainLayout->addWidget(this->title);
+        editorFormLayout->addRow("名称", this->title);
 
         auto btns = new QDialogButtonBox(QDialogButtonBox::Close |
                                              QDialogButtonBox::Save,
@@ -41,5 +54,15 @@ namespace XGApp {
         mainLayout->addWidget(btns, 0, Qt::AlignBottom);
 
         this->setLayout(mainLayout);
+    }
+
+    void MainWidget::Editor::setValue(
+									  const std::optional<XGLib::Media *> &media) {
+		if (media) {
+            auto title = XGLib::readMediaTitle(*media);
+            this->title->setText(QString::fromStdString((std::string)title));
+        } else {
+            this->title->setText("");
+        }
     }
 }
