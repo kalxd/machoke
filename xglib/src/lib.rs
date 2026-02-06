@@ -6,30 +6,32 @@ pub mod ffi {
 		type Media;
 
 		#[cxx_name = "readAudioFile"]
-		fn read_audio_file(filepath: &str) -> Result<*mut Media>;
+		fn read_audio_file(filepath: &str) -> Result<Box<Media>>;
 
 		#[cxx_name = "readMediaTitle"]
-		unsafe fn read_media_title(media: *mut Media) -> String;
+		fn title(self: &Media) -> String;
 	}
 }
 
-struct Media(Tag);
+struct Media(Option<Tag>);
 
-fn read_audio_file(filepath: &str) -> Result<*mut Media> {
+fn read_audio_file(filepath: &str) -> Result<Box<Media>> {
 	match Tag::read_from_path(filepath) {
-		Ok(tag) => {
-			let b = Box::new(Media(tag));
-			Ok(Box::into_raw(b))
-		}
+		Ok(tag) => Ok(Box::new(Media(Some(tag)))),
 		Err(id3::Error {
 			kind: IdErrorKind::NoTag,
 			..
-		}) => Ok(std::ptr::null_mut()),
+		}) => Ok(Box::new(Media(None))),
 		Err(e) => Err(e),
 	}
 }
 
-fn read_media_title(media: *mut Media) -> String {
-	let media = unsafe { Box::from_raw(media) };
-	media.0.title().map(String::from).unwrap_or_default()
+impl Media {
+	fn title(&self) -> String {
+		self.0
+			.as_ref()
+			.and_then(|s| dbg!(s.title()))
+			.map(String::from)
+			.unwrap_or_default()
+	}
 }

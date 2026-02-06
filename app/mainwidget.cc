@@ -14,7 +14,7 @@ namespace XGApp {
         this->addWidget(this->welcome);
     }
 
-    void MainWidget::openEditor(const std::optional<XGLib::Media *> &media) {
+    void MainWidget::openEditor(::rust::Box<XGLib::Media> &media) {
 		if (!this->editor) {
 			this->editor = new Editor;
         }
@@ -56,13 +56,8 @@ namespace XGApp {
         this->setLayout(mainLayout);
     }
 
-    void MainWidget::Editor::setValue(
-									  const std::optional<XGLib::Media *> &media) {
-		if (media) {
-            auto title = XGLib::readMediaTitle(*media);
-            this->title->setText(QString::fromStdString((std::string)title));
-        } else {
-            this->title->setText("");
-        }
+    void MainWidget::Editor::setValue(::rust::Box<XGLib::Media> &media) {
+        auto title = media->readMediaTitle();
+        this->title->setText(QString::fromStdString((std::string)title));
     }
 }

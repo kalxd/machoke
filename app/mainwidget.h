@@ -18,7 +18,7 @@ namespace XGApp {
     public:
 		explicit MainWidget(QWidget *parent = nullptr);
 
-        void openEditor(const std::optional<XGLib::Media*> &media);
+        void openEditor(::rust::Box<XGLib::Media> &media);
     };
 
     class MainWidget::Welcome : public QWidget {
@@ -33,7 +33,7 @@ namespace XGApp {
     public:
 		explicit Editor(QWidget *parent = nullptr);
 
-        void setValue(const std::optional<XGLib::Media*> &media);
+        void setValue(::rust::Box<XGLib::Media> &media);
     };
 }
 
