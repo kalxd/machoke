@@ -17,7 +17,10 @@ struct Media(Option<Tag>);
 
 fn read_audio_file(filepath: &str) -> Result<Box<Media>> {
 	match Tag::read_from_path(filepath) {
-		Ok(tag) => Ok(Box::new(Media(Some(tag)))),
+		Ok(tag) => {
+			dbg!(tag.title());
+			Ok(Box::new(Media(Some(tag))))
+		}
 		Err(id3::Error {
 			kind: IdErrorKind::NoTag,
 			..
@@ -30,7 +33,7 @@ impl Media {
 	fn title(&self) -> String {
 		self.0
 			.as_ref()
-			.and_then(|s| dbg!(s.title()))
+			.and_then(|s| s.title())
 			.map(String::from)
 			.unwrap_or_default()
 	}
