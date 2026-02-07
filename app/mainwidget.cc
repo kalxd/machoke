@@ -64,13 +64,15 @@ namespace XGApp {
     }
 
     void MainWidget::Editor::setValue(::rust::Box<XGLib::Media> &media) {
+		using namespace XGWidget;
+
 		auto title = media->title();
-        this->title->setText(XGWidget::Rust::toString(std::move(title)));
+        this->title->setText(Rust::toString(std::move(title)));
 
         auto album = media->album();
-        this->album->setText(XGWidget::Rust::toString(std::move(album)));
+        this->album->setText(Rust::toString(std::move(album)));
 
         auto artists = media->artists();
-        this->authorEdits->setValues(XGWidget::Rust::toListOfString(std::move(artists)));
+        this->authorEdits->setValues(Rust::toListOfString(std::move(artists)));
     }
 }
