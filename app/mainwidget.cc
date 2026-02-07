@@ -48,6 +48,9 @@ namespace XGApp {
         this->title = new QLineEdit;
         editorFormLayout->addRow("名称", this->title);
 
+        this->authorEdits = new XGWidget::MultiEdit;
+        editorFormLayout->addRow("作者", this->authorEdits);
+
         this->album = new QLineEdit;
         editorFormLayout->addRow("专辑", this->album);
 
