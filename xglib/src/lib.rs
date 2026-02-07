@@ -9,6 +9,7 @@ pub mod ffi {
 		fn read_audio_file(filepath: &str) -> Result<Box<Media>>;
 
 		fn title(self: &Media) -> String;
+		fn artists(self: &Media) -> Vec<String>;
 		fn album(self: &Media) -> String;
 	}
 }
@@ -43,6 +44,14 @@ impl Media {
 			.as_ref()
 			.and_then(|s| s.album())
 			.map(String::from)
+			.unwrap_or_default()
+	}
+
+	fn artists(&self) -> Vec<String> {
+		self.0
+			.as_ref()
+			.and_then(|s| s.artists())
+			.map(|xs| xs.into_iter().map(String::from).collect())
 			.unwrap_or_default()
 	}
 }

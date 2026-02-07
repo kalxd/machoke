@@ -1,4 +1,5 @@
 #include "mainwidget.h"
+#include "widget/util.h"
 #include "lib.rs.h"
 #include <QLabel>
 #include <QVBoxLayout>
@@ -64,9 +65,11 @@ namespace XGApp {
 
     void MainWidget::Editor::setValue(::rust::Box<XGLib::Media> &media) {
 		auto title = media->title();
-        this->title->setText(QString::fromStdString((std::string)title));
+        this->title->setText(XGWidget::Rust::toString(std::move(title)));
 
         auto album = media->album();
-		this->album->setText(QString::fromStdString((std::string)album));
+        this->album->setText(XGWidget::Rust::toString(std::move(album)));
+
+        auto artists = media->artists();
     }
 }

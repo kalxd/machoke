@@ -26,6 +26,7 @@ qt_add_executable(machoke
 
   app/widget/cover.cc
   app/widget/multiedit.cc
+  app/widget/util.cc
 )
 
 target_link_libraries(
