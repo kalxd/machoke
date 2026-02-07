@@ -5,7 +5,7 @@ namespace XGWidget {
         auto mainLayout = new QVBoxLayout;
         mainLayout->setContentsMargins(0, 0, 0, 0);
 
-        this->model = new QStringListModel(QStringList() << "abc" << "efg");
+        this->model = new QStringListModel;
 
         this->firstCombo = this->createCombox();
         mainLayout->addWidget(this->firstCombo);
@@ -34,5 +34,18 @@ namespace XGWidget {
 		auto combo = this->createCombox();
         this->expandBoxs << combo;
         this->expandLayout->addWidget(combo);
+    }
+
+    void MultiEdit::setValues(const QStringList &xs) {
+		auto raws = this->model->stringList();
+        raws << xs;
+        raws.removeDuplicates();
+        this->model->setStringList(raws);
+
+        for (const auto &item : this->expandBoxs) {
+			this->expandLayout->removeWidget(item);
+        }
+
+        this->expandBoxs.clear();
     }
 }

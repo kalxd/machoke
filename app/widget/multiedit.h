@@ -19,7 +19,8 @@ namespace XGWidget {
         QComboBox *createCombox(QWidget *parent = nullptr) const;
         void addBlankLine();
     public:
-        explicit MultiEdit(QWidget *parent = nullptr);
+		explicit MultiEdit(QWidget *parent = nullptr);
+		void setValues(const QStringList &xs);
 	};
 }
 
