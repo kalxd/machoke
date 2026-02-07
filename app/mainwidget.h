@@ -29,7 +29,8 @@ namespace XGApp {
     class MainWidget::Editor : public QWidget {
     private:
 		XGWidget::Cover* cover;
-		QLineEdit* title;
+        QLineEdit *title;
+        QLineEdit *album;
     public:
 		explicit Editor(QWidget *parent = nullptr);
 

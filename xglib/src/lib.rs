@@ -8,8 +8,8 @@ pub mod ffi {
 		#[cxx_name = "readAudioFile"]
 		fn read_audio_file(filepath: &str) -> Result<Box<Media>>;
 
-		#[cxx_name = "readMediaTitle"]
 		fn title(self: &Media) -> String;
+		fn album(self: &Media) -> String;
 	}
 }
 
@@ -34,6 +34,14 @@ impl Media {
 		self.0
 			.as_ref()
 			.and_then(|s| s.title())
+			.map(String::from)
+			.unwrap_or_default()
+	}
+
+	fn album(&self) -> String {
+		self.0
+			.as_ref()
+			.and_then(|s| s.album())
 			.map(String::from)
 			.unwrap_or_default()
 	}

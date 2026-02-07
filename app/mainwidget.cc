@@ -48,6 +48,9 @@ namespace XGApp {
         this->title = new QLineEdit;
         editorFormLayout->addRow("名称", this->title);
 
+        this->album = new QLineEdit;
+        editorFormLayout->addRow("专辑", this->album);
+
         auto btns = new QDialogButtonBox(QDialogButtonBox::Close |
                                              QDialogButtonBox::Save,
                                          Qt::Orientation::Horizontal);
@@ -57,7 +60,10 @@ namespace XGApp {
     }
 
     void MainWidget::Editor::setValue(::rust::Box<XGLib::Media> &media) {
-        auto title = media->readMediaTitle();
+		auto title = media->title();
         this->title->setText(QString::fromStdString((std::string)title));
+
+        auto album = media->album();
+		this->album->setText(QString::fromStdString((std::string)album));
     }
 }
