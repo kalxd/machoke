@@ -71,5 +71,6 @@ namespace XGApp {
         this->album->setText(XGWidget::Rust::toString(std::move(album)));
 
         auto artists = media->artists();
+        this->authorEdits->setValues(XGWidget::Rust::toListOfString(std::move(artists)));
     }
 }

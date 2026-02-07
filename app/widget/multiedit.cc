@@ -36,7 +36,7 @@ namespace XGWidget {
         this->expandLayout->addWidget(combo);
     }
 
-    void MultiEdit::setValues(const QStringList &xs) {
+    void MultiEdit::setValues(const QStringList &&xs) {
 		auto raws = this->model->stringList();
         raws << xs;
         raws.removeDuplicates();
