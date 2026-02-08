@@ -5,24 +5,41 @@
 #include <QVBoxLayout>
 #include <QStringListModel>
 #include <QPushButton>
+#include <functional>
 
 namespace XGWidget {
+	namespace {
+		static QComboBox* createCombox(QAbstractListModel *model, QWidget *parent = nullptr);
+	}
+
 	class MultiEdit : public QWidget {
     private:
-		QComboBox *firstCombo;
+		class EditRow;
+
+        QComboBox *firstCombo;
         QVBoxLayout *expandLayout;
-        QList<QComboBox*> expandBoxs;
+        QList<EditRow*> expandBoxs;
 
         QStringListModel *model;
         QPushButton *addBtn;
 
-        QComboBox *createCombox(QWidget *parent = nullptr) const;
         void addBlankLine();
     public:
 		explicit MultiEdit(QWidget *parent = nullptr);
         void setValues(const QStringList &&xs);
         QList<QString> getValues() const;
-	};
+    };
+
+    class MultiEdit::EditRow : public QWidget {
+    private:
+		QComboBox *combo;
+		QPushButton *removeBtn;
+    public:
+		explicit EditRow(QAbstractListModel *model, QWidget *parent = nullptr);
+        QString getValue() const;
+
+        void connectRemove(std::function<void()> f) const;
+    };
 }
 
 #endif

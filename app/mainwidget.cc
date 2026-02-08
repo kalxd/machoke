@@ -79,6 +79,6 @@ namespace XGApp {
 
     void MainWidget::Editor::save() const {
 		auto xs = this->authorEdits->getValues();
-		qDebug() << xs;
+        qDebug() << xs;
     }
 }
