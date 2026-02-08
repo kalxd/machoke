@@ -69,6 +69,9 @@ namespace XGApp {
     }
 
     void MainWidget::Editor::setValue(::rust::Box<XGLib::Media> &media) {
+		auto cover = media->front_cover();
+		this->cover->setValue(std::move(media->front_cover()));
+
 		auto title = media->title();
         this->title->setText(XGRust::toString(std::move(title)));
 
@@ -77,6 +80,9 @@ namespace XGApp {
 
         auto artists = media->artists();
         this->artistEdits->setValues(XGRust::toListString(std::move(artists)));
+
+        auto geners = media->genres();
+		this->genreEdits->setValues(XGRust::toListString(std::move(artists)));
     }
 
     void MainWidget::Editor::save() const {

@@ -4,6 +4,7 @@
 #include "lib.rs.h"
 #include <QString>
 #include <QList>
+#include <QByteArray>
 
 namespace XGRust {
 	using namespace ::rust;
@@ -13,6 +14,10 @@ namespace XGRust {
 
 	String fromString(const QString &&s);
     Vec<String> fromListString(const QList<QString> &&s);
+
+    QByteArray toByteArray(const Vec<std::uint8_t> &&xs);
+
+    const char* toMimeString(const XGLib::CoverMime &mime);
 }
 
 #endif

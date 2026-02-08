@@ -1,4 +1,5 @@
 #include "util.h"
+#include "lib.rs.h"
 
 namespace XGRust {
 	QString toString(const String &&s) {
@@ -24,5 +25,22 @@ namespace XGRust {
         }
 
         return result;
+    }
+
+    QByteArray toByteArray(const Vec<std::uint8_t> &&xs) {
+		QByteArray result;
+        for (const auto x : xs) {
+            result.append(x);
+        }
+
+        return result;
+    }
+
+    const char* toMimeString(const XGLib::CoverMime &mime) {
+		if (mime == XGLib::CoverMime::Png) {
+			return "PNG";
+        } else {
+            return "JPEG";
+        }
     }
 }

@@ -9,6 +9,7 @@ pub mod ffi {
 		None,
 	}
 
+	#[derive(Debug)]
 	struct CoverTuple {
 		mime: CoverMime,
 		data: Vec<u8>,
@@ -39,10 +40,7 @@ struct Media(Option<Tag>);
 
 fn read_audio_file(filepath: &str) -> Result<Box<Media>> {
 	match Tag::read_from_path(filepath) {
-		Ok(tag) => {
-			dbg!(tag.title());
-			Ok(Box::new(Media(Some(tag))))
-		}
+		Ok(tag) => Ok(Box::new(Media(Some(tag)))),
 		Err(id3::Error {
 			kind: IdErrorKind::NoTag,
 			..
@@ -83,6 +81,8 @@ impl Media {
 			mime: ffi::CoverMime::None,
 			data: Vec::default(),
 		});
+
+		dbg!(&a.mime);
 
 		Box::new(a)
 	}
