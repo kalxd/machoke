@@ -3,6 +3,18 @@ use id3::{ErrorKind as IdErrorKind, Result, Tag, TagLike};
 #[cxx::bridge(namespace = "XGLib")]
 pub mod ffi {
 	#[derive(Debug)]
+	enum CoverMime {
+		Jpg,
+		Png,
+		None,
+	}
+
+	struct CoverTuple {
+		mime: CoverMime,
+		data: Vec<u8>,
+	}
+
+	#[derive(Debug)]
 	struct SaveTagData {
 		title: String,
 		artists: Vec<String>,
@@ -15,6 +27,7 @@ pub mod ffi {
 		#[cxx_name = "readAudioFile"]
 		fn read_audio_file(filepath: &str) -> Result<Box<Media>>;
 
+		fn front_cover(self: &Media) -> Box<CoverTuple>;
 		fn title(self: &Media) -> String;
 		fn artists(self: &Media) -> Vec<String>;
 		fn album(self: &Media) -> String;
@@ -39,6 +52,41 @@ fn read_audio_file(filepath: &str) -> Result<Box<Media>> {
 }
 
 impl Media {
+	fn pick_front_cover(&self) -> Option<ffi::CoverTuple> {
+		let tag = self.0.as_ref()?;
+
+		tag.pictures()
+			.filter_map(|pic| {
+				if pic.picture_type != id3::frame::PictureType::CoverFront {
+					return None;
+				}
+
+				if !["image/jpeg", "image/png"].contains(&pic.mime_type.as_str()) {
+					return None;
+				}
+
+				let mime = match pic.mime_type.as_str() {
+					"image/png" => ffi::CoverMime::Png,
+					_ => ffi::CoverMime::Jpg,
+				};
+
+				Some(ffi::CoverTuple {
+					mime,
+					data: pic.data.clone(),
+				})
+			})
+			.next()
+	}
+
+	fn front_cover(&self) -> Box<ffi::CoverTuple> {
+		let a = self.pick_front_cover().unwrap_or_else(|| ffi::CoverTuple {
+			mime: ffi::CoverMime::None,
+			data: Vec::default(),
+		});
+
+		Box::new(a)
+	}
+
 	fn title(&self) -> String {
 		self.0
 			.as_ref()
