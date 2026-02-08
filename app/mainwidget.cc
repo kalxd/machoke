@@ -58,6 +58,7 @@ namespace XGApp {
         auto btns = new QDialogButtonBox(QDialogButtonBox::Close |
                                              QDialogButtonBox::Save,
                                          Qt::Orientation::Horizontal);
+        connect(btns, &QDialogButtonBox::accepted, this, &Editor::save);
         mainLayout->addWidget(btns, 0, Qt::AlignBottom);
 
         this->setLayout(mainLayout);
@@ -74,5 +75,10 @@ namespace XGApp {
 
         auto artists = media->artists();
         this->authorEdits->setValues(Rust::toListOfString(std::move(artists)));
+    }
+
+    void MainWidget::Editor::save() const {
+		auto xs = this->authorEdits->getValues();
+		qDebug() << xs;
     }
 }

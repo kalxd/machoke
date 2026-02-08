@@ -48,4 +48,22 @@ namespace XGWidget {
 
         this->expandBoxs.clear();
     }
+
+    QList<QString> MultiEdit::getValues() const {
+		QList<QString> result;
+
+        auto firstValue = this->firstCombo->currentText();
+        if (not firstValue.isEmpty()) {
+			result << firstValue;
+        }
+
+        for (const auto &item : this->expandBoxs) {
+			auto value = item->currentText();
+            if (not value.isEmpty()) {
+                result << value;
+            }
+        }
+
+        return result;
+    }
 }

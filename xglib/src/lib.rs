@@ -2,6 +2,13 @@ use id3::{ErrorKind as IdErrorKind, Result, Tag, TagLike};
 
 #[cxx::bridge(namespace = "XGLib")]
 pub mod ffi {
+	#[derive(Debug)]
+	struct SaveTagData {
+		title: String,
+		artists: Vec<String>,
+		album: String,
+	}
+
 	extern "Rust" {
 		type Media;
 
@@ -11,6 +18,7 @@ pub mod ffi {
 		fn title(self: &Media) -> String;
 		fn artists(self: &Media) -> Vec<String>;
 		fn album(self: &Media) -> String;
+
 	}
 }
 

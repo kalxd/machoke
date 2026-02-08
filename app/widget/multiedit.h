@@ -20,7 +20,8 @@ namespace XGWidget {
         void addBlankLine();
     public:
 		explicit MultiEdit(QWidget *parent = nullptr);
-		void setValues(const QStringList &&xs);
+        void setValues(const QStringList &&xs);
+        QList<QString> getValues() const;
 	};
 }
 

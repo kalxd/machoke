@@ -15,7 +15,6 @@ namespace XGApp {
 		class Editor;
         Welcome *welcome;
         std::optional<Editor*> editor = std::nullopt;
-
     public:
 		explicit MainWidget(QWidget *parent = nullptr);
 
@@ -33,6 +32,7 @@ namespace XGApp {
         QLineEdit *title;
         XGWidget::MultiEdit *authorEdits;
         QLineEdit *album;
+		void save() const;
     public:
 		explicit Editor(QWidget *parent = nullptr);
 
