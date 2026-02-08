@@ -18,7 +18,7 @@ pub mod ffi {
 		fn title(self: &Media) -> String;
 		fn artists(self: &Media) -> Vec<String>;
 		fn album(self: &Media) -> String;
-
+		fn genres(self: &Media) -> Vec<String>;
 	}
 }
 
@@ -47,6 +47,14 @@ impl Media {
 			.unwrap_or_default()
 	}
 
+	fn artists(&self) -> Vec<String> {
+		self.0
+			.as_ref()
+			.and_then(|s| s.artists())
+			.map(|xs| xs.into_iter().map(String::from).collect())
+			.unwrap_or_default()
+	}
+
 	fn album(&self) -> String {
 		self.0
 			.as_ref()
@@ -55,10 +63,10 @@ impl Media {
 			.unwrap_or_default()
 	}
 
-	fn artists(&self) -> Vec<String> {
+	fn genres(&self) -> Vec<String> {
 		self.0
 			.as_ref()
-			.and_then(|s| s.artists())
+			.and_then(|s| s.genres())
 			.map(|xs| xs.into_iter().map(String::from).collect())
 			.unwrap_or_default()
 	}

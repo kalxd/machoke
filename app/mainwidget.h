@@ -32,6 +32,7 @@ namespace XGApp {
         QLineEdit *title;
         XGWidget::MultiEdit *authorEdits;
         QLineEdit *album;
+        XGWidget::MultiEdit *genreEdits;
 		void save() const;
     public:
 		explicit Editor(QWidget *parent = nullptr);

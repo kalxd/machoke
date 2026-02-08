@@ -1,4 +1,5 @@
 #include "mainwidget.h"
+#include "widget/multiedit.h"
 #include "widget/util.h"
 #include "lib.rs.h"
 #include <QLabel>
@@ -54,6 +55,9 @@ namespace XGApp {
 
         this->album = new QLineEdit;
         editorFormLayout->addRow("专辑", this->album);
+
+        this->genreEdits = new XGWidget::MultiEdit;
+        editorFormLayout->addRow("流派", this->genreEdits);
 
         auto btns = new QDialogButtonBox(QDialogButtonBox::Close |
                                              QDialogButtonBox::Save,
