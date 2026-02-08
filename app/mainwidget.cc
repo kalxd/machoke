@@ -80,7 +80,17 @@ namespace XGApp {
     }
 
     void MainWidget::Editor::save() const {
-		auto title = this->title->text().trimmed();
-		// auto artists = XGRust::fromListString(std::move(this->artistEdits->getValues()));
+		auto title = XGRust::fromString(std::move(this->title->text().trimmed()));
+        auto artists = XGRust::fromListString(std::move(this->artistEdits->getValues()));
+        auto album =
+            XGRust::fromString(std::move(this->album->text().trimmed()));
+        auto genres =
+            XGRust::fromListString(std::move(this->genreEdits->getValues()));
+
+        XGLib::SaveTagData data = {
+			.title = title,
+			.artists = artists,
+			.album = album,
+        };
     }
 }
