@@ -1,6 +1,6 @@
 #include "mainwidget.h"
 #include "widget/multiedit.h"
-#include "widget/util.h"
+#include "rust/util.h"
 #include "lib.rs.h"
 #include <QLabel>
 #include <QVBoxLayout>
@@ -50,8 +50,8 @@ namespace XGApp {
         this->title = new QLineEdit;
         editorFormLayout->addRow("名称", this->title);
 
-        this->authorEdits = new XGWidget::MultiEdit;
-        editorFormLayout->addRow("作者", this->authorEdits);
+        this->artistEdits = new XGWidget::MultiEdit;
+        editorFormLayout->addRow("作者", this->artistEdits);
 
         this->album = new QLineEdit;
         editorFormLayout->addRow("专辑", this->album);
@@ -69,20 +69,18 @@ namespace XGApp {
     }
 
     void MainWidget::Editor::setValue(::rust::Box<XGLib::Media> &media) {
-		using namespace XGWidget;
-
 		auto title = media->title();
-        this->title->setText(Rust::toString(std::move(title)));
+        this->title->setText(XGRust::toString(std::move(title)));
 
         auto album = media->album();
-        this->album->setText(Rust::toString(std::move(album)));
+        this->album->setText(XGRust::toString(std::move(album)));
 
         auto artists = media->artists();
-        this->authorEdits->setValues(Rust::toListOfString(std::move(artists)));
+        this->artistEdits->setValues(XGRust::toListString(std::move(artists)));
     }
 
     void MainWidget::Editor::save() const {
-		auto xs = this->authorEdits->getValues();
-        qDebug() << xs;
+		auto title = this->title->text().trimmed();
+		// auto artists = XGRust::fromListString(std::move(this->artistEdits->getValues()));
     }
 }

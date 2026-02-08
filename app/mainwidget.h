@@ -30,7 +30,7 @@ namespace XGApp {
     private:
 		XGWidget::Cover* cover;
         QLineEdit *title;
-        XGWidget::MultiEdit *authorEdits;
+        XGWidget::MultiEdit *artistEdits;
         QLineEdit *album;
         XGWidget::MultiEdit *genreEdits;
 		void save() const;

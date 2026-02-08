@@ -1,0 +1,18 @@
+#ifndef XGRUST_UTIL
+#define XGRUST_UTIL
+
+#include "lib.rs.h"
+#include <QString>
+#include <QList>
+
+namespace XGRust {
+	using namespace ::rust;
+
+    QString toString(const String &&s);
+    QList<QString> toListString(const Vec<String> &&);
+
+	String fromString(const QString &&s);
+    Vec<String> fromListString(const QList<QString> &&s);
+}
+
+#endif
