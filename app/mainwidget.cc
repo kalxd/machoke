@@ -75,11 +75,11 @@ namespace XGApp {
 		auto title = media->title();
         this->title->setText(XGRust::toString(std::move(title)));
 
-        auto album = media->album();
-        this->album->setText(XGRust::toString(std::move(album)));
-
         auto artists = media->artists();
         this->artistEdits->setValues(XGRust::toListString(std::move(artists)));
+
+        auto album = media->album();
+        this->album->setText(XGRust::toString(std::move(album)));
 
         auto geners = media->genres();
 		this->genreEdits->setValues(XGRust::toListString(std::move(artists)));

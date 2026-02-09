@@ -23,7 +23,7 @@ namespace XGWidget {
         QStringListModel *model;
         QPushButton *addBtn;
 
-        void addBlankLine();
+        void addBlankLine(const QString &&init);
     public:
 		explicit MultiEdit(QWidget *parent = nullptr);
         void setValues(const QStringList &&xs);
@@ -37,6 +37,7 @@ namespace XGWidget {
     public:
 		explicit EditRow(QAbstractListModel *model, QWidget *parent = nullptr);
         QString getValue() const;
+        void setValue(const QString &&s);
 
         void connectRemove(std::function<void()> f) const;
     };

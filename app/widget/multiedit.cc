@@ -27,23 +27,25 @@ namespace XGWidget {
         mainLayout->addLayout(this->expandLayout);
 
         this->addBtn = new QPushButton("添加新列");
-        connect(this->addBtn, &QPushButton::clicked, this, &MultiEdit::addBlankLine);
+        connect(this->addBtn, &QPushButton::clicked, this,
+                [this]() { this->addBlankLine(""); });
         mainLayout->addWidget(this->addBtn);
 
         this->setLayout(mainLayout);
     }
 
-    void MultiEdit::addBlankLine() {
+    void MultiEdit::addBlankLine(const QString &&init) {
 		auto row = new EditRow(this->model);
+		row->setValue(std::move(init));
         this->expandBoxs << row;
         this->expandLayout->addWidget(row);
 
         row->connectRemove([this, row]() {
 			this->expandLayout->removeWidget(row);
-            this->expandBoxs.removeIf(
+			this->expandBoxs.removeIf(
 									  [row](const EditRow *box) { return box == row; });
 			delete row;
-		});
+        });
     }
 
     void MultiEdit::setValues(const QStringList &&xs) {
@@ -52,11 +54,29 @@ namespace XGWidget {
         raws.removeDuplicates();
         this->model->setStringList(raws);
 
-        for (const auto &item : this->expandBoxs) {
+        for (const auto item : this->expandBoxs) {
 			this->expandLayout->removeWidget(item);
+			delete item;
         }
 
         this->expandBoxs.clear();
+
+        qDebug() << xs;
+        auto iter = xs.cbegin();
+        if (iter == xs.cend()) {
+			this->firstCombo->setEditText("");
+            return;
+        }
+
+        this->firstCombo->setEditText(*iter);
+        ++iter;
+
+        while (iter != xs.cend()) {
+			qDebug() << "do this?";
+			qDebug() << (*iter);
+            this->addBlankLine(std::move(*iter));
+            ++iter;
+        }
     }
 
     QList<QString> MultiEdit::getValues() const {
@@ -92,6 +112,10 @@ namespace XGWidget {
 
     QString MultiEdit::EditRow::getValue() const {
 		return this->combo->currentText();
+    }
+
+    void MultiEdit::EditRow::setValue(const QString &&s) {
+		this->combo->setEditText(s);
     }
 
     void
