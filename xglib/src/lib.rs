@@ -57,6 +57,13 @@ fn save_audio_file(media: &mut Box<Media>, value: ffi::SaveTagData) -> Result<()
 		raw_tag.set_title(value.title);
 	}
 
+	if !value.artists.is_empty() {
+		let c = id3::Content::new_text_values(value.artists);
+		raw_tag.set_artist(c.to_string());
+	} else {
+		raw_tag.remove_artist();
+	}
+
 	raw_tag.write_to_path(filepath, raw_tag.version())
 }
 
