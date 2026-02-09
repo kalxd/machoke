@@ -20,6 +20,7 @@ pub mod ffi {
 		title: String,
 		artists: Vec<String>,
 		album: String,
+		genres: Vec<String>,
 	}
 
 	extern "Rust" {
@@ -53,15 +54,30 @@ fn read_audio_file(filepath: &str) -> Box<Media> {
 fn save_audio_file(media: &mut Box<Media>, value: ffi::SaveTagData) -> Result<()> {
 	let (raw_tag, filepath) = &mut media.0;
 
-	if !value.title.is_empty() {
+	if value.title.is_empty() {
+		raw_tag.remove_title();
+	} else {
 		raw_tag.set_title(value.title);
 	}
 
-	if !value.artists.is_empty() {
+	if value.artists.is_empty() {
+		raw_tag.remove_artist();
+	} else {
 		let c = id3::Content::new_text_values(value.artists);
 		raw_tag.set_artist(c.to_string());
+	}
+
+	if value.album.is_empty() {
+		raw_tag.remove_album();
 	} else {
-		raw_tag.remove_artist();
+		raw_tag.set_album(value.album);
+	}
+
+	if value.genres.is_empty() {
+		raw_tag.remove_genre();
+	} else {
+		let c = id3::Content::new_text_values(value.genres);
+		raw_tag.set_genre(c.to_string());
 	}
 
 	raw_tag.write_to_path(filepath, raw_tag.version())
@@ -99,8 +115,6 @@ impl Media {
 			mime: ffi::CoverMime::None,
 			data: Vec::default(),
 		});
-
-		dbg!(&a.mime);
 
 		Box::new(a)
 	}

@@ -102,9 +102,10 @@ namespace XGApp {
             XGRust::fromListString(std::move(this->genreEdits->getValues()));
 
         XGLib::SaveTagData data = {
-            .title = title,
-            .artists = artists,
-            .album = album,
+			.title = title,
+			.artists = artists,
+			.album = album,
+			.genres = genres
         };
 
 		XGLib::saveAudioFile(*this->media, data);
