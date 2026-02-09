@@ -1,4 +1,4 @@
-use id3::{ErrorKind as IdErrorKind, Result, Tag, TagLike};
+use id3::{Result, Tag, TagLike};
 
 #[cxx::bridge(namespace = "XGLib")]
 pub mod ffi {
@@ -26,10 +26,10 @@ pub mod ffi {
 		type Media;
 
 		#[cxx_name = "readAudioFile"]
-		fn read_audio_file(filepath: &str) -> Result<Box<Media>>;
+		fn read_audio_file(filepath: &str) -> Box<Media>;
 
 		#[cxx_name = "saveAudioFile"]
-		fn save_audio_file(media: &mut Media, value: SaveTagData) -> Result<()>;
+		fn save_audio_file(media: &mut Box<Media>, value: SaveTagData) -> Result<()>;
 
 		fn front_cover(self: &Media) -> Box<CoverTuple>;
 		fn title(self: &Media) -> String;
@@ -39,26 +39,19 @@ pub mod ffi {
 	}
 }
 
-struct Media(Option<(Tag, std::path::PathBuf)>);
+struct Media((Tag, std::path::PathBuf));
 
-fn read_audio_file(filepath: &str) -> Result<Box<Media>> {
+fn read_audio_file(filepath: &str) -> Box<Media> {
 	let path = std::path::PathBuf::from(filepath);
 
 	match Tag::read_from_path(&path) {
-		Ok(tag) => Ok(Box::new(Media(Some((tag, path))))),
-		Err(id3::Error {
-			kind: IdErrorKind::NoTag,
-			..
-		}) => Ok(Box::new(Media(None))),
-		Err(e) => Err(e),
+		Ok(tag) => Box::new(Media((tag, path))),
+		Err(_) => Box::new(Media((Tag::new(), path))),
 	}
 }
 
-fn save_audio_file(media: &mut Media, value: ffi::SaveTagData) -> Result<()> {
-	let (raw_tag, filepath) = media.0.as_mut().ok_or(id3::Error::new(
-		id3::ErrorKind::InvalidInput,
-		"无法保存未打开过的音频",
-	))?;
+fn save_audio_file(media: &mut Box<Media>, value: ffi::SaveTagData) -> Result<()> {
+	let (raw_tag, filepath) = &mut media.0;
 
 	if !value.title.is_empty() {
 		raw_tag.set_title(value.title);
@@ -69,7 +62,7 @@ fn save_audio_file(media: &mut Media, value: ffi::SaveTagData) -> Result<()> {
 
 impl Media {
 	fn pick_front_cover(&self) -> Option<ffi::CoverTuple> {
-		let (tag, _) = self.0.as_ref()?;
+		let (tag, _) = &self.0;
 
 		tag.pictures()
 			.filter_map(|pic| {
@@ -106,33 +99,25 @@ impl Media {
 	}
 
 	fn title(&self) -> String {
-		self.0
-			.as_ref()
-			.and_then(|s| s.0.title())
-			.map(String::from)
-			.unwrap_or_default()
+		self.0.0.title().map(String::from).unwrap_or_default()
 	}
 
 	fn artists(&self) -> Vec<String> {
 		self.0
-			.as_ref()
-			.and_then(|s| s.0.artists())
+			.0
+			.artists()
 			.map(|xs| xs.into_iter().map(String::from).collect())
 			.unwrap_or_default()
 	}
 
 	fn album(&self) -> String {
-		self.0
-			.as_ref()
-			.and_then(|s| s.0.album())
-			.map(String::from)
-			.unwrap_or_default()
+		self.0.0.album().map(String::from).unwrap_or_default()
 	}
 
 	fn genres(&self) -> Vec<String> {
 		self.0
-			.as_ref()
-			.and_then(|s| s.0.genres())
+			.0
+			.genres()
 			.map(|xs| xs.into_iter().map(String::from).collect())
 			.unwrap_or_default()
 	}

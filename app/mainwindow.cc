@@ -20,7 +20,7 @@ namespace XGApp {
     void MainWindow::openAudio(const QString path) {
 		try {
             auto media = XGLib::readAudioFile(path.toStdString());
-            this->mainWidget->openEditor(media);
+            this->mainWidget->openEditor(std::move(media));
             this->media = std::move(media);
         } catch (const std::exception &e) {
             QMessageBox msg(this);

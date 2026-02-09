@@ -8,6 +8,7 @@
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QDialogButtonBox>
+#include <QMessageBox>
 
 namespace XGApp {
 	MainWidget::MainWidget(QWidget *parent) : QStackedWidget(parent) {
@@ -16,11 +17,11 @@ namespace XGApp {
         this->addWidget(this->welcome);
     }
 
-    void MainWidget::openEditor(::rust::Box<XGLib::Media> &media) {
+    void MainWidget::openEditor(::rust::Box<XGLib::Media> &&media) {
 		if (!this->editor) {
 			this->editor = new Editor;
         }
-        (*this->editor)->setValue(media);
+        (*this->editor)->setValue(std::move(media));
         this->addWidget(*this->editor);
         this->setCurrentWidget(*this->editor);
     }
@@ -68,7 +69,7 @@ namespace XGApp {
         this->setLayout(mainLayout);
     }
 
-    void MainWidget::Editor::setValue(::rust::Box<XGLib::Media> &media) {
+    void MainWidget::Editor::setValue(::rust::Box<XGLib::Media> &&media) {
 		auto cover = media->front_cover();
 		this->cover->setValue(std::move(media->front_cover()));
 
@@ -82,11 +83,18 @@ namespace XGApp {
         this->album->setText(XGRust::toString(std::move(album)));
 
         auto geners = media->genres();
-		this->genreEdits->setValues(XGRust::toListString(std::move(artists)));
+        this->genreEdits->setValues(XGRust::toListString(std::move(artists)));
+
+		this->media.emplace(std::move(media));
     }
 
-    void MainWidget::Editor::save() const {
-		auto title = XGRust::fromString(std::move(this->title->text().trimmed()));
+    void MainWidget::Editor::save() {
+		if (not this->media) {
+            QMessageBox::critical(this, "无法保存", "音频还未打开！");
+            return ;
+		}
+
+        auto title = XGRust::fromString(std::move(this->title->text().trimmed()));
         auto artists = XGRust::fromListString(std::move(this->artistEdits->getValues()));
         auto album =
             XGRust::fromString(std::move(this->album->text().trimmed()));
@@ -94,9 +102,11 @@ namespace XGApp {
             XGRust::fromListString(std::move(this->genreEdits->getValues()));
 
         XGLib::SaveTagData data = {
-			.title = title,
-			.artists = artists,
-			.album = album,
+            .title = title,
+            .artists = artists,
+            .album = album,
         };
+
+		XGLib::saveAudioFile(*this->media, data);
     }
 }
