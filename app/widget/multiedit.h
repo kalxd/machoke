@@ -1,11 +1,11 @@
 #ifndef XGWIDGET_MULTIEDIT
 #define XGWIDGET_MULTIEDIT
 
+#include "combomodel.h"
 #include <QComboBox>
 #include <QVBoxLayout>
 #include <QStringListModel>
 #include <QPushButton>
-#include <functional>
 
 namespace XGWidget {
 	namespace {
@@ -20,11 +20,9 @@ namespace XGWidget {
         QVBoxLayout *expandLayout;
         QList<EditRow*> expandBoxs;
 
-        QStringListModel *model;
+        ComboModel *model;
         QPushButton *addBtn;
 
-        std::optional<QModelIndex> tryInsertModel(const QString &word);
-        void setModelStrings(const QStringList &s);
         void addBlankLine(const QString &&init);
     public:
 		explicit MultiEdit(QWidget *parent = nullptr);

@@ -1,6 +1,5 @@
 #include "multiedit.h"
 #include <QHBoxLayout>
-#include <qabstractitemmodel.h>
 
 namespace XGWidget {
 	namespace {
@@ -19,7 +18,7 @@ namespace XGWidget {
         auto mainLayout = new QVBoxLayout;
         mainLayout->setContentsMargins(0, 0, 0, 0);
 
-        this->model = new QStringListModel;
+        this->model = new ComboModel;
 
         this->firstCombo = createCombox(this->model, parent);
         mainLayout->addWidget(this->firstCombo);
@@ -33,37 +32,6 @@ namespace XGWidget {
         mainLayout->addWidget(this->addBtn);
 
         this->setLayout(mainLayout);
-    }
-
-    std::optional<QModelIndex> MultiEdit::tryInsertModel(const QString &word) {
-		auto total = this->model->rowCount();
-
-        for (int i = 0; i < total; ++i) {
-			auto index = this->model->index(i);
-            auto value = this->model->data(index).toString();
-
-            if (value == word) {
-				return {};
-            }
-        }
-
-        if (this->model->insertRow(total)) {
-			auto index = this->model->index(total);
-            this->model->setData(index, word);
-
-            return index;
-        }
-
-        return {};
-    }
-
-    void MultiEdit::setModelStrings(const QStringList &s) {
-		for (const auto x : s) {
-            auto index = this->tryInsertModel(x);
-            if (index) {
-				this->model->setData(*index, x);
-            }
-		}
     }
 
     void MultiEdit::addBlankLine(const QString &&init) {
@@ -81,7 +49,7 @@ namespace XGWidget {
     }
 
     void MultiEdit::setValues(const QStringList &&xs) {
-		this->setModelStrings(xs);
+		this->model->appendWords(xs);
 
         for (const auto item : this->expandBoxs) {
 			this->expandLayout->removeWidget(item);
@@ -120,7 +88,7 @@ namespace XGWidget {
             }
         }
 
-        this->setModelStrings(result);
+        this->model->appendWords(result);
 
         return result;
     }
