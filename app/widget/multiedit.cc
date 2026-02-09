@@ -1,5 +1,6 @@
 #include "multiedit.h"
 #include <QHBoxLayout>
+#include <qabstractitemmodel.h>
 
 namespace XGWidget {
 	namespace {
@@ -34,6 +35,37 @@ namespace XGWidget {
         this->setLayout(mainLayout);
     }
 
+    std::optional<QModelIndex> MultiEdit::tryInsertModel(const QString &word) {
+		auto total = this->model->rowCount();
+
+        for (int i = 0; i < total; ++i) {
+			auto index = this->model->index(i);
+            auto value = this->model->data(index).toString();
+
+            if (value == word) {
+				return {};
+            }
+        }
+
+        if (this->model->insertRow(total)) {
+			auto index = this->model->index(total);
+            this->model->setData(index, word);
+
+            return index;
+        }
+
+        return {};
+    }
+
+    void MultiEdit::setModelStrings(const QStringList &s) {
+		for (const auto x : s) {
+            auto index = this->tryInsertModel(x);
+            if (index) {
+				this->model->setData(*index, x);
+            }
+		}
+    }
+
     void MultiEdit::addBlankLine(const QString &&init) {
 		auto row = new EditRow(this->model);
 		row->setValue(std::move(init));
@@ -49,10 +81,7 @@ namespace XGWidget {
     }
 
     void MultiEdit::setValues(const QStringList &&xs) {
-		auto raws = this->model->stringList();
-        raws << xs;
-        raws.removeDuplicates();
-        this->model->setStringList(raws);
+		this->setModelStrings(xs);
 
         for (const auto item : this->expandBoxs) {
 			this->expandLayout->removeWidget(item);
@@ -61,7 +90,6 @@ namespace XGWidget {
 
         this->expandBoxs.clear();
 
-        qDebug() << xs;
         auto iter = xs.cbegin();
         if (iter == xs.cend()) {
 			this->firstCombo->setEditText("");
@@ -77,7 +105,7 @@ namespace XGWidget {
         }
     }
 
-    QList<QString> MultiEdit::getValues() const {
+    QList<QString> MultiEdit::getValues() {
 		QList<QString> result;
 
         auto firstValue = this->firstCombo->currentText();
@@ -91,6 +119,8 @@ namespace XGWidget {
                 result << value;
             }
         }
+
+        this->setModelStrings(result);
 
         return result;
     }

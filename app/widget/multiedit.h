@@ -23,11 +23,13 @@ namespace XGWidget {
         QStringListModel *model;
         QPushButton *addBtn;
 
+        std::optional<QModelIndex> tryInsertModel(const QString &word);
+        void setModelStrings(const QStringList &s);
         void addBlankLine(const QString &&init);
     public:
 		explicit MultiEdit(QWidget *parent = nullptr);
         void setValues(const QStringList &&xs);
-        QList<QString> getValues() const;
+        QList<QString> getValues();
     };
 
     class MultiEdit::EditRow : public QWidget {
