@@ -26,6 +26,8 @@ qt_add_executable(machoke
 
   app/widget/cover.cc
   app/widget/multiedit.cc
+  app/widget/singleedit.cc
+  app/widget/combomodel.cc
   app/rust/util.cc
 )
 

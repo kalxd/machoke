@@ -54,7 +54,7 @@ namespace XGApp {
         this->artistEdits = new XGWidget::MultiEdit;
         editorFormLayout->addRow("作者", this->artistEdits);
 
-        this->album = new QLineEdit;
+        this->album = new XGWidget::SingleEdit;
         editorFormLayout->addRow("专辑", this->album);
 
         this->genreEdits = new XGWidget::MultiEdit;
@@ -80,7 +80,7 @@ namespace XGApp {
         this->artistEdits->setValues(XGRust::toListString(std::move(artists)));
 
         auto album = media->album();
-        this->album->setText(XGRust::toString(std::move(album)));
+        this->album->setValue(XGRust::toString(std::move(album)));
 
         auto geners = media->genres();
         this->genreEdits->setValues(XGRust::toListString(std::move(artists)));
@@ -97,7 +97,7 @@ namespace XGApp {
         auto title = XGRust::fromString(std::move(this->title->text().trimmed()));
         auto artists = XGRust::fromListString(std::move(this->artistEdits->getValues()));
         auto album =
-            XGRust::fromString(std::move(this->album->text().trimmed()));
+            XGRust::fromString(std::move(this->album->getValue()));
         auto genres =
             XGRust::fromListString(std::move(this->genreEdits->getValues()));
 

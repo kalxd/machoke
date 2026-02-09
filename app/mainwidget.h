@@ -7,6 +7,7 @@
 #include "lib.rs.h"
 #include "widget/cover.h"
 #include "widget/multiedit.h"
+#include "widget/singleedit.h"
 
 namespace XGApp {
     class MainWidget : public QStackedWidget {
@@ -33,7 +34,7 @@ namespace XGApp {
 		XGWidget::Cover* cover;
         QLineEdit *title;
         XGWidget::MultiEdit *artistEdits;
-        QLineEdit *album;
+        XGWidget::SingleEdit *album;
         XGWidget::MultiEdit *genreEdits;
 		void save();
     public:
