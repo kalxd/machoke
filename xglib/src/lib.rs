@@ -28,6 +28,9 @@ pub mod ffi {
 		#[cxx_name = "readAudioFile"]
 		fn read_audio_file(filepath: &str) -> Result<Box<Media>>;
 
+		#[cxx_name = "saveAudioFile"]
+		fn save_audio_file(media: &mut Media, value: SaveTagData) -> Result<()>;
+
 		fn front_cover(self: &Media) -> Box<CoverTuple>;
 		fn title(self: &Media) -> String;
 		fn artists(self: &Media) -> Vec<String>;
@@ -36,11 +39,13 @@ pub mod ffi {
 	}
 }
 
-struct Media(Option<Tag>);
+struct Media(Option<(Tag, std::path::PathBuf)>);
 
 fn read_audio_file(filepath: &str) -> Result<Box<Media>> {
-	match Tag::read_from_path(filepath) {
-		Ok(tag) => Ok(Box::new(Media(Some(tag)))),
+	let path = std::path::PathBuf::from(filepath);
+
+	match Tag::read_from_path(&path) {
+		Ok(tag) => Ok(Box::new(Media(Some((tag, path))))),
 		Err(id3::Error {
 			kind: IdErrorKind::NoTag,
 			..
@@ -49,9 +54,22 @@ fn read_audio_file(filepath: &str) -> Result<Box<Media>> {
 	}
 }
 
+fn save_audio_file(media: &mut Media, value: ffi::SaveTagData) -> Result<()> {
+	let (raw_tag, filepath) = media.0.as_mut().ok_or(id3::Error::new(
+		id3::ErrorKind::InvalidInput,
+		"无法保存未打开过的音频",
+	))?;
+
+	if !value.title.is_empty() {
+		raw_tag.set_title(value.title);
+	}
+
+	raw_tag.write_to_path(filepath, raw_tag.version())
+}
+
 impl Media {
 	fn pick_front_cover(&self) -> Option<ffi::CoverTuple> {
-		let tag = self.0.as_ref()?;
+		let (tag, _) = self.0.as_ref()?;
 
 		tag.pictures()
 			.filter_map(|pic| {
@@ -90,7 +108,7 @@ impl Media {
 	fn title(&self) -> String {
 		self.0
 			.as_ref()
-			.and_then(|s| s.title())
+			.and_then(|s| s.0.title())
 			.map(String::from)
 			.unwrap_or_default()
 	}
@@ -98,7 +116,7 @@ impl Media {
 	fn artists(&self) -> Vec<String> {
 		self.0
 			.as_ref()
-			.and_then(|s| s.artists())
+			.and_then(|s| s.0.artists())
 			.map(|xs| xs.into_iter().map(String::from).collect())
 			.unwrap_or_default()
 	}
@@ -106,7 +124,7 @@ impl Media {
 	fn album(&self) -> String {
 		self.0
 			.as_ref()
-			.and_then(|s| s.album())
+			.and_then(|s| s.0.album())
 			.map(String::from)
 			.unwrap_or_default()
 	}
@@ -114,7 +132,7 @@ impl Media {
 	fn genres(&self) -> Vec<String> {
 		self.0
 			.as_ref()
-			.and_then(|s| s.genres())
+			.and_then(|s| s.0.genres())
 			.map(|xs| xs.into_iter().map(String::from).collect())
 			.unwrap_or_default()
 	}

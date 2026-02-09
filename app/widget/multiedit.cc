@@ -72,8 +72,6 @@ namespace XGWidget {
         ++iter;
 
         while (iter != xs.cend()) {
-			qDebug() << "do this?";
-			qDebug() << (*iter);
             this->addBlankLine(std::move(*iter));
             ++iter;
         }
