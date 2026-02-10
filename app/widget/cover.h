@@ -15,6 +15,7 @@ namespace XGWidget {
 
         void loadPixmap(const QPixmap *pixmap);
         void chooseCover();
+        void removeCover();
 
     public:
 		explicit Cover(QWidget *parent = nullptr);

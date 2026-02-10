@@ -23,6 +23,7 @@ namespace XGWidget {
 
         auto removeBtn = new QPushButton("删除封面");
         mainLayout->addWidget(removeBtn);
+        connect(removeBtn, &QPushButton::clicked, this, &Cover::removeCover);
 
         this->setLayout(mainLayout);
     }
@@ -43,6 +44,11 @@ namespace XGWidget {
 
         auto pixmap = new QPixmap(filename);
         this->loadPixmap(pixmap);
+    }
+
+    void Cover::removeCover() {
+		this->coverLabel->clear();
+		this->pixmap.reset();
     }
 
     void Cover::setValue(const ::rust::Box<XGLib::CoverTuple> &&cover) {
