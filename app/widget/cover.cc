@@ -4,8 +4,6 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QFileDialog>
-#include <QDebug>
-#include <qnamespace.h>
 
 namespace XGWidget {
 	Cover::Cover(QWidget *parent) : QGroupBox(parent) {
@@ -42,19 +40,23 @@ namespace XGWidget {
 			return ;
         }
 
+        auto file = QFileInfo(filename);
         auto pixmap = new QPixmap(filename);
         this->loadPixmap(pixmap);
+        this->mime = XGRust::mimeFromString(file.suffix());
     }
 
     void Cover::removeCover() {
 		this->coverLabel->clear();
-		this->pixmap.reset();
+        this->pixmap.reset();
+        this->mime = XGLib::CoverMime::None;
     }
 
     void Cover::setValue(const ::rust::Box<XGLib::CoverTuple> &&cover) {
 		if (cover->mime == XGLib::CoverMime::None) {
             this->pixmap.reset();
             this->coverLabel->clear();
+            this->mime = XGLib::CoverMime::None;
             return ;
         }
 
@@ -62,6 +64,7 @@ namespace XGWidget {
         auto picData = XGRust::toByteArray(std::move(cover->data));
         if (pixmap->loadFromData(picData, XGRust::toMimeString(cover->mime))) {
 			this->loadPixmap(pixmap);
+			this->mime = cover->mime;
         } else {
 			delete pixmap;
         }

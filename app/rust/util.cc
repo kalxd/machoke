@@ -43,4 +43,15 @@ namespace XGRust {
             return "JPEG";
         }
     }
+
+    XGLib::CoverMime mimeFromString(const QString &mime) {
+		auto value = mime.toLower();
+        if (value == "png") {
+            return XGLib::CoverMime::Png;
+        } else if (value == "jpg" or value == "jpeg") {
+			return XGLib::CoverMime::Jpg;
+        } else {
+			return XGLib::CoverMime::None;
+        }
+    }
 }

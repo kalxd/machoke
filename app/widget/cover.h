@@ -12,6 +12,7 @@ namespace XGWidget {
     private:
 		QLabel *coverLabel;
         std::optional<const QPixmap *> pixmap = std::nullopt;
+        XGLib::CoverMime mime = XGLib::CoverMime::None;
 
         void loadPixmap(const QPixmap *pixmap);
         void chooseCover();

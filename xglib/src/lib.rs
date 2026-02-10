@@ -17,6 +17,7 @@ pub mod ffi {
 
 	#[derive(Debug)]
 	struct SaveTagData {
+		cover: CoverTuple,
 		title: String,
 		artists: Vec<String>,
 		album: String,
