@@ -19,11 +19,20 @@ namespace XGApp {
 
     void MainWidget::openEditor(::rust::Box<XGLib::Media> &&media) {
 		if (!this->editor) {
-			this->editor = new Editor;
+            this->editor = new Editor;
+            (*this->editor)->connectClose([this]() {
+				this->closeEditor();
+			});
         }
         (*this->editor)->setValue(std::move(media));
         this->addWidget(*this->editor);
         this->setCurrentWidget(*this->editor);
+    }
+
+    void MainWidget::closeEditor() {
+		this->removeWidget(*this->editor);
+        this->editor.reset();
+        this->setCurrentWidget(this->welcome);
     }
 
     MainWidget::Welcome::Welcome(QWidget *parent) : QWidget(parent) {
@@ -60,10 +69,9 @@ namespace XGApp {
         this->genreEdits = new XGWidget::MultiEdit;
         editorFormLayout->addRow("流派", this->genreEdits);
 
-        auto btns = new QDialogButtonBox(QDialogButtonBox::Close |
-                                             QDialogButtonBox::Save,
-                                         Qt::Orientation::Horizontal);
-        connect(btns, &QDialogButtonBox::accepted, this, &Editor::save);
+        this->btns = new QDialogButtonBox(QDialogButtonBox::Close | QDialogButtonBox::Save,
+                                          Qt::Orientation::Horizontal);
+        connect(this->btns, &QDialogButtonBox::accepted, this, &Editor::save);
         mainLayout->addWidget(btns, 0, Qt::AlignBottom);
 
         this->setLayout(mainLayout);
@@ -111,5 +119,9 @@ namespace XGApp {
         };
 
 		XGLib::saveAudioFile(*this->media, data);
+    }
+
+    void MainWidget::Editor::connectClose(std::function<void()> &&f) const {
+		connect(this->btns, &QDialogButtonBox::rejected, this, f);
     }
 }

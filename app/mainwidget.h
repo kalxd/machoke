@@ -4,6 +4,7 @@
 #include <QStackedWidget>
 #include <QLineEdit>
 #include <optional>
+#include <QDialogButtonBox>
 #include "lib.rs.h"
 #include "widget/cover.h"
 #include "widget/multiedit.h"
@@ -20,6 +21,7 @@ namespace XGApp {
 		explicit MainWidget(QWidget *parent = nullptr);
 
         void openEditor(::rust::Box<XGLib::Media> &&media);
+        void closeEditor();
     };
 
     class MainWidget::Welcome : public QWidget {
@@ -36,11 +38,15 @@ namespace XGApp {
         XGWidget::MultiEdit *artistEdits;
         XGWidget::SingleEdit *album;
         XGWidget::MultiEdit *genreEdits;
-		void save();
+
+        QDialogButtonBox *btns;
+
+        void save();
     public:
 		explicit Editor(QWidget *parent = nullptr);
 
         void setValue(::rust::Box<XGLib::Media> &&media);
+        void connectClose(std::function<void()> &&f) const;
     };
 }
 

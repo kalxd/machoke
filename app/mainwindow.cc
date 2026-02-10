@@ -1,7 +1,5 @@
 #include "mainwindow.h"
-#include <exception>
 #include <QMessageBox>
-#include <QDebug>
 
 namespace XGApp {
 	MainWindow::MainWindow() {
@@ -18,16 +16,8 @@ namespace XGApp {
     }
 
     void MainWindow::openAudio(const QString path) {
-		try {
-            auto media = XGLib::readAudioFile(path.toStdString());
-            this->mainWidget->openEditor(std::move(media));
-            this->media = std::move(media);
-        } catch (const std::exception &e) {
-            QMessageBox msg(this);
-            msg.setIcon(QMessageBox::Critical);
-            msg.setText("无法打开音频！");
-			msg.setDetailedText(e.what());
-            msg.exec();
-        }
+        auto media = XGLib::readAudioFile(path.toStdString());
+        this->mainWidget->openEditor(std::move(media));
+        this->media = std::move(media);
     }
 }
