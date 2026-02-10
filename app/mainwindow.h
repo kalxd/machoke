@@ -14,11 +14,13 @@ namespace XGApp {
         XGApp::FSTree* fstreeDock = new XGApp::FSTree;
         XGApp::CoverHistory *coverhistory = new XGApp::CoverHistory();
         XGApp::MainWidget *mainWidget = new XGApp::MainWidget;
-
         std::optional<::rust::Box<XGLib::Media>> media;
 
         void openAudio(const QString path);
 
+		void showReadyMsg();
+        void showFailMsg(const QString);
+        void showOkMsg();
     public:
 		explicit MainWindow();
 	};

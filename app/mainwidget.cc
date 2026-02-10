@@ -9,6 +9,7 @@
 #include <QGroupBox>
 #include <QDialogButtonBox>
 #include <QMessageBox>
+#include <exception>
 
 namespace XGApp {
 	MainWidget::MainWidget(QWidget *parent) : QStackedWidget(parent) {
@@ -20,9 +21,10 @@ namespace XGApp {
     void MainWidget::openEditor(::rust::Box<XGLib::Media> &&media) {
 		if (!this->editor) {
             this->editor = new Editor;
-            (*this->editor)->connectClose([this]() {
-				this->closeEditor();
-			});
+            connect(*this->editor, &Editor::closed, this,
+                    &MainWidget::closeEditor);
+            connect(*this->editor, &Editor::failed, this, &MainWidget::failed);
+            connect(*this->editor, &Editor::saved, this, &MainWidget::saved);
         }
         (*this->editor)->setValue(std::move(media));
         this->addWidget(*this->editor);
@@ -69,9 +71,10 @@ namespace XGApp {
         this->genreEdits = new XGWidget::MultiEdit;
         editorFormLayout->addRow("流派", this->genreEdits);
 
-        this->btns = new QDialogButtonBox(QDialogButtonBox::Close | QDialogButtonBox::Save,
+        auto btns = new QDialogButtonBox(QDialogButtonBox::Close | QDialogButtonBox::Save,
                                           Qt::Orientation::Horizontal);
-        connect(this->btns, &QDialogButtonBox::accepted, this, &Editor::save);
+        connect(btns, &QDialogButtonBox::accepted, this, &Editor::save);
+        connect(btns, &QDialogButtonBox::rejected, this, [this]() { emit this->closed(); });
         mainLayout->addWidget(btns, 0, Qt::AlignBottom);
 
         this->setLayout(mainLayout);
@@ -118,10 +121,11 @@ namespace XGApp {
 			.genres = genres
         };
 
-		XGLib::saveAudioFile(*this->media, data);
-    }
-
-    void MainWidget::Editor::connectClose(std::function<void()> &&f) const {
-		connect(this->btns, &QDialogButtonBox::rejected, this, f);
+        try {
+			XGLib::saveAudioFile(*this->media, data);
+			emit this->saved();
+        } catch (const std::exception &e) {
+			emit this->failed(e.what());
+        }
     }
 }

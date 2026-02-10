@@ -4,19 +4,22 @@
 #include <QStackedWidget>
 #include <QLineEdit>
 #include <optional>
-#include <QDialogButtonBox>
 #include "lib.rs.h"
 #include "widget/cover.h"
 #include "widget/multiedit.h"
 #include "widget/singleedit.h"
 
 namespace XGApp {
-    class MainWidget : public QStackedWidget {
+	class MainWidget : public QStackedWidget {
+		Q_OBJECT
     private:
 		class Welcome;
 		class Editor;
         Welcome *welcome;
-        std::optional<Editor*> editor = std::nullopt;
+        std::optional<Editor *> editor = std::nullopt;
+	signals:
+        void saved();
+        void failed(const QString);
     public:
 		explicit MainWidget(QWidget *parent = nullptr);
 
@@ -30,6 +33,7 @@ namespace XGApp {
     };
 
     class MainWidget::Editor : public QWidget {
+		Q_OBJECT
     private:
 		std::optional<::rust::Box<XGLib::Media>> media = std::nullopt;
 
@@ -39,14 +43,15 @@ namespace XGApp {
         XGWidget::SingleEdit *album;
         XGWidget::MultiEdit *genreEdits;
 
-        QDialogButtonBox *btns;
-
         void save();
+	signals:
+        void closed();
+        void saved();
+        void failed(const QString);
     public:
 		explicit Editor(QWidget *parent = nullptr);
 
         void setValue(::rust::Box<XGLib::Media> &&media);
-        void connectClose(std::function<void()> &&f) const;
     };
 }
 
