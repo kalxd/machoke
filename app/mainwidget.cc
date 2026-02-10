@@ -94,6 +94,7 @@ namespace XGApp {
             return ;
 		}
 
+        auto cover = this->cover->getValue();
         auto title = XGRust::fromString(std::move(this->title->text().trimmed()));
         auto artists = XGRust::fromListString(std::move(this->artistEdits->getValues()));
         auto album =
@@ -102,6 +103,7 @@ namespace XGApp {
             XGRust::fromListString(std::move(this->genreEdits->getValues()));
 
         XGLib::SaveTagData data = {
+			.cover = cover,
 			.title = title,
 			.artists = artists,
 			.album = album,

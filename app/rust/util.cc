@@ -36,6 +36,16 @@ namespace XGRust {
         return result;
     }
 
+    Vec<std::uint8_t> fromByteArray(const QByteArray &xs) {
+		Vec<std::uint8_t> result;
+
+        for (const auto x : xs) {
+            result.push_back(x);
+        }
+
+        return result;
+    }
+
     const char* toMimeString(const XGLib::CoverMime &mime) {
 		if (mime == XGLib::CoverMime::Png) {
 			return "PNG";

@@ -4,6 +4,7 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QFileDialog>
+#include <QBuffer>
 
 namespace XGWidget {
 	Cover::Cover(QWidget *parent) : QGroupBox(parent) {
@@ -68,5 +69,23 @@ namespace XGWidget {
         } else {
 			delete pixmap;
         }
+    }
+
+    XGLib::CoverTuple Cover::getValue() const {
+		if (this->mime == XGLib::CoverMime::None) {
+            return {
+				.mime = XGLib::CoverMime::None
+            };
+        }
+
+        QByteArray ba;
+        QBuffer buf(&ba);
+        buf.open(QIODevice::WriteOnly);
+        (*this->pixmap)->save(&buf, XGRust::toMimeString(this->mime));
+
+		return {
+            .mime = this->mime,
+            .data = XGRust::fromByteArray(ba)
+		};
     }
 }

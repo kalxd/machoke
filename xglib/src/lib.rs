@@ -1,4 +1,4 @@
-use id3::{Result, Tag, TagLike};
+use id3::{Content, Result, Tag, TagLike, frame};
 
 #[cxx::bridge(namespace = "XGLib")]
 pub mod ffi {
@@ -55,6 +55,25 @@ fn read_audio_file(filepath: &str) -> Box<Media> {
 fn save_audio_file(media: &mut Box<Media>, value: ffi::SaveTagData) -> Result<()> {
 	let (raw_tag, filepath) = &mut media.0;
 
+	if value.cover.mime == ffi::CoverMime::None {
+		raw_tag.remove_picture_by_type(frame::PictureType::CoverFront);
+	} else {
+		let mime = match value.cover.mime {
+			ffi::CoverMime::Jpg => "image/jpeg",
+			ffi::CoverMime::Png => "image/png",
+			_ => panic!("不能保存mime为none的封面！"),
+		};
+
+		let pic = frame::Picture {
+			description: String::default(),
+			mime_type: mime.to_string(),
+			picture_type: frame::PictureType::CoverFront,
+			data: value.cover.data,
+		};
+
+		raw_tag.add_frame(pic);
+	}
+
 	if value.title.is_empty() {
 		raw_tag.remove_title();
 	} else {
@@ -64,7 +83,7 @@ fn save_audio_file(media: &mut Box<Media>, value: ffi::SaveTagData) -> Result<()
 	if value.artists.is_empty() {
 		raw_tag.remove_artist();
 	} else {
-		let c = id3::Content::new_text_values(value.artists);
+		let c = Content::new_text_values(value.artists);
 		raw_tag.set_artist(c.to_string());
 	}
 
@@ -77,7 +96,7 @@ fn save_audio_file(media: &mut Box<Media>, value: ffi::SaveTagData) -> Result<()
 	if value.genres.is_empty() {
 		raw_tag.remove_genre();
 	} else {
-		let c = id3::Content::new_text_values(value.genres);
+		let c = Content::new_text_values(value.genres);
 		raw_tag.set_genre(c.to_string());
 	}
 
@@ -90,7 +109,7 @@ impl Media {
 
 		tag.pictures()
 			.filter_map(|pic| {
-				if pic.picture_type != id3::frame::PictureType::CoverFront {
+				if pic.picture_type != frame::PictureType::CoverFront {
 					return None;
 				}
 

@@ -22,6 +22,7 @@ namespace XGWidget {
 		explicit Cover(QWidget *parent = nullptr);
 
         void setValue(const ::rust::Box<XGLib::CoverTuple> &&cover);
+        XGLib::CoverTuple getValue() const;
 	};
 }
 

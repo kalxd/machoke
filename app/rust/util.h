@@ -16,6 +16,7 @@ namespace XGRust {
     Vec<String> fromListString(const QList<QString> &&s);
 
     QByteArray toByteArray(const Vec<std::uint8_t> &&xs);
+    Vec<std::uint8_t> fromByteArray(const QByteArray &xs);
 
     const char *toMimeString(const XGLib::CoverMime &mime);
 
