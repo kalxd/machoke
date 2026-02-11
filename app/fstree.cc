@@ -7,7 +7,8 @@ namespace XGApp {
         this->fs = new QFileSystemModel;
         this->fs->setRootPath(QDir::rootPath());
         this->fs->setReadOnly(true);
-        this->fs->setNameFilters({ "*.mp3" });
+        this->fs->setNameFilters({"*.mp3"});
+        this->fs->setNameFilterDisables(false);
 
         this->tree = new QTreeView;
         this->tree->setModel(this->fs);
