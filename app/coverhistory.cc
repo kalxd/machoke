@@ -50,6 +50,12 @@ namespace XGApp {
     }
 
     void CoverHistory::CoverModel::appendValue(const XGRust::CoverInfo &&info) {
+		for (const auto &item : this->covers) {
+            if (item.path == info.path) {
+                return ;
+            }
+		}
+
 		auto rawTotal = this->covers.length();
 
         this->beginInsertRows(QModelIndex(), rawTotal, rawTotal);

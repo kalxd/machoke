@@ -27,7 +27,7 @@ namespace XGRust {
         return result;
     }
 
-    QByteArray toByteArray(const Vec<std::uint8_t> &&xs) {
+    QByteArray toByteArray(const Vec<std::uint8_t> &xs) {
 		QByteArray result;
         for (const auto x : xs) {
             result.append(x);

@@ -1,7 +1,8 @@
 #include "mainwindow.h"
 #include <QMessageBox>
 #include <QStatusBar>
-#include <QDebug>
+#include "lib.rs.h"
+#include "rust/util.h"
 
 namespace XGApp {
 	MainWindow::MainWindow() {
@@ -28,7 +29,24 @@ namespace XGApp {
     }
 
     void MainWindow::openAudio(const QString path) {
-        auto media = XGLib::readAudioFile(path.toStdString());
+		auto media = XGLib::readAudioFile(path.toStdString());
+        {
+            auto cover = media->front_cover();
+            if (cover->mime != XGLib::CoverMime::None) {
+				auto bs = XGRust::toByteArray(cover->data);
+                QPixmap pixmap;
+                pixmap.loadFromData(bs, XGRust::toMimeString(cover->mime));
+
+                XGRust::CoverInfo info{
+					.pixmap = pixmap,
+					.mime = cover->mime,
+					.path = path
+                };
+
+                this->coverhistory->appendCover(std::move(info));
+            }
+        }
+
         this->mainWidget->openEditor(std::move(media));
         this->showReadyMsg();
         this->media = std::move(media);
