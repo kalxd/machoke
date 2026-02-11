@@ -6,8 +6,6 @@
 
 namespace XGApp {
 	MainWindow::MainWindow() {
-        this->resize(1200, 800);
-
         this->addDockWidget(Qt::LeftDockWidgetArea, this->fstreeDock);
         this->addDockWidget(Qt::RightDockWidgetArea, this->coverhistory);
 
@@ -23,9 +21,10 @@ namespace XGApp {
         });
 
         this->showReadyMsg();
-        this->fstreeDock->connectPickFile(std::bind(&MainWindow::openAudio,
-                                                    this,
-                                                    std::placeholders::_1));
+        this->fstreeDock->connectPickFile(std::bind(&MainWindow::openAudio, this, std::placeholders::_1));
+
+        this->resize(1200, 800);
+        this->setWindowTitle("音频编辑器");
     }
 
     void MainWindow::openAudio(const QString path) {
