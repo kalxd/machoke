@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include <QMessageBox>
 #include <QStatusBar>
+#include <QDebug>
 
 namespace XGApp {
 	MainWindow::MainWindow() {
@@ -12,9 +13,15 @@ namespace XGApp {
         this->setCentralWidget(this->mainWidget);
         connect(this->mainWidget, &MainWidget::failed, this,
                 &MainWindow::showFailMsg);
-        connect(this->mainWidget, &MainWidget::saved, this, &MainWindow::showOkMsg);
-		this->showReadyMsg();
+        connect(this->mainWidget, &MainWidget::saved, this,
+                &MainWindow::showOkMsg);
+        connect(this->mainWidget, &MainWidget::updateCover, this,
+                &MainWindow::updateCoverIcon);
+        this->coverhistory->connectChoose([this](const auto info) {
+			this->mainWidget->setCover(std::move(info));
+        });
 
+        this->showReadyMsg();
         this->fstreeDock->connectPickFile(std::bind(&MainWindow::openAudio,
                                                     this,
                                                     std::placeholders::_1));
@@ -25,6 +32,10 @@ namespace XGApp {
         this->mainWidget->openEditor(std::move(media));
         this->showReadyMsg();
         this->media = std::move(media);
+    }
+
+    void MainWindow::updateCoverIcon(const XGRust::CoverInfo info) {
+		this->coverhistory->appendCover(std::move(info));
     }
 
     void MainWindow::showReadyMsg() {

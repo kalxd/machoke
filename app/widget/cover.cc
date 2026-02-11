@@ -28,8 +28,7 @@ namespace XGWidget {
     }
 
     void Cover::loadPixmap(const QPixmap *pixmap) {
-      this->coverLabel->setPixmap(
-								  pixmap->scaled(256, 256, Qt::KeepAspectRatio));
+      this->coverLabel->setPixmap(pixmap->scaled(256, 256, Qt::KeepAspectRatio));
 	  this->pixmap.emplace(pixmap);
     }
 
@@ -45,6 +44,12 @@ namespace XGWidget {
         auto pixmap = new QPixmap(filename);
         this->loadPixmap(pixmap);
         this->mime = XGRust::mimeFromString(file.suffix());
+
+        emit this->updateCover(XGRust::CoverInfo{
+            .pixmap = QPixmap(*pixmap),
+            .mime = this->mime,
+            .path = filename,
+		});
     }
 
     void Cover::removeCover() {
@@ -87,5 +92,11 @@ namespace XGWidget {
             .mime = this->mime,
             .data = XGRust::fromByteArray(ba)
 		};
+    }
+
+    void Cover::setCover(const XGRust::CoverInfo &&info) {
+		this->mime = info.mime;
+		auto pixmap = new QPixmap(info.pixmap);
+		this->loadPixmap(pixmap);
     }
 }

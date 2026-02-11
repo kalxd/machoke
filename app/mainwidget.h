@@ -5,6 +5,7 @@
 #include <QLineEdit>
 #include <optional>
 #include "lib.rs.h"
+#include "rust/util.h"
 #include "widget/cover.h"
 #include "widget/multiedit.h"
 #include "widget/singleedit.h"
@@ -20,11 +21,13 @@ namespace XGApp {
 	signals:
         void saved();
         void failed(const QString);
+        void updateCover(const XGRust::CoverInfo info);
     public:
 		explicit MainWidget(QWidget *parent = nullptr);
 
         void openEditor(::rust::Box<XGLib::Media> &&media);
         void closeEditor();
+        void setCover(const XGRust::CoverInfo &&info);
     };
 
     class MainWidget::Welcome : public QWidget {
@@ -48,10 +51,12 @@ namespace XGApp {
         void closed();
         void saved();
         void failed(const QString);
+        void updateCover(const XGRust::CoverInfo info);
     public:
 		explicit Editor(QWidget *parent = nullptr);
 
         void setValue(::rust::Box<XGLib::Media> &&media);
+        void setCover(const XGRust::CoverInfo &&info);
     };
 }
 

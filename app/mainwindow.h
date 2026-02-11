@@ -7,6 +7,7 @@
 #include "coverhistory.h"
 #include "mainwidget.h"
 #include "lib.rs.h"
+#include "rust/util.h"
 
 namespace XGApp {
 	class MainWindow: public QMainWindow {
@@ -17,6 +18,7 @@ namespace XGApp {
         std::optional<::rust::Box<XGLib::Media>> media;
 
         void openAudio(const QString path);
+        void updateCoverIcon(const XGRust::CoverInfo info);
 
 		void showReadyMsg();
         void showFailMsg(const QString);

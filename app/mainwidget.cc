@@ -25,6 +25,7 @@ namespace XGApp {
                     &MainWidget::closeEditor);
             connect(*this->editor, &Editor::failed, this, &MainWidget::failed);
             connect(*this->editor, &Editor::saved, this, &MainWidget::saved);
+            connect(*this->editor, &Editor::updateCover, this, &MainWidget::updateCover);
         }
         (*this->editor)->setValue(std::move(media));
         this->addWidget(*this->editor);
@@ -35,6 +36,12 @@ namespace XGApp {
 		this->removeWidget(*this->editor);
         this->editor.reset();
         this->setCurrentWidget(this->welcome);
+    }
+
+    void MainWidget::setCover(const XGRust::CoverInfo &&info) {
+		if (this->editor) {
+			(*this->editor)->setCover(std::move(info));
+		}
     }
 
     MainWidget::Welcome::Welcome(QWidget *parent) : QWidget(parent) {
@@ -51,6 +58,7 @@ namespace XGApp {
 		auto mainLayout = new QVBoxLayout;
 
         this->cover = new XGWidget::Cover;
+        connect(this->cover, &XGWidget::Cover::updateCover, this, &Editor::updateCover);
         mainLayout->addWidget(this->cover);
 
         auto mainEditorLayout = new QGroupBox("主信息");
@@ -97,6 +105,10 @@ namespace XGApp {
         this->genreEdits->setValues(XGRust::toListString(std::move(artists)));
 
 		this->media.emplace(std::move(media));
+    }
+
+    void MainWidget::Editor::setCover(const XGRust::CoverInfo &&info) {
+		this->cover->setCover(std::move(info));
     }
 
     void MainWidget::Editor::save() {

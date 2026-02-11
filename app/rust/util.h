@@ -5,6 +5,7 @@
 #include <QString>
 #include <QList>
 #include <QByteArray>
+#include <QPixmap>
 
 namespace XGRust {
 	using namespace ::rust;
@@ -20,7 +21,13 @@ namespace XGRust {
 
     const char *toMimeString(const XGLib::CoverMime &mime);
 
-	XGLib::CoverMime mimeFromString(const QString &mime);
+    XGLib::CoverMime mimeFromString(const QString &mime);
+
+    struct CoverInfo {
+		QPixmap pixmap;
+        XGLib::CoverMime mime;
+        QString path;
+    };
 }
 
 #endif
