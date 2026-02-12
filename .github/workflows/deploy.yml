@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    step:
+    steps:
       - name: checkout
         uses: actions/checkout@v4
       - name: build-rust-static-library
