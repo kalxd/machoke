@@ -6,7 +6,9 @@
 
 # 截图
 
-![截图](./_image/shot.png)
+![截图](./_image/1.png)
+
+![截图](./_image/2.png)
 
 # 图标来源
 
