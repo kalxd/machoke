@@ -1,0 +1,16 @@
+name: 发布流程
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    step:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: build-rust-static-library
+        working-directory: xglib
+        run: cargo build --release
