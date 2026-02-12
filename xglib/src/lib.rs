@@ -26,6 +26,7 @@ pub mod ffi {
 
 	extern "Rust" {
 		type Media;
+		type MediaPathInfo;
 
 		#[cxx_name = "readAudioFile"]
 		fn read_audio_file(filepath: &str) -> Box<Media>;
@@ -38,10 +39,23 @@ pub mod ffi {
 		fn artists(self: &Media) -> Vec<String>;
 		fn album(self: &Media) -> String;
 		fn genres(self: &Media) -> Vec<String>;
+
+		#[cxx_name = "pathInfo"]
+		fn path_info(self: &Media) -> Box<MediaPathInfo>;
+
+		fn title(self: &MediaPathInfo) -> String;
+		fn artist(self: &MediaPathInfo) -> String;
 	}
 }
 
 struct Media((Tag, std::path::PathBuf));
+
+struct PathInfo {
+	title: String,
+	artist: String,
+}
+
+struct MediaPathInfo(Option<PathInfo>);
 
 fn read_audio_file(filepath: &str) -> Box<Media> {
 	let path = std::path::PathBuf::from(filepath);
@@ -160,6 +174,43 @@ impl Media {
 			.0
 			.genres()
 			.map(|xs| xs.into_iter().map(String::from).collect())
+			.unwrap_or_default()
+	}
+
+	fn path_info_simple(&self) -> Option<PathInfo> {
+		let filename = self.0.1.file_prefix()?.to_str()?;
+
+		match filename.strip_prefix('《') {
+			Some(filename) => {
+				let (title, artist) = filename.split_once('》')?;
+
+				Some(PathInfo {
+					title: String::from(title),
+					artist: String::from(artist),
+				})
+			}
+
+			None => Some(PathInfo {
+				title: String::from(filename),
+				artist: String::default(),
+			}),
+		}
+	}
+
+	fn path_info(&self) -> Box<MediaPathInfo> {
+		Box::new(MediaPathInfo(self.path_info_simple()))
+	}
+}
+
+impl MediaPathInfo {
+	fn title(&self) -> String {
+		self.0.as_ref().map(|s| s.title.clone()).unwrap_or_default()
+	}
+
+	fn artist(&self) -> String {
+		self.0
+			.as_ref()
+			.map(|s| s.artist.clone())
 			.unwrap_or_default()
 	}
 }

@@ -47,6 +47,7 @@ namespace XGApp {
         XGWidget::MultiEdit *genreEdits;
 
         void save();
+		void applyMediaInfo();
 	signals:
         void closed();
         void saved();

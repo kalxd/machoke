@@ -68,7 +68,12 @@ namespace XGApp {
         mainEditorLayout->setLayout(editorFormLayout);
 
         this->title = new QLineEdit;
-        editorFormLayout->addRow("名称", this->title);
+        auto apBtn = new QPushButton("快速填充");
+        connect(apBtn, &QPushButton::clicked, this, &Editor::applyMediaInfo);
+        auto titleLayout = new QHBoxLayout;
+        titleLayout->addWidget(this->title, 1);
+        titleLayout->addWidget(apBtn);
+        editorFormLayout->addRow("名称", titleLayout);
 
         this->artistEdits = new XGWidget::MultiEdit;
         editorFormLayout->addRow("作者", this->artistEdits);
@@ -109,6 +114,19 @@ namespace XGApp {
 
     void MainWidget::Editor::setCover(const XGRust::CoverInfo &&info) {
 		this->cover->setCover(std::move(info));
+    }
+
+    void MainWidget::Editor::applyMediaInfo() {
+		auto pathinfo = (*this->media)->pathInfo();
+        if (auto title = pathinfo->title(); not title.empty()) {
+			this->title->setText(XGRust::toString(std::move(title)));
+		}
+
+        if (auto artist = pathinfo->artist(); not artist.empty()) {
+			QList<QString> xs;
+			xs.append(XGRust::toString(std::move(artist)));
+			this->artistEdits->setValues(std::move(xs));
+		}
     }
 
     void MainWidget::Editor::save() {
