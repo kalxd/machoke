@@ -62,7 +62,7 @@ namespace XGApp {
         mainLayout->addWidget(this->cover);
 
         auto mainEditorLayout = new QGroupBox("主信息");
-        mainLayout->addWidget(mainEditorLayout);
+        mainLayout->addWidget(mainEditorLayout, 1);
 
         auto editorFormLayout = new QFormLayout;
         mainEditorLayout->setLayout(editorFormLayout);
