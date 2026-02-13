@@ -10,11 +10,11 @@ jobs:
     strategy:
       matrix:
         include:
-          - prefix: linux-machoke
+          - target: linux-machoke
             os: ubuntu-latest
-          - prefix: windows-machoke.exe
+          - target: windows-machoke.exe
             os: windows-latest
-          - prefix: apple-machoke
+          - target: apple-machoke
             os: macos-latest
 
     name: release ${{ matrix.target }}
