@@ -11,18 +11,10 @@ qt_standard_project_setup(REQUIRES 6.5)
 
 include_directories(${CMAKE_SOURCE_DIR}/xglib/target/cxxbridge/xglib/src)
 
-if (LINUX)
-  set(LIB_NAME libxglib.a)
-elseif (WIN32)
-  set(LIB_NAME libxglib.lib)
-else(APPLE)
-  set(LIB_NAME libxglib.dylib)
-endif()
-
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-  set(LIB_XGFFI ${CMAKE_SOURCE_DIR}/xglib/target/debug/${LIB_NAME})
+  set(LIB_XGFFI ${CMAKE_SOURCE_DIR}/xglib/target/debug/libxglib.a)
 else()
-  set(LIB_XGFFI ${CMAKE_SOURCE_DIR}/xglib/target/release/${LIB_NAME})
+  set(LIB_XGFFI ${CMAKE_SOURCE_DIR}/xglib/target/release/libxglib.a)
 endif()
 
 qt_add_executable(machoke
