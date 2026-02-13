@@ -10,11 +10,14 @@ jobs:
     strategy:
       matrix:
         include:
-          - target: linux-machoke
+          - source: machoke
+            target: linux-machoke
             os: ubuntu-latest
-          - target: windows-machoke.exe
+          - source: machoke.exe
+            target: windows-machoke.exe
             os: windows-latest
-          - target: apple-machoke
+          - source: machoke
+            target: apple-machoke
             os: macos-latest
 
     name: release ${{ matrix.target }}
@@ -35,13 +38,7 @@ jobs:
       - name: build application
         run: cmake -B build/release && cmake --build build/release
       - name: rename target
-        shell: fish
-        run: |
-          if test "${{ matrix.os }}" = "windows-latest" {
-          	mv build/release/machoke.exe build/release/${{ matrix.target}}
-          else {
-          	mv build/release/machoke build/release/${{ matrix.target }}
-          }
+        run: mv build/release/{{ matrix.source }} build/release/{{ matrix.target }}
       - name: upload to release
         uses: ncipollo/release-action@v1
         with:
