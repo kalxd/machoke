@@ -21,3 +21,9 @@ jobs:
           target: desktop
       - name: build application
         run: cmake -B build/release && cmake --build build/release
+      - name: upload to release
+        uses: AButler/upload-release-assets@v3.0
+        with:
+          files: build/release/machoke
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          release-tag: v0.0.1
