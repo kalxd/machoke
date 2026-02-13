@@ -37,7 +37,7 @@ jobs:
       - name: rename target
         shell: fish
         run: |
-          switch ${{ matrix.os }} {
+          switch "${{ matrix.os }}" {
           case windows-latest
           	mv build/release/machoke.exe build/release/${{ matrix.target}}
           case '*'
