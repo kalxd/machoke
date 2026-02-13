@@ -14,3 +14,10 @@ jobs:
       - name: build-rust-static-library
         working-directory: xglib
         run: cargo build --release
+      - name: setup qt6
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: 6.8.2
+          target: desktop
+      - name: build application
+        run: cmake -B build/release && cmake --build build/release
