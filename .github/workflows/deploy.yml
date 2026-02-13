@@ -13,12 +13,6 @@ jobs:
           - source: machoke
             target: linux-machoke
             os: ubuntu-latest
-          - source: machoke.exe
-            target: windows-machoke.exe
-            os: windows-latest
-          - source: machoke
-            target: apple-machoke
-            os: macos-latest
 
     name: release ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
