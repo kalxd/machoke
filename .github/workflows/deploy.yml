@@ -38,7 +38,7 @@ jobs:
       - name: build application
         run: cmake -B build/release && cmake --build build/release
       - name: rename target
-        run: mv build/release/{{ matrix.source }} build/release/{{ matrix.target }}
+        run: mv build/release/${{ matrix.source }} build/release/${{ matrix.target }}
       - name: upload to release
         uses: ncipollo/release-action@v1
         with:
