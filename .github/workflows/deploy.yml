@@ -7,7 +7,18 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - prefix: linux-machoke
+            os: ubuntu-latest
+          - prefix: windows-machoke.exe
+            os: windows-latest
+          - prefix: apple-machoke
+            os: macos-latest
+
+    name: release ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
     permissions:
       contents: write
     steps:
@@ -23,7 +34,16 @@ jobs:
           target: desktop
       - name: build application
         run: cmake -B build/release && cmake --build build/release
+      - name: rename target
+        shell: fish
+        run: |
+          switch ${{ matrix.os }} {
+          case windows-latest
+          	mv build/release/machoke.exe build/release/${{ matrix.target}}
+          case '*'
+          	mv build/release/machoke build/release/${{ matrix.target }}
+          }
       - name: upload to release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "build/release/machoke"
+          artifacts: "build/release/${{ matrix.target}}"
