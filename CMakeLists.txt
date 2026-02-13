@@ -16,9 +16,8 @@ if (LINUX)
 elseif (WIN32)
   set(LIB_NAME libxglib.lib)
 else(APPLE)
-  set(LIB_NAME lixglib.dylib)
+  set(LIB_NAME libxglib.dylib)
 endif()
-
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(LIB_XGFFI ${CMAKE_SOURCE_DIR}/xglib/target/debug/${LIB_NAME})
