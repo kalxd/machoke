@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -22,8 +24,6 @@ jobs:
       - name: build application
         run: cmake -B build/release && cmake --build build/release
       - name: upload to release
-        uses: AButler/upload-release-assets@v3.0
+        uses: ncipollo/release-action@v1
         with:
-          files: build/release/machoke
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          release-tag: v0.0.1
+          artifacts: "build/release/machoke"
