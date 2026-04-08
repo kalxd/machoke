@@ -31,9 +31,13 @@ jobs:
           target: desktop
       - name: build application
         run: cmake -B build/release && cmake --build build/release
-      - name: rename target
+      - name: 查看
+        run: ls -l build/release/
+      - name: 改名
         run: mv build/release/${{ matrix.source }} build/release/${{ matrix.target }}
-      - name: upload to release
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: "build/release/${{ matrix.target}}"
+      - name: 上传
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release view ${{ github.ref_name }} > /dev/null 2>&1 || gh release create ${{ github.ref_name }} --generate-notes
+          gh release upload ${{ github.ref_name }} ./target/release/${{ matrix.target}}
