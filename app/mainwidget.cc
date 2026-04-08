@@ -107,7 +107,7 @@ namespace XGApp {
         this->album->setValue(XGRust::toString(std::move(album)));
 
         auto geners = media->genres();
-        this->genreEdits->setValues(XGRust::toListString(std::move(artists)));
+        this->genreEdits->setValues(XGRust::toListString(std::move(geners)));
 
 		this->media.emplace(std::move(media));
     }
